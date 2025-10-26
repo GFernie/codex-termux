@@ -20,6 +20,66 @@ This repository contains **pre-compiled OpenAI Codex CLI binaries for Android Te
 
 ---
 
+## 📋 Prerequisites (Termux)
+
+### For npm Installation (Recommended)
+
+```bash
+# Update package lists
+pkg update && pkg upgrade -y
+
+# Install Node.js and npm
+pkg install nodejs-lts -y
+
+# Verify installation
+node --version  # Should be v18+
+npm --version   # Should be v9+
+
+# (Optional) Create bin directory if not exists
+mkdir -p ~/.local/bin
+```
+
+**Requirements:**
+- Android 7.0+ (Termux)
+- ARM64 architecture
+- Node.js ≥ 18.0.0
+- npm ≥ 9.0.0
+- ~50MB free storage
+
+### For Compilation from Source (Advanced)
+
+If you want to compile from source:
+
+```bash
+# Update packages
+pkg update && pkg upgrade -y
+
+# Install build dependencies
+pkg install -y \
+  rust \
+  binutils \
+  git \
+  nodejs-lts \
+  python
+
+# Verify Rust installation
+rustc --version  # Should be 1.75+
+cargo --version
+
+# Clone repository
+git clone https://github.com/DioNanos/codex-termux.git
+cd codex-termux/codex-rs
+```
+
+**Build Requirements:**
+- Rust ≥ 1.75.0
+- Git
+- ~8GB RAM (recommended for compilation)
+- ~2GB free storage
+- 30-60 minutes compilation time
+
+---
+
 ## 📦 Installation
 
 ### Method 1: npm (Recommended)
