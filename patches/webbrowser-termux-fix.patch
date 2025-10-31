@@ -1,0 +1,19 @@
+--- a/login/src/server.rs
++++ b/login/src/server.rs
+@@ -120,7 +120,14 @@ pub fn run_login_server(opts: ServerOptions) -> std::io::Result<LoginServer> {
+     };
+
+     if opts.open_browser {
+-        let _ = webbrowser::open(&auth_url);
++        // On Termux, use termux-open-url directly to avoid ndk-context crash
++        #[cfg(target_os = "android")]
++        {
++            let _ = std::process::Command::new("termux-open-url").arg(&auth_url).status();
++        }
++        #[cfg(not(target_os = "android"))]
++        {
++            let _ = webbrowser::open(&auth_url);
++        }
+     }
+
+     Ok(LoginServer {
