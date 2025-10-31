@@ -158,6 +158,60 @@ let version = latest_tag_name
 - ✅ Supports both `vX.Y.Z-termux` and fallback formats
 - ✅ No breaking changes to existing functionality
 
+### 5. Node.js Wrapper for Auto-Update
+
+**File**: `npm-package/bin/codex.js` (new file)
+**Lines Added**: 62
+**Date Applied**: 2025-10-31
+**Upstream Issue**: Binary called directly, can't execute npm auto-update
+
+#### Problem
+npm package pointed directly to Rust binary:
+```json
+"bin": { "codex": "bin/codex" }
+```
+
+Without `CODEX_MANAGED_BY_NPM` environment variable set, the binary can't:
+- Detect it was installed via npm
+- Execute `npm install -g @mmmbuto/codex-cli-termux@latest` automatically
+- Show proper update instructions
+
+#### Solution
+Create Node.js wrapper script that:
+1. Sets `CODEX_MANAGED_BY_NPM=1` environment variable
+2. Spawns the Rust binary with all arguments
+3. Forwards signals (SIGINT, SIGTERM, SIGHUP)
+4. Mirrors child exit code/signal
+
+**Changes:**
+```javascript
+// bin/codex.js (new file)
+const env = {
+  ...process.env,
+  CODEX_MANAGED_BY_NPM: "1",
+};
+
+const child = spawn(binaryPath, process.argv.slice(2), {
+  stdio: "inherit",
+  env,
+});
+```
+
+**package.json update:**
+```json
+{
+  "type": "module",
+  "bin": { "codex": "bin/codex.js" },
+  "files": ["bin/codex.js", "bin/codex"]
+}
+```
+
+**Impact:**
+- ✅ Users get prompted to update with exact npm command
+- ✅ Can auto-execute update with confirmation
+- ✅ Full parity with upstream OpenAI package
+- ✅ No performance overhead (direct spawn)
+
 ---
 
 ## Testing Checklist
