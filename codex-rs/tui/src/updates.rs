@@ -53,7 +53,7 @@ struct ReleaseInfo {
 }
 
 const VERSION_FILENAME: &str = "version.json";
-const LATEST_RELEASE_URL: &str = "https://api.github.com/repos/openai/codex/releases/latest";
+const LATEST_RELEASE_URL: &str = "https://api.github.com/repos/DioNanos/codex-termux/releases/latest";
 
 fn version_filepath(config: &Config) -> PathBuf {
     config.codex_home.join(VERSION_FILENAME)
@@ -77,11 +77,15 @@ async fn check_for_update(version_file: &Path) -> anyhow::Result<()> {
 
     // Preserve any previously dismissed version if present.
     let prev_info = read_version_info(version_file).ok();
+
+    // For Termux fork: tags are "vX.Y.Z-termux" instead of upstream "rust-vX.Y.Z"
+    let version = latest_tag_name
+        .strip_prefix("v")
+        .unwrap_or(&latest_tag_name)
+        .to_string();
+
     let info = VersionInfo {
-        latest_version: latest_tag_name
-            .strip_prefix("rust-v")
-            .ok_or_else(|| anyhow::anyhow!("Failed to parse latest tag name '{latest_tag_name}'"))?
-            .into(),
+        latest_version: version,
         last_checked_at: Utc::now(),
         dismissed_version: prev_info.and_then(|p| p.dismissed_version),
     };
