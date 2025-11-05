@@ -192,6 +192,58 @@ parse_version("0.55.1-termux") → Some((0, 55, 1)) ✅
 
 ---
 
+### 6. NPM Package Name Fix in Auto-Update
+
+**File**: `codex-rs/tui/src/updates.rs` + `codex-rs/Cargo.toml`
+**Lines Modified**: 4
+**Date Applied**: 2025-11-05
+**Upstream Issue**: Auto-update command uses wrong npm package name
+
+#### Problem
+When user accepts auto-update prompt, Codex tries to run:
+```bash
+npm install -g @openai/codex@latest
+```
+
+**Two issues:**
+1. **Wrong package**: Uses `@openai/codex` instead of `@mmmbuto/codex-cli-termux`
+2. **Update loop**: Binary version stayed at `0.55.0` while npm published `0.55.1-termux`
+   - User installs 0.55.1-termux
+   - Binary shows: `codex-cli 0.55.0`
+   - API returns: `0.55.1-termux`
+   - Parser: `(0, 55, 1) > (0, 55, 0)` → **Shows update again!** ∞
+
+**Error seen:**
+```
+Updating Codex via `npm install -g @openai/codex@latest`...
+env: 'node': Permission denied
+Error: failed with status exit status: 126
+```
+
+#### Solution
+1. **Fix npm package name** in `UpdateAction::command_args()`
+2. **Increment binary version** in `Cargo.toml` to match npm release
+
+**Changes:**
+```rust
+// updates.rs line 182-183
+UpdateAction::NpmGlobalLatest => ("npm", &["install", "-g", "@mmmbuto/codex-cli-termux@latest"]),
+UpdateAction::BunGlobalLatest => ("bun", &["install", "-g", "@mmmbuto/codex-cli-termux@latest"]),
+```
+
+```toml
+// Cargo.toml line 46
+version = "0.55.1"  # Was: "0.55.0"
+```
+
+**Impact:**
+- ✅ Auto-update now installs correct Termux package
+- ✅ No more update loop (binary version matches npm version)
+- ✅ Permission errors resolved
+- ✅ Clean upgrade path for all users
+
+---
+
 ## Versioning Strategy
 
 | Component | Version | Example |
