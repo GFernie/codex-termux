@@ -315,6 +315,191 @@ Use conditional compilation to detect Android and show manual instructions inste
 
 ---
 
+### 8. Fix Bash Execution on Android/Termux
+
+**Files Modified**:
+- `codex-rs/core/src/safety.rs` (3 lines)
+- `codex-rs/process-hardening/src/lib.rs` (29 lines)
+- `codex-rs/core/src/shell.rs` (56 lines)
+
+**Date Applied**: 2025-11-06
+**Upstream Issue**: Bash commands fail with "Permission denied" in Agent mode on Termux
+
+#### Problem
+
+When using Codex in TUI/Agent mode (interactive chat), all bash command executions fail:
+```
+/data/data/com.termux/files/usr/bin/bash: /data/data/com.termux/files/usr/bin/pkg: /data/data/com.termux/files/usr/bin/bash: bad interpreter: Permission denied
+```
+
+**Root causes (3 distinct issues):**
+
+1. **Shell detection fails on Termux**
+   - `getpwuid()` returns `/data/data/.../login` instead of actual shell
+   - Codex tries to execute with "login" binary instead of bash/zsh
+
+2. **LD_* environment variables removed**
+   - Process-hardening removes `LD_LIBRARY_PATH` and other `LD_*` vars
+   - Termux requires these to find libraries in `/data/data/com.termux/files/usr/lib`
+   - Without them: `bash` cannot find shared libraries → Permission denied
+
+3. **Sandbox not supported on Android**
+   - Codex tries to use landlock/seccomp sandbox
+   - Android kernel doesn't support these Linux features
+   - Sandbox initialization can cause process failures
+
+**Tested with v0.53.0**: Same error confirmed → Upstream bug since at least 0.53.0
+
+#### Solution
+
+Three independent fixes, all using `#[cfg(target_os = "android")]`:
+
+**1. Disable sandbox on Android** (`core/src/safety.rs:102-104`)
+```rust
+pub fn get_platform_sandbox() -> Option<SandboxType> {
+    if cfg!(target_os = "macos") {
+        Some(SandboxType::MacosSeatbelt)
+    } else if cfg!(target_os = "android") {
+        // Android/Termux does not support landlock/seccomp sandbox
+        None
+    } else if cfg!(target_os = "linux") {
+        Some(SandboxType::LinuxSeccomp)
+    } else if cfg!(target_os = "windows") {
+        #[cfg(target_os = "windows")]
+        {
+            if WINDOWS_SANDBOX_ENABLED.load(Ordering::Relaxed) {
+                return Some(SandboxType::WindowsRestrictedToken);
+            }
+        }
+        None
+    } else {
+        None
+    }
+}
+```
+
+**2. Preserve LD_* variables on Android** (`process-hardening/src/lib.rs:45-62`)
+```rust
+// Official Codex releases are MUSL-linked, which means that variables such
+// as LD_PRELOAD are ignored anyway, but just to be sure, clear them here.
+// EXCEPTION: On Android/Termux, LD_* variables are required to find shared libraries
+// in non-standard paths (/data/data/com.termux/files/usr/lib), so we must preserve them.
+#[cfg(not(target_os = "android"))]
+{
+    let ld_keys: Vec<String> = std::env::vars()
+        .filter_map(|(key, _)| {
+            if key.starts_with("LD_") {
+                Some(key)
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    for key in ld_keys {
+        unsafe {
+            std::env::remove_var(key);
+        }
+    }
+}
+```
+
+**3. Use $SHELL instead of getpwuid() on Android** (`core/src/shell.rs:50-69`)
+```rust
+#[cfg(unix)]
+fn detect_default_user_shell() -> Shell {
+    // On Android/Termux, getpwuid() returns "/data/data/.../login" instead of the actual shell.
+    // Use $SHELL environment variable instead, which correctly points to bash/zsh.
+    #[cfg(target_os = "android")]
+    {
+        if let Ok(shell_path) = std::env::var("SHELL") {
+            let home_path = std::env::var("HOME").unwrap_or_else(|_| "/data/data/com.termux/files/home".to_string());
+
+            if shell_path.ends_with("/zsh") {
+                return Shell::Zsh(ZshShell {
+                    shell_path,
+                    zshrc_path: format!("{home_path}/.zshrc"),
+                });
+            }
+
+            if shell_path.ends_with("/bash") {
+                return Shell::Bash(BashShell {
+                    shell_path,
+                    bashrc_path: format!("{home_path}/.bashrc"),
+                });
+            }
+        }
+        return Shell::Unknown;
+    }
+
+    // On Linux/BSD/other Unix, use getpwuid() which works correctly
+    #[cfg(not(target_os = "android"))]
+    {
+        use libc::getpwuid;
+        use libc::getuid;
+        use std::ffi::CStr;
+
+        unsafe {
+            let uid = getuid();
+            let pw = getpwuid(uid);
+
+            if !pw.is_null() {
+                let shell_path = CStr::from_ptr((*pw).pw_shell)
+                    .to_string_lossy()
+                    .into_owned();
+                let home_path = CStr::from_ptr((*pw).pw_dir).to_string_lossy().into_owned();
+
+                if shell_path.ends_with("/zsh") {
+                    return Shell::Zsh(ZshShell {
+                        shell_path,
+                        zshrc_path: format!("{home_path}/.zshrc"),
+                    });
+                }
+
+                if shell_path.ends_with("/bash") {
+                    return Shell::Bash(BashShell {
+                        shell_path,
+                        bashrc_path: format!("{home_path}/.bashrc"),
+                    });
+                }
+            }
+        }
+        Shell::Unknown
+    }
+}
+```
+
+#### Testing
+
+**Before Patch #8:**
+```bash
+$ codex
+> Ask Codex: "run pkg help"
+Error: /data/data/com.termux/files/usr/bin/bash: Permission denied ❌
+```
+
+**After Patch #8 (Expected):**
+```bash
+$ codex --version
+codex-cli 0.55.4 ✅
+
+$ codex
+> Ask Codex: "run pkg help"
+Usage: pkg command [arguments] ✅
+```
+
+#### Impact
+- ✅ **Enables Agent mode bash execution** - Critical functionality restored
+- ✅ **Shell detection fixed** - Correctly identifies bash/zsh on Termux
+- ✅ **Library loading fixed** - LD_* preserved for dynamic linking
+- ✅ **Sandbox disabled on Android** - Prevents sandbox-related crashes
+- ✅ **No changes to other platforms** - Linux/Mac/Windows unchanged
+- ✅ **Minimal invasive** - 88 lines modified across 3 files
+
+**Note:** This patch fixes a critical bug that has existed since at least v0.53.0, making Agent mode completely unusable on Termux.
+
+---
+
 ## 📊 Patch Categories
 
 ### Core Functionality (Required)
@@ -327,6 +512,9 @@ Use conditional compilation to detect Android and show manual instructions inste
 - **Patch #5**: Version parser (-termux suffix handling)
 - **Patch #6**: NPM package name fix
 - **Patch #7**: Manual update instructions on Android
+
+### Bash Execution (Critical)
+- **Patch #8**: Fix bash execution in Agent mode (shell detection, LD_*, sandbox)
 
 **All patches are CRITICAL** - Codex will not work correctly on Termux without them.
 
@@ -370,6 +558,7 @@ We only accept patches for Termux-specific issues, not general feature requests.
 
 ---
 
-**Last Updated**: 2025-11-05
+**Last Updated**: 2025-11-06
+**Patches Applied**: 8 (7 from 0.55.0-0.55.3 + Patch #8 in 0.55.4)
 **Based on**: OpenAI Codex 0.55.0 (46 commits ahead of 0.53.0)
 **Platform**: Android Termux ARM64
