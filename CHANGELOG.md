@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.55.3-termux] - 2025-11-06
+
+### Fixed
+- **Critical**: Auto-update on Android/Termux now shows manual instructions instead of failing with "Permission denied"
+- **Critical**: Resolved infinite update loop - binary version synchronized to 0.55.3
+- Android binary in use can no longer block npm update attempts
+
+### Added
+- **Patch #7**: Platform-specific update handling with `#[cfg(target_os = "android")]`
+- User-friendly manual update instructions on Termux
+- Organized patch documentation by categories in `patches/README.md`
+
+### Changed
+- Binary version: 0.55.3 (matches npm base version)
+- npm package: 0.55.3-termux
+- Auto-update on Android: Manual instructions only (platform limitation)
+- Auto-update on Linux/Mac: Automatic execution (unchanged)
+
+### Documentation
+- Complete Patch #7 documentation with root cause analysis
+- Updated all patches with categorization (Core + Auto-Update)
+- Documented Android file-in-use limitation
+
+---
+
 ## [0.55.2-termux] - 2025-11-05
 
 ### Fixed

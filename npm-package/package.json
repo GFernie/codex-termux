@@ -1,0 +1,44 @@
+{
+  "name": "@mmmbuto/codex-cli-termux",
+  "version": "0.55.3-termux",
+  "description": "OpenAI Codex CLI v0.55.3 - Complete auto-update fix for Termux (Android ARM64)",
+  "type": "module",
+  "main": "bin/codex.js",
+  "bin": {
+    "codex": "bin/codex.js"
+  },
+  "files": [
+    "bin/codex.js",
+    "bin/codex"
+  ],
+  "keywords": [
+    "codex",
+    "openai",
+    "termux",
+    "android",
+    "arm64",
+    "cli",
+    "ai",
+    "coding-agent"
+  ],
+  "author": "Davide A. Guglielmi <dev@mmmbuto.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DioNanos/codex-termux.git"
+  },
+  "homepage": "https://github.com/DioNanos/codex-termux#readme",
+  "bugs": {
+    "url": "https://github.com/DioNanos/codex-termux/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "os": [
+    "android",
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ]
+}
