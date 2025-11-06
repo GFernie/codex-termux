@@ -244,6 +244,94 @@ version = "0.55.1"  # Was: "0.55.0"
 
 ---
 
+### 7. Manual Update Instructions on Android/Termux
+
+**File**: `codex-rs/cli/src/main.rs`
+**Lines Modified**: ~30 (function `run_update_action`)
+**Date Applied**: 2025-11-05
+**Upstream Issue**: Auto-update fails on Android with "Permission denied"
+
+#### Problem
+When user accepts auto-update on Termux, Codex tries to execute:
+```bash
+npm install -g @mmmbuto/codex-cli-termux@latest
+```
+
+**Error seen:**
+```
+Updating Codex via `npm install -g @mmmbuto/codex-cli-termux@latest`...
+env: 'node': Permission denied
+Error: failed with status exit status: 126
+```
+
+**Root cause:**
+- Codex binary is spawned by Node.js wrapper (`bin/codex.js`)
+- When npm tries to update, it must overwrite `/usr/lib/node_modules/.../bin/codex`
+- Binary is IN USE (running process)
+- Android/Termux: Cannot overwrite files in use → Permission denied
+- Linux/Mac: Can overwrite (old inode remains) → Works fine
+
+**Why loop exists:**
+Even if npm succeeded:
+1. npm 0.55.2-termux published with binary 0.55.1 inside
+2. User accepts update → npm reinstalls same broken package
+3. Binary still 0.55.1 after "update"
+4. Codex checks: 0.55.2 > 0.55.1 → Shows update again
+5. INFINITE LOOP
+
+#### Solution
+Use conditional compilation to detect Android and show manual instructions instead:
+
+**Changes:**
+```rust
+// cli/src/main.rs - run_update_action()
+
+#[cfg(target_os = "android")]
+{
+    println!("⚠️  Auto-update is not available on Termux/Android");
+    println!("    (binary in use cannot be overwritten)");
+    println!();
+    println!("📦 To update manually, run:");
+    println!("    {cmd_str}");
+    println!();
+    println!("💡 After update completes, restart Codex to use the new version.");
+    return Ok(());
+}
+
+#[cfg(not(target_os = "android"))]
+{
+    // Execute update automatically on other platforms
+    let status = std::process::Command::new(cmd).args(args).status()?;
+    // ... error handling
+}
+```
+
+**Impact:**
+- ✅ No more "Permission denied" errors
+- ✅ User-friendly message explaining Termux limitation
+- ✅ Clear manual update command displayed
+- ✅ Other platforms (Linux/Mac) unchanged
+- ✅ No infinite loop (combined with version fix)
+
+---
+
+## 📊 Patch Categories
+
+### Core Functionality (Required)
+- **Patch #1**: Browser login fix (termux-open-url)
+- **Patch #2**: RAM optimizations (compilation settings)
+- **Patch #3**: Version alignment with upstream
+
+### Auto-Update System (Required)
+- **Patch #4**: Auto-update URL redirect (GitHub API)
+- **Patch #5**: Version parser (-termux suffix handling)
+- **Patch #6**: NPM package name fix
+- **Patch #7**: Manual update instructions on Android
+
+**All patches are CRITICAL** - Codex will not work correctly on Termux without them.
+
+---
+
 ## Versioning Strategy
 
 | Component | Version | Example |
