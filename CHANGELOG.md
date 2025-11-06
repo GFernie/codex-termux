@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.55.4-termux] - 2025-11-06
+
+### Fixed
+- **Critical**: Bash command execution in Agent mode (TUI interactive chat) now works on Termux
+- **Critical**: Resolved "Permission denied" errors when running bash commands in Agent mode
+- Shell detection on Termux (was incorrectly detecting "login" instead of bash/zsh)
+- LD_* environment variables preserved on Android (required for dynamic library loading)
+- Sandbox disabled on Android (landlock/seccomp not supported)
+
+### Added
+- **Patch #8**: Fix bash execution with three independent Android-specific fixes
+  1. Disable sandbox on Android (`core/src/safety.rs`)
+  2. Preserve LD_* environment variables (`process-hardening/src/lib.rs`)
+  3. Use $SHELL instead of getpwuid() for shell detection (`core/src/shell.rs`)
+- Missing npm wrapper script (`npm-package/bin/codex.js`)
+
+### Changed
+- Binary version: 0.55.4
+- npm package: 0.55.4-termux
+- 88 lines modified across 3 files (all platform-specific with `#[cfg(target_os = "android")]`)
+
+### Documentation
+- Complete Patch #8 documentation with root cause analysis
+- Updated `patches/README.md` with Bash Execution category
+- Three distinct problems identified and fixed independently
+
+### Notes
+- This bug existed since at least v0.53.0 (tested and confirmed)
+- Agent mode was completely unusable on Termux before this fix
+- No changes to Linux/Mac/Windows behavior
+
+---
+
 ## [0.55.3-termux] - 2025-11-06
 
 ### Fixed
