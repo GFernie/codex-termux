@@ -1,127 +1,191 @@
-# 🤖 Codex CLI - Termux Edition
+# 🚀 Codex CLI - Termux Edition
 
-> **Pre-compiled OpenAI Codex for Android Termux (ARM64)**
+**Pre-compiled OpenAI Codex for Android Termux (ARM64)**
 
-## What This Is
-
-Official OpenAI Codex CLI compiled for Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
-
-### What We Do:
-✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
-✅ **Compile for ARM64** (Android Termux native)
-✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
-✅ **Package as npm** for easy installation
-✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
-
-### What We DON'T Do:
-❌ **NO new features**
-❌ **NO behavior modifications** (works exactly like upstream)
-❌ **NO replacement** of official Codex
-
-### 🔧 Compatibility Patches
-
-We only apply patches for issues that:
-- **Prevent Codex from working on Termux**
-- **Are not addressed by upstream** (Termux is not officially supported)
-- **Are minimal and well-documented**
-
-**Current patches**: See [patches/](./patches/) directory for full documentation.
-
-**Found an issue?** Well-documented bug reports with reproduction steps are welcome! Open an [issue](https://github.com/DioNanos/codex-termux/issues).
+OpenAI Codex compiled natively for Android ARM64 (Termux), with full compatibility patches.
 
 ---
 
-## 📋 Prerequisites
+## 📦 Latest Release
 
-```bash
-# Update Termux packages
-pkg update && pkg upgrade -y
-
-# Install Node.js
-pkg install nodejs-lts -y
-
-# Verify
-node --version  # v14+
-npm --version   # v6+
-```
-
-**Requirements:**
-- Android 7+ (Termux)
-- ARM64 architecture
-- Node.js ≥ 14.0.0
-- ~50MB storage
+**Version**: `0.56.0-termux`  
+**Built**: 2025-11-07 19:56 UTC  
+**Device**: Android ARM64 (Pixel 9 Pro - 16GB RAM)  
+**Upstream**: OpenAI Codex rust-v0.56.0 (42 commits merged)
 
 ---
 
-## 📦 Installation
+## 📥 Installation
 
 ### Via npm (Recommended)
-
 ```bash
-npm install -g @mmmbuto/codex-cli-termux
+npm install -g @mmmbuto/codex-cli-termux@latest
 ```
 
-### Verify Installation
+### Specific Version
+```bash
+npm install -g @mmmbuto/codex-cli-termux@0.56.0-termux
+```
+
+---
+
+## ✨ Features
+
+- ✅ **Native ARM64** compilation optimized for Termux
+- ✅ **All 8 critical patches** applied and tested
+- ✅ **Browser login** working (termux-open-url)
+- ✅ **Agent mode bash execution** fixed (shell detection, LD_*, sandbox)
+- ✅ **RAM optimized** for 8GB/16GB devices
+- ✅ **Auto-update** system configured for Termux fork
+
+---
+
+## 🔧 Patches Applied
+
+This build includes **8 critical patches** for Termux compatibility:
+
+1. **Browser Login Fix** - Uses `termux-open-url` instead of ndk-context
+2. **RAM Optimizations** - `lto=false`, `codegen-units=16` for low-RAM devices
+3. **Version Alignment** - Binary version matches upstream (0.56.0)
+4. **Auto-Update URL** - Points to DioNanos/codex-termux releases
+5. **Version Parser** - Handles `-termux` suffix correctly
+6. **NPM Package Name** - Uses @mmmbuto/codex-cli-termux
+7. **Manual Update Instructions** - Android-specific update flow
+8. **Bash Execution Fix** ⭐ - Shell detection, LD_* preservation, sandbox disabled
+
+**All patches documented**: `patches/README.md`
+
+---
+
+## 📊 Build Info
+
+- **Compilation Time**: 27m 38s (16GB RAM config)
+- **Binary Size**: 46.8 MB
+- **Package Size**: 17.9 MB (compressed)
+- **Rust Version**: 1.90.0
+- **Cargo Config**: lto=false, codegen-units=16, opt-level=3
+
+---
+
+## 🧪 Testing
+
+All critical features tested before release:
 
 ```bash
+# Version check
 codex --version
-# Output: codex-cli 0.55.0
+# ✅ codex-cli 0.56.0
 
+# Browser login (patch #1)
 codex login
-# Opens browser for authentication
-```
+# ✅ Browser opens without crash
 
-**Links:**
-- npm: https://www.npmjs.com/package/@mmmbuto/codex-cli-termux
-- Releases: https://github.com/DioNanos/codex-termux/releases
-- Upstream: https://github.com/openai/codex
+# Agent mode bash (patch #8)
+codex
+> run uname -a
+# ✅ Command executes without permission errors
+
+# Basic functionality
+codex 'echo hello from codex'
+# ✅ Works correctly
+```
 
 ---
 
-## 🚀 Usage
+## 🔄 Changelog
 
-Same as official Codex CLI:
+### v0.56.0-termux (2025-11-07)
+
+**Upstream Merge:**
+- Merged **42 commits** from OpenAI/codex rust-v0.56.0
+- Updated from v0.55.4 to v0.56.0
+
+**Patches:**
+- ✅ All 8 patches preserved and verified after merge
+- ✅ Two-stage pipeline implemented (anti-deploy without test)
+
+**Testing:**
+- ✅ Build and install tested locally
+- ✅ All critical patches verified working
+- ✅ Browser login: PASS
+- ✅ Agent mode bash: PASS
+
+**Previous versions**: See [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+## 🏗️ Building from Source
 
 ```bash
-# Login to OpenAI
-codex login
+# Clone
+git clone https://github.com/DioNanos/codex-termux.git
+cd codex-termux
 
-# Start chat
-codex
+# Compile (optimized for 16GB RAM)
+cd codex-rs
+cargo build --release -j 2
 
-# Help
-codex --help
+# Binary location
+./target/release/codex
 ```
 
-For full documentation, see [OpenAI Codex docs](https://github.com/openai/codex).
+**For 8GB devices**, see: `docs/COMPILATION_LOW_RAM.md`
 
 ---
 
-## 🔨 Building from Source
+## 🐛 Troubleshooting
 
-See [BUILDING.md](./BUILDING.md) for compilation instructions.
+### Installation Issues
+```bash
+# Clean install
+npm uninstall -g @mmmbuto/codex-cli-termux
+npm cache clean --force
+npm install -g @mmmbuto/codex-cli-termux@latest
+```
+
+### Version Mismatch
+```bash
+# Check installed version
+codex --version
+
+# Check npm version
+npm list -g @mmmbuto/codex-cli-termux
+```
+
+### Permission Errors
+See `patches/README.md` - Patch #8 (Bash Execution Fix)
 
 ---
 
-## 📝 License
+## 📚 Documentation
 
-This project maintains full compliance with the Apache 2.0 license from OpenAI Codex.
-
-**Original work**: Copyright OpenAI (https://github.com/openai/codex)
-**Termux port**: Minimal patches for Android compatibility
-
-See [LICENSE](./LICENSE) file for details.
+- **Patches**: `patches/README.md` (all 8 patches explained)
+- **Compilation**: `docs/COMPILATION_LOW_RAM.md`
+- **Pipeline**: `docs/PIPELINE.md`
 
 ---
 
-## 🙏 Credits
+## 🔗 Links
 
-- **OpenAI** for the amazing Codex CLI
-- **Termux** community for Android terminal environment
-- All contributors to upstream Codex project
+- **npm Package**: https://www.npmjs.com/package/@mmmbuto/codex-cli-termux
+- **GitHub Repo**: https://github.com/DioNanos/codex-termux
+- **Upstream**: https://github.com/openai/codex
 
 ---
 
-**Version**: Based on OpenAI Codex 0.55.0
-**Platform**: Android Termux ARM64
-**Maintained**: Community-driven, not affiliated with OpenAI
+## 👤 Maintainer
+
+**Davide A. Guglielmi**  
+Built on: Pixel 9 Pro (Android 15 + Termux)  
+Compiler: Rust 1.90.0 (ARM64 native)
+
+---
+
+## ⚖️ License
+
+Same as upstream OpenAI Codex.
+
+---
+
+**Last Updated**: 2025-11-07  
+**Build System**: Two-stage pipeline with anti-deploy protection
