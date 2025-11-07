@@ -1,53 +1,127 @@
-# @mmmbuto/codex-cli-termux
+# 🤖 Codex CLI - Termux Edition
 
-> OpenAI Codex CLI v0.55.0 pre-compiled for Android Termux (ARM64)
+> **Pre-compiled OpenAI Codex for Android Termux (ARM64)**
 
-## 🔧 v0.55.1 - Auto-Update Detection Fix
+## What This Is
 
-**Critical fix**: Version parser now correctly detects updates with `-termux` suffix
+Official OpenAI Codex CLI compiled for Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
 
-### What was broken
-Users on 0.53.x versions never saw update notifications for 0.55.0-termux
+### What We Do:
+✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
+✅ **Compile for ARM64** (Android Termux native)
+✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
+✅ **Package as npm** for easy installation
+✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
 
-### What's fixed
-Auto-update detection now works correctly across all version ranges
+### What We DON'T Do:
+❌ **NO new features**
+❌ **NO behavior modifications** (works exactly like upstream)
+❌ **NO replacement** of official Codex
 
-## Installation
+### 🔧 Compatibility Patches
+
+We only apply patches for issues that:
+- **Prevent Codex from working on Termux**
+- **Are not addressed by upstream** (Termux is not officially supported)
+- **Are minimal and well-documented**
+
+**Current patches**: See [patches/](./patches/) directory for full documentation.
+
+**Found an issue?** Well-documented bug reports with reproduction steps are welcome! Open an [issue](https://github.com/DioNanos/codex-termux/issues).
+
+---
+
+## 📋 Prerequisites
+
+```bash
+# Update Termux packages
+pkg update && pkg upgrade -y
+
+# Install Node.js
+pkg install nodejs-lts -y
+
+# Verify
+node --version  # v14+
+npm --version   # v6+
+```
+
+**Requirements:**
+- Android 7+ (Termux)
+- ARM64 architecture
+- Node.js ≥ 14.0.0
+- ~50MB storage
+
+---
+
+## 📦 Installation
+
+### Via npm (Recommended)
 
 ```bash
 npm install -g @mmmbuto/codex-cli-termux
 ```
 
-## Usage
+### Verify Installation
 
 ```bash
+codex --version
+# Output: codex-cli 0.56.0
+
 codex login
-codex
+# Opens browser for authentication
 ```
 
-## Requirements
+**Links:**
+- npm: https://www.npmjs.com/package/@mmmbuto/codex-cli-termux
+- Releases: https://github.com/DioNanos/codex-termux/releases
+- Upstream: https://github.com/openai/codex
 
-- Android 7+ (Termux)
-- ARM64 architecture
-- Node.js ≥ 14.0.0
+---
 
-## About
+## 🚀 Usage
 
-This is a pre-compiled build of the official OpenAI Codex CLI with minimal patches for Termux compatibility.
+Same as official Codex CLI:
 
-### Total Patches Applied: 5
-1. Browser login fix (termux-open-url)
-2. RAM optimizations (compilation settings)
-3. Version alignment
-4. Auto-update URL redirect
-5. **Version parser fix** (NEW in 0.55.1)
+```bash
+# Login to OpenAI
+codex login
 
-## Links
+# Start chat
+codex
 
-- **GitHub**: https://github.com/DioNanos/codex-termux
-- **Upstream**: https://github.com/openai/codex
-- **Patches**: https://github.com/DioNanos/codex-termux/blob/main/patches/README.md
+# Help
+codex --help
+```
 
-## License
+For full documentation, see [OpenAI Codex docs](https://github.com/openai/codex).
 
-Apache-2.0 (same as upstream OpenAI Codex)
+---
+
+## 🔨 Building from Source
+
+See [BUILDING.md](./BUILDING.md) for compilation instructions.
+
+---
+
+## 📝 License
+
+This project maintains full compliance with the Apache 2.0 license from OpenAI Codex.
+
+**Original work**: Copyright OpenAI (https://github.com/openai/codex)
+**Termux port**: Minimal patches for Android compatibility
+
+See [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🙏 Credits
+
+- **OpenAI** for the amazing Codex CLI
+- **Termux** community for Android terminal environment
+- All contributors to upstream Codex project
+
+---
+
+**Version**: Based on OpenAI Codex 0.56.0
+**Platform**: Android Termux ARM64
+**Maintained**: Community-driven, not affiliated with OpenAI

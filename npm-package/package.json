@@ -1,7 +1,7 @@
 {
   "name": "@mmmbuto/codex-cli-termux",
-  "version": "0.55.4-termux",
-  "description": "OpenAI Codex CLI v0.55.4 - Fix bash execution in Agent mode for Termux (Android ARM64)",
+  "version": "0.56.0-termux",
+  "description": "OpenAI Codex CLI v0.56.0 pre-compiled for Android Termux (ARM64)",
   "type": "module",
   "main": "bin/codex.js",
   "bin": {
