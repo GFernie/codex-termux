@@ -78,7 +78,7 @@ npm install -g @mmmbuto/codex-cli-termux
 
 ```bash
 codex --version
-# Output: codex-tui 0.62.0
+# Output: codex-cli 0.62.1
 
 codex login
 # Opens browser for authentication
@@ -108,6 +108,30 @@ codex --help
 
 For full documentation, see [OpenAI Codex docs](https://github.com/openai/codex).
 
+### Non-Interactive Mode (Automation)
+
+The `codex` binary is a multitool that includes the `exec` subcommand for automation and scripting:
+
+```bash
+# Run non-interactively with JSON output
+codex exec --json "list files in current directory"
+
+# With custom sandbox mode
+codex exec --json -s danger-full-access "run npm test"
+
+# Skip git repo check for non-repo directories
+codex exec --json --skip-git-repo-check "echo hello"
+
+# Output to file
+codex exec --json -o output.json "describe this project"
+```
+
+**Key flags:**
+- `--json` - Output events as JSONL (for parsing)
+- `-s, --sandbox` - Sandbox mode: `read-only`, `workspace-write`, `danger-full-access`
+- `--skip-git-repo-check` - Run outside git repositories
+- `-o, --output-last-message` - Save final response to file
+
 ### Execpolicy Quickstart
 
 Codex can enforce your own rules-based execution policy before it runs shell commands.
@@ -131,15 +155,15 @@ prefix_rule(
 
 In this example rule, if Codex wants to run commands with the prefix `git push` or `git fetch`, it will first ask for user approval.
 
-Use [`execpolicy` CLI](./codex-rs/execpolicy/README.md) to preview decisions for policy files:
+Use the `codex execpolicy check` subcommand to preview decisions before you save a rule (see the [`codex-execpolicy` README](./codex-rs/execpolicy/README.md) for syntax details):
 
 ```shell
-cargo run -p codex-execpolicy -- check --policy ~/.codex/policy/default.codexpolicy git push origin main
+codex execpolicy check --policy ~/.codex/policy/default.codexpolicy git push origin main
 ```
 
-Pass multiple `--policy` flags to test how several files combine. See the [`codex-rs/execpolicy` README](./codex-rs/execpolicy/README.md) for a more detailed walkthrough of the available syntax.
+Pass multiple `--policy` flags to test how several files combine, and use `--pretty` for formatted JSON output. See the [`codex-rs/execpolicy` README](./codex-rs/execpolicy/README.md) for a more detailed walkthrough of the available syntax.
 
----
+## Note: `execpolicy` commands are still in preview. The API may have breaking changes in the future.
 
 ## 🧪 Testing & Validation
 
@@ -203,18 +227,19 @@ Codex will automatically:
 - At least 80% overall pass rate
 - No critical crashes
 
-**Example Report** (v0.61.0):
+**Example Report** (v0.62.1):
 ```
 CODEX CLI TEST SUITE - FINAL REPORT
 ====================================
-Platform: Android Termux ARM64
-Codex Version: 0.61.0
-Total Tests: 42
-✅ Passed: 40
+Platform: Android Termux ARM64 (ROG Phone 3)
+Codex Version: 0.62.1
+Total Tests: 49
+✅ Passed: 46
 ❌ Failed: 0
-⚠️ Skipped: 2 (WebSearch, Git - optional)
+⚠️ Skipped: 3 (WebSearch, Git - optional)
 
 Termux-Specific: 10/10 passed ✅
+Package & Binary: 8/8 passed ✅
 
 VERDICT: ⚠️ PASS WITH WARNINGS
 ```
@@ -263,7 +288,7 @@ See [LICENSE](./LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex 0.62.0 (includes GPT-5.1 MAX support)
+**Version**: Based on OpenAI Codex 0.62.1 (includes GPT-5.1 MAX support)
 **Platform**: Android Termux ARM64
 **Maintained**: Community-driven, not affiliated with OpenAI
 
@@ -274,6 +299,8 @@ See [LICENSE](./LICENSE) file for details.
 ### v0.62.0-termux (2025-11-21)
 
 **Update**: Synced with upstream OpenAI Codex rust-v0.62.0 (40+ commits from v0.61.0)
+
+> **Note**: Upstream rust-v0.63.0 skipped - only 3 minor commits (duplicate bash fix, drop unused param, declined status). Will sync with next significant release.
 
 **Upstream Features**:
 - 🆕 **codex-shell-tool-mcp**: New MCP server for shell tools
