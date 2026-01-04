@@ -33,9 +33,9 @@ We only apply patches for issues that:
 
 **Current patches**: See [patches/](./patches/) directory for full documentation.
 
-Serve aiuto per debuggare gli avvisi di upgrade? Consulta
-[docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md) per cause note e
-strategie di fix.
+Need help debugging upgrade alerts? See
+[docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md) for known causes
+and fix strategies.
 
 **Found an issue?** Well-documented bug reports with reproduction steps are welcome! Open an [issue](https://github.com/DioNanos/codex-termux/issues).
 
