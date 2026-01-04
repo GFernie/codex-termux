@@ -104,7 +104,7 @@ codex
 codex --help
 ```
 
-For full documentation, see [OpenAI Codex docs](https://github.com/openai/codex).
+For full documentation, see [OpenAI Codex docs](https://developers.openai.com/codex).
 
 ### Non-Interactive Mode (Automation)
 
@@ -237,16 +237,12 @@ VERDICT: ✅ PASS
   - [GitHub Action](https://github.com/openai/codex-action)
   - [TypeScript SDK](./sdk/typescript/README.md)
   - [Non-interactive mode (`codex exec`)](./docs/exec.md)
-- [**Advanced**](./docs/advanced.md)
-  - [Tracing / verbose logging](./docs/advanced.md#tracing--verbose-logging)
-  - [Model Context Protocol (MCP)](./docs/advanced.md#model-context-protocol-mcp)
-- [**Zero data retention (ZDR)**](./docs/zdr.md)
-- [**Contributing**](./docs/contributing.md)
-- [**Install & build**](./docs/install.md)
+- [**Skills**](./docs/skills.md)
+- [**Installing & building**](./docs/install.md)
   - [System Requirements](./docs/install.md#system-requirements)
   - [DotSlash](./docs/install.md#dotslash)
   - [Build from source](./docs/install.md#build-from-source)
-- [**FAQ**](./docs/faq.md)
+- [**Contributing**](./docs/contributing.md)
 - [**Open source fund**](./docs/open-source-fund.md)
 
 ---
