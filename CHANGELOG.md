@@ -6,8 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.78.0-termux] - 2026-01-06
 
-### Termux Notes
-- Upstream bump to OpenAI Codex rust-v0.78.0.
+### Upstream
+- OpenAI Codex rust-v0.78.0 release: https://github.com/openai/codex/releases/tag/rust-v0.78.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
 - Termux patches (#1–#6, #8, #9) revalidated via `verify-patches.sh`.
 
 ### Testing
@@ -17,8 +20,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.77.1-termux] - 2026-01-04
 
-### Termux Notes
-- Upstream bump to rust-v0.77.0 plus 63 commits after; key highlights: config sources, execpolicy wiring, TUI2 selection/copy/perf, unified exec output cap.
+### Upstream
+- Base release: rust-v0.77.0 — https://github.com/openai/codex/releases/tag/rust-v0.77.0
+- Termux build synced after rust-v0.77.0 (upstream commit range not listed here; see upstream history for details).
+
+### Termux Patches
 - Single entrypoint confirmed: `codex` for TUI; `codex exec` for automation; `codex-exec` kept as JS wrapper (no symlink).
 - Termux patches (#1–#6, #8, #9) revalidated via `verify-patches.sh`.
 
