@@ -89,6 +89,34 @@ codex login
 
 ---
 
+## ⚡ 2-Minute Quickstart / ⚡ 2分钟快速开始
+Get a first session running fast. Choose the path that matches your account.
+快速完成首次运行。选择与你的账号/网关匹配的路径。
+
+### Path 1 — OpenAI (default)
+```bash
+codex login
+codex
+```
+
+### Path 2 — For friends using OpenRouter / gateways / OpenAI-compatible providers / 给使用 OpenRouter 或兼容网关的朋友
+Set an API key and a minimal config, then run with a profile:
+[docs/openrouter-quickstart.md](./docs/openrouter-quickstart.md)
+
+```bash
+source ~/.codex/.env
+codex --profile or-fast
+```
+
+Caution: model slugs/names can change on providers—verify the current model list first.
+注意：模型名称可能变化，请以提供商模型列表为准。
+
+## 🧭 OpenRouter & gateways note / 🧭 OpenRouter 与兼容网关说明
+This Termux port only adds Android compatibility; it does not change Codex behavior.
+本 Termux 版本仅提供 Android 兼容性，不改变 Codex 行为。
+Providers/models are determined by your own config and backend.
+提供商与模型由你的配置与后端决定。
+
 ## 🚀 Usage
 
 Same as official Codex CLI:
@@ -137,7 +165,21 @@ codex exec --json -o output.json "describe this project"
 
 See the [Execpolicy quickstart](./docs/execpolicy.md) to set up rules that govern what commands Codex can execute.
 
+## 🔧 Troubleshooting (Termux) / 🔧 故障排查（Termux）
+Common Termux issues and the fastest places to check.
+常见 Termux 问题与最快排查入口。
+
+- Upgrade alerts or shared library errors: see [docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md)
+- Basic usage/setup: see [docs/getting-started.md](./docs/getting-started.md)
+- Authentication/login problems: see [docs/authentication.md](./docs/authentication.md)
+- Still stuck? Open an issue with repro steps: [GitHub Issues](https://github.com/DioNanos/codex-termux/issues)
+
 ## 🧪 Testing & Validation
+
+Latest validation (2026-01-04): 47 passed / 0 failed / 2 skipped — see [CODEX_TEST_SUITE.md](./CODEX_TEST_SUITE.md).
+
+<details>
+<summary>Details: automated test suite, coverage, and sample report</summary>
 
 ### Automated Test Suite
 
@@ -244,6 +286,8 @@ VERDICT: ✅ PASS
   - [Build from source](./docs/install.md#build-from-source)
 - [**Contributing**](./docs/contributing.md)
 - [**Open source fund**](./docs/open-source-fund.md)
+
+</details>
 
 ---
 
