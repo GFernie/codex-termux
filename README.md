@@ -341,20 +341,9 @@ See [LICENSE](./LICENSE) file for details.
 
 ## 📜 Changelog
 
-### v0.78.0-termux (2026-01-06) – latest
-**Dist-tag**: `latest`
+Upstream Codex releases: https://github.com/openai/codex/releases
 
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.78.0.
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-06) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
-
-### v0.77.1-termux (2026-01-04) – previous
-**Dist-tag**: `previous`
-
-- ⬆️ Upstream bump to rust-v0.77.0 plus 63 commits after; key highlights: config sources, execpolicy wiring, TUI2 selection/copy/perf, unified exec output cap.
-- 🧭 Single entrypoint confirmed: `codex` for TUI; `codex exec` for automation; `codex-exec` kept as JS wrapper (no symlink).
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-04) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
+Termux-specific changes: see [CHANGELOG.md](./CHANGELOG.md).
 
 ---
 

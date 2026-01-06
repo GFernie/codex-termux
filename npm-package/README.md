@@ -31,10 +31,10 @@ We only apply patches for issues that:
 - **Are not addressed by upstream** (Termux is not officially supported)
 - **Are minimal and well-documented**
 
-**Current patches**: See [patches/](./patches/) directory for full documentation.
+**Current patches**: See [patches/](../patches/) directory for full documentation.
 
 Need help debugging upgrade alerts? See
-[docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md) for known causes
+[docs/termux-upgrade-checks.md](../docs/termux-upgrade-checks.md) for known causes
 and fix strategies.
 
 **Found an issue?** Well-documented bug reports with reproduction steps are welcome! Open an [issue](https://github.com/DioNanos/codex-termux/issues).
@@ -135,7 +135,7 @@ codex exec --json -o output.json "describe this project"
 
 ### Execpolicy
 
-See the [Execpolicy quickstart](./docs/execpolicy.md) to set up rules that govern what commands Codex can execute.
+See the [Execpolicy quickstart](../docs/execpolicy.md) to set up rules that govern what commands Codex can execute.
 
 ## 🧪 Testing & Validation
 
@@ -143,7 +143,7 @@ See the [Execpolicy quickstart](./docs/execpolicy.md) to set up rules that gover
 
 This project includes a comprehensive test suite specifically designed for Termux validation:
 
-**Test Suite**: [`CODEX_TEST_SUITE.md`](./CODEX_TEST_SUITE.md)
+**Test Suite**: [`CODEX_TEST_SUITE.md`](../CODEX_TEST_SUITE.md)
 
 **Coverage**:
 - ✅ **82 automated tests** across 12 categories (including prep/cleanup)
@@ -219,37 +219,37 @@ Package & Binary: 8/8 passed ✅
 
 VERDICT: ✅ PASS
 ```
-- [**Getting started**](./docs/getting-started.md)
-  - [CLI usage](./docs/getting-started.md#cli-usage)
-  - [Slash Commands](./docs/slash_commands.md)
-  - [Running with a prompt as input](./docs/getting-started.md#running-with-a-prompt-as-input)
-  - [Example prompts](./docs/getting-started.md#example-prompts)
-  - [Custom prompts](./docs/prompts.md)
-  - [Memory with AGENTS.md](./docs/getting-started.md#memory-with-agentsmd)
-- [**Configuration**](./docs/config.md)
-  - [Example config](./docs/example-config.md)
-- [**Sandbox & approvals**](./docs/sandbox.md)
-- [**Execpolicy quickstart**](./docs/execpolicy.md)
-- [**Authentication**](./docs/authentication.md)
-  - [Auth methods](./docs/authentication.md#forcing-a-specific-auth-method-advanced)
-  - [Login on a "Headless" machine](./docs/authentication.md#connecting-on-a-headless-machine)
+- [**Getting started**](../docs/getting-started.md)
+  - [CLI usage](../docs/getting-started.md#cli-usage)
+  - [Slash Commands](../docs/slash_commands.md)
+  - [Running with a prompt as input](../docs/getting-started.md#running-with-a-prompt-as-input)
+  - [Example prompts](../docs/getting-started.md#example-prompts)
+  - [Custom prompts](../docs/prompts.md)
+  - [Memory with AGENTS.md](../docs/getting-started.md#memory-with-agentsmd)
+- [**Configuration**](../docs/config.md)
+  - [Example config](../docs/example-config.md)
+- [**Sandbox & approvals**](../docs/sandbox.md)
+- [**Execpolicy quickstart**](../docs/execpolicy.md)
+- [**Authentication**](../docs/authentication.md)
+  - [Auth methods](../docs/authentication.md#forcing-a-specific-auth-method-advanced)
+  - [Login on a "Headless" machine](../docs/authentication.md#connecting-on-a-headless-machine)
 - **Automating Codex**
   - [GitHub Action](https://github.com/openai/codex-action)
-  - [TypeScript SDK](./sdk/typescript/README.md)
-  - [Non-interactive mode (`codex exec`)](./docs/exec.md)
-- [**Skills**](./docs/skills.md)
-- [**Installing & building**](./docs/install.md)
-  - [System Requirements](./docs/install.md#system-requirements)
-  - [DotSlash](./docs/install.md#dotslash)
-  - [Build from source](./docs/install.md#build-from-source)
-- [**Contributing**](./docs/contributing.md)
-- [**Open source fund**](./docs/open-source-fund.md)
+  - [TypeScript SDK](../sdk/typescript/README.md)
+  - [Non-interactive mode (`codex exec`)](../docs/exec.md)
+- [**Skills**](../docs/skills.md)
+- [**Installing & building**](../docs/install.md)
+  - [System Requirements](../docs/install.md#system-requirements)
+  - [DotSlash](../docs/install.md#dotslash)
+  - [Build from source](../docs/install.md#build-from-source)
+- [**Contributing**](../docs/contributing.md)
+- [**Open source fund**](../docs/open-source-fund.md)
 
 ---
 
 ## 🔨 Building from Source
 
-See [BUILDING.md](./BUILDING.md) for compilation instructions.
+See [BUILDING.md](../BUILDING.md) for compilation instructions.
 
 ---
 
@@ -277,7 +277,7 @@ This project maintains full compliance with the Apache 2.0 license from OpenAI C
 **Original work**: Copyright OpenAI (https://github.com/openai/codex)
 **Termux port**: Minimal patches for Android compatibility
 
-See [LICENSE](./LICENSE) file for details.
+See [LICENSE](../LICENSE) file for details.
 
 ---
 
@@ -297,21 +297,10 @@ See [LICENSE](./LICENSE) file for details.
 
 ## 📜 Changelog
 
-### v0.78.0-termux (2026-01-06) – latest
-**Dist-tag**: `latest`
+Upstream Codex releases: https://github.com/openai/codex/releases
 
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.78.0.
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-06) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
-
-### v0.77.1-termux (2026-01-04) – previous
-**Dist-tag**: `previous`
-
-- ⬆️ Upstream bump to rust-v0.77.0 plus 63 commits after; key highlights: config sources, execpolicy wiring, TUI2 selection/copy/perf, unified exec output cap.
-- 🧭 Single entrypoint confirmed: `codex` for TUI; `codex exec` for automation; `codex-exec` kept as JS wrapper (no symlink).
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-04) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
+Termux-specific changes: see [CHANGELOG.md](../CHANGELOG.md).
 
 ---
 
-**Testing**: Comprehensive test suite v1.2 with 82 tests (incl. Termux + Package) in [`CODEX_TEST_SUITE.md`](./CODEX_TEST_SUITE.md)
+**Testing**: Comprehensive test suite v1.2 with 82 tests (incl. Termux + Package) in [`CODEX_TEST_SUITE.md`](../CODEX_TEST_SUITE.md)
