@@ -33,9 +33,9 @@ We only apply patches for issues that:
 
 **Current patches**: See [patches/](../patches/) directory for full documentation.
 
-Need help debugging upgrade alerts? See
-[docs/termux-upgrade-checks.md](../docs/termux-upgrade-checks.md) for known causes
-and fix strategies.
+Serve aiuto per debuggare gli avvisi di upgrade? Consulta
+[docs/termux-upgrade-checks.md](../docs/termux-upgrade-checks.md) per cause note e
+strategie di fix.
 
 **Found an issue?** Well-documented bug reports with reproduction steps are welcome! Open an [issue](https://github.com/DioNanos/codex-termux/issues).
 
@@ -104,7 +104,7 @@ codex
 codex --help
 ```
 
-For full documentation, see [OpenAI Codex docs](https://developers.openai.com/codex).
+For full documentation, see [OpenAI Codex docs](https://github.com/openai/codex).
 
 ### Non-Interactive Mode (Automation)
 
@@ -237,12 +237,11 @@ VERDICT: ✅ PASS
   - [GitHub Action](https://github.com/openai/codex-action)
   - [TypeScript SDK](../sdk/typescript/README.md)
   - [Non-interactive mode (`codex exec`)](../docs/exec.md)
-- [**Skills**](../docs/skills.md)
-- [**Installing & building**](../docs/install.md)
+- [**Contributing**](../docs/contributing.md)
+- [**Install & build**](../docs/install.md)
   - [System Requirements](../docs/install.md#system-requirements)
   - [DotSlash](../docs/install.md#dotslash)
   - [Build from source](../docs/install.md#build-from-source)
-- [**Contributing**](../docs/contributing.md)
 - [**Open source fund**](../docs/open-source-fund.md)
 
 ---
@@ -289,7 +288,7 @@ See [LICENSE](../LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex main (post rust-v0.78.0) with Termux compatibility patches
+**Version**: Based on OpenAI Codex 0.78.0 (Termux build refresh, package/bin verification updated)
 **Platform**: Android Termux ARM64
 **Maintained**: Community-driven, not affiliated with OpenAI
 
