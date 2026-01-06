@@ -75,7 +75,7 @@ npm install -g @mmmbuto/codex-cli-termux
 
 ```bash
 codex --version
-# Output: codex-cli 0.77.1-termux
+# Output: codex-cli 0.78.0-termux
 
 codex login
 # Opens browser for authentication
@@ -196,23 +196,23 @@ Codex will automatically:
 - ✅ Browser opener availability (Patch #1 validation)
 - ✅ Architecture detection (aarch64/ARM64)
 
-**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-04) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch tool absent, git info in non-repo workspace).
+**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-06) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
 
 **Success Criteria**:
 - All System, Files, Shell, and Termux tests must pass
 - At least 80% overall pass rate
 - No critical crashes
 
-**Example Report** (v0.77.1-termux, 2026-01-04):
+**Example Report** (v0.78.0-termux, 2026-01-06):
 ```
 CODEX CLI TEST SUITE - FINAL REPORT
 ====================================
 Platform: Android Termux ARM64 (reference device)
-Codex Version: 0.77.1-termux
+Codex Version: 0.78.0-termux
 Total Tests: 49
 ✅ Passed: 47
 ❌ Failed: 0
-⚠️ Skipped: 2 (WebSearch disabled, git info skipped in non-repo workspace)
+⚠️ Skipped: 2 (WebSearch unavailable, git info skipped in non-repo workspace)
 
 Termux-Specific: 10/10 passed ✅
 Package & Binary: 8/8 passed ✅
@@ -289,7 +289,7 @@ See [LICENSE](./LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex main (post rust-v0.77.0) with Termux compatibility patches
+**Version**: Based on OpenAI Codex main (post rust-v0.78.0) with Termux compatibility patches
 **Platform**: Android Termux ARM64
 **Maintained**: Community-driven, not affiliated with OpenAI
 
@@ -297,68 +297,20 @@ See [LICENSE](./LICENSE) file for details.
 
 ## 📜 Changelog
 
-### v0.77.1-termux (2026-01-04) – latest
+### v0.78.0-termux (2026-01-06) – latest
 **Dist-tag**: `latest`
 
-- ⬆️ Upstream merge: 63 commits after rust-v0.77.0. Highlights:
-  - Config sources: in-repo `.codex/config.toml` (8ff16a7), `/etc/codex/config.toml` (e27d9bd), `project_root_markers` (314937f).
-  - ExecPolicyManager wiring: add (96fdbdd), load from ConfigLayerStack (277babb).
-  - TUI2 selection/copy/perf: multi-click selection (0130a2f), copy shortcut (414fbe0), cache transcript (90f37e8), reduce redraws (3cfa4bc), scroll stickiness fix (279283f).
-  - Unified exec output cap (fb24c47), SandboxUsers group for ACLs (79ce79a).
-  - Remove reasoning format (40de81e), remove model family from TUI (2de7314).
+- ⬆️ Upstream bump to OpenAI Codex rust-v0.78.0.
 - 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-04) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
+- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-06) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
 
-### v0.77.0-termux (2025-12-21)
+### v0.77.1-termux (2026-01-04) – previous
 **Dist-tag**: `previous`
 
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.77.0.
-- 🧭 Single entrypoint confirmed: `codex` with no args opens TUI; `codex <prompt>` routes to exec; `codex-exec` kept as JS wrapper (no symlink).
+- ⬆️ Upstream bump to rust-v0.77.0 plus 63 commits after; key highlights: config sources, execpolicy wiring, TUI2 selection/copy/perf, unified exec output cap.
+- 🧭 Single entrypoint confirmed: `codex` for TUI; `codex exec` for automation; `codex-exec` kept as JS wrapper (no symlink).
 - 🔧 Termux patches #1–6, #8, #9 revalidated after merge (`verify-patches.sh`).
-- 📦 npm package bumped to 0.77.0-termux; packaged binary includes `codex` plus `codex-exec` wrapper (no symlink).
-- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2025-12-21) → 48 passed / 0 failed / 2 skipped (WebSearch disabled, git info skipped in non-repo workspace); Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
-- 🌟 **Official Upstream Highlights**:
-  - Introducing gpt-5.2-codex our latest frontier model
-  - Projects are now collapsed to a single folder in the file explorer
-  - Hide collapsed folders from the file explorer
-  - Initial support for desktop notifications on macOS and Linux
-  - MCP improvements: Better error handling and resource management
-  - TUI improvements: Better visual feedback and performance
-
-### v0.73.0-termux (2025-12-16)
-**Dist-tag**: `latest`
-
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.73.0 (skills manager rework, ghost snapshots v2, config ghost commits, wrap algorithm now FirstFit, OTEL tracing).
-- 🧭 Single entrypoint confirmed: `codex` with no args opens TUI; `codex <prompt>` routes to exec; `codex-exec` kept as alias wrapper.
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (verify-patches.sh).
-- 📦 npm package bumped to 0.73.0-termux; binary rebuilt and packaged once with symlinked `codex-exec`.
-- ✅ Build: `cargo build -p codex-cli --release --locked` on Termux; npm wrapper binary updated. Install + test suite run still pending.
-
-
-### v0.72.0-termux (2025-12-13) – stable
-**Dist-tag**: `stable`
-
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.72.0 (OTEL tracing, config loader rewrite, notifications).
-- 🧭 Single entrypoint confirmed: `codex` with no args opens TUI; `codex <prompt>` routes to exec; `codex-exec` kept as alias wrapper.
-- 🔧 Termux patches #1–6, #8, #9 revalidated after merge (verify-patches.sh).
-- 📦 npm package bumped to 0.72.0-termux; binary packaged once with symlinked `codex-exec`.
-- ✅ Tests: build + install on Termux pending (will run in this session).
-
-### v0.71.0-termux (2025-12-12) – stable
-**Dist-tag**: `stable`
-
-- ⬆️ Upstream bump to OpenAI Codex rust-v0.71.0 (gpt-5.2 models, TUI2 refinements, policy refresh).
-- 🔧 Termux patches #1–6, #8, #9 revalidated; release profile kept RAM-friendly (lto=false, codegen-units=16).
-- 🖥️ Single entrypoint confirmed: `codex` serves both TUI and automation; `codex-exec` remains alias wrapper (JS launcher unchanged).
-- 📦 Package verification: bin includes `codex`, symlinked `codex-exec`, JS wrappers; `LD_LIBRARY_PATH` preserved; termux-open-url login path intact.
-- ✅ Tests: CODEX_TEST_SUITE v1.2 quick run → 37 passed / 0 failed / 12 skipped (web search, AI, some git/Termux-API); critical package checks 8/8.
-
-### v0.64.1-termux (2025-12-03) – stable
-**Dist-tag**: `stable`
-
-- Maintenance follow-up to 0.64.0: docs/test report refresh and npm package verification (codex-exec symlink + bin entries).
-- Base upstream: rust-v0.64.0; Termux patches #1-6, #8, #9 revalidated.
-- ✅ Tests: CODEX_TEST_SUITE v1.2 → 47/49 pass (Git optional skipped), Package & Binary 8/8 pass, Termux-Specific 10/10 pass.
+- ✅ Tests: CODEX_TEST_SUITE v1.2 on Termux (2026-01-04) → 47 passed / 0 failed / 2 skipped; Package & Binary 8/8 passed; Termux-Specific 10/10 passed.
 
 ---
 
