@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.79.0-termux] - 2026-01-08
+
+### Upstream
+- OpenAI Codex rust-v0.79.0 release: https://github.com/openai/codex/releases/tag/rust-v0.79.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
+- Termux patches (#1–#6, #8, #9) revalidated via `verify-patches.sh`.
+
+### Testing
+- CODEX_TEST_SUITE v1.2 on Termux (2026-01-08): 49 tests, 47 passed / 0 failed / 2 skipped (WebSearch unavailable; git info skipped outside repo). Package & Binary 8/8 passed; Termux-specific 10/10 passed.
+
+### Documentation
+- Added GLM-4.7 quickstart guide: [docs/GLM4.7-quickstart.md](./docs/GLM4.7-quickstart.md)
+- Updated README.md with GLM-4.7 setup instructions in Quickstart section
+
+---
+
 ## [0.78.0-termux] - 2026-01-06
 
 ### Upstream
