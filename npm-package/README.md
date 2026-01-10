@@ -75,7 +75,7 @@ npm install -g @mmmbuto/codex-cli-termux
 
 ```bash
 codex --version
-# Output: codex-cli 0.79.0-termux
+# Output: codex-cli 0.80.0-termux
 
 codex login
 # Opens browser for authentication
@@ -217,7 +217,7 @@ Common Termux issues and the fastest places to check.
 
 ## 🧪 Testing & Validation
 
-Latest validation (2026-01-08): 47 passed / 0 failed / 2 skipped — see [CODEX_TEST_REPORT_v0.79.0.md](./CODEX_TEST_REPORT_v0.79.0.md).
+Latest validation (2026-01-10): 47 passed / 0 failed / 2 skipped — see [CODEX_TEST_REPORT_v0.79.0.md](./CODEX_TEST_REPORT_v0.79.0.md).
 
 <details>
 <summary>Details: automated test suite, coverage, and sample report</summary>
@@ -227,7 +227,7 @@ Latest validation (2026-01-08): 47 passed / 0 failed / 2 skipped — see [CODEX_
 
 **Coverage**:
 - ✅ **82 automated tests** across 12 categories (including prep/cleanup)
-- ✅ **10 Termux-specific tests** validating all 8 compatibility patches
+- ✅ **10 Termux-specific tests** validating all active compatibility patches (#1-#6, #9)
 - ✅ **8 Package & Binary tests** for npm installation verification
 - ✅ File operations, shell execution, environment detection
 - ✅ Android permissions, library paths, package manager
@@ -276,20 +276,23 @@ Codex will automatically:
 - ✅ Browser opener availability (Patch #1 validation)
 - ✅ Architecture detection (aarch64/ARM64)
 
-**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-08) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
+**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-10) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
 
 **Success Criteria**:
 - All System, Files, Shell, and Termux tests must pass
 - At least 80% overall pass rate
 - No critical crashes
 
-**Example Report** (v0.79.0-termux, 2026-01-08):
+**Example Report** (v0.80.0-termux, 2026-01-10):
 ```
 CODEX CLI TEST SUITE - FINAL REPORT
 ====================================
 Platform: Android Termux ARM64
-Codex Version: 0.79.0-termux
+Codex Version: 0.80.0-termux
 Total Tests: 49
+✅ Passed: 49
+❌ Failed: 0
+⚠️ Skipped: 0
 ✅ Passed: 47
 ❌ Failed: 0
 ⚠️ Skipped: 2 (WebSearch unavailable, git info skipped in non-repo workspace)
@@ -376,7 +379,7 @@ See [LICENSE](./LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex main (rust-v0.79.0) with Termux compatibility patches
+**Version**: Based on OpenAI Codex main (rust-v0.80.0) with Termux compatibility patches
 **Platform**: Android Termux ARM64
 **Maintained**: Community-driven, not affiliated with OpenAI
 
