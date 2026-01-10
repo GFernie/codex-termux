@@ -1,7 +1,7 @@
 # 🔧 Termux Compatibility Patches
 
 This document describes the Termux‑specific patches applied to the official OpenAI Codex CLI so that it works well on Android Termux (ARM64).
-Validated for: **v0.74.0-termux** (built from upstream `rust-v0.73.0`; upstream has no 0.74.0 tag as of 2025-12-18).
+Validated for: **v0.80.0-termux** (built from upstream `rust-v0.80.0`; upstream has no 0.74.0 tag as of 2025-12-18).
 
 ---
 
@@ -604,10 +604,10 @@ codex --version  # Should show latest version
 - **Patch #7**: Manual update instructions on Android *(historical, 0.55.x only)*
 - **Patch #9**: Auto-update execution (main.rs)
 
-### Bash Execution (Critical)
+### Bash Execution (Historical - Resolved Upstream)
 - **Patch #8**: Fix bash execution in Agent mode (shell detection, LD_*, sandbox)
 
-For the current **0.74.0-termux** release, active patches are **#1–#6, #8, and #9**. All are critical for correct behavior on Termux. Patch **#7** remains historical (0.55.x only).
+For the current **0.80.0-termux** release, active patches are **#1–#6, and #9**. Patch #8 is no longer required (resolved upstream in v0.80.0).. All are critical for correct behavior on Termux. Patch **#7** remains historical (0.55.x only).
 
 ---
 
@@ -651,7 +651,67 @@ We only accept patches for Termux-specific issues, not general feature requests.
 ---
 
 **Last Updated**: 2025-12-18
-**Patches Applied**: 9 (revalidated for 0.74.0-termux)
+**Patches Applied**: 8 (revalidated for v0.80.0-termux)
 **Based on**: OpenAI Codex rust-v0.73.0
 **Platform**: Android Termux ARM64
 **Upstream Changes**: 0.72.0 → 0.73.0 (skills manager rework, ghost snapshots v2, wrap algorithm FirstFit, stability fixes)
+
+---
+
+## v0.80.0-termux Updates
+
+### Upstream Changes Affecting Termux
+
+#### Process Hardening Removal
+**Upstream Commit**: `d3ff668f6` - "fix: remove existing process hardening from Codex CLI (#8951)"
+**Impact**: Termux Patch #8 (bash execution in Agent mode) is no longer needed
+
+The upstream team removed `codex_process_hardening::pre_main_hardening()` from the Codex CLI. This resolves the bash execution issues on Termux that required Patch #8 in previous versions. The process hardening is still used in `codex-responses-api-proxy` but not in the main CLI.
+
+**Benefits for Termux:**
+- Bash commands in Agent mode now work correctly without patches
+- Environment variables like `LD_LIBRARY_PATH` are properly inherited
+- No need for shell detection or LD_*/sandbox workarounds
+
+**Previous Patch #8 Status:**
+- ❌ No longer required
+- ✅ Resolved by upstream PR #8951
+
+**Last Updated**: 2026-01-10
+**Patches Applied**: 8 (revalidated for v0.80.0-termux)
+**Based on**: OpenAI Codex rust-v0.80.0
+**Platform**: Android Termux ARM64
+**Upstream Changes**: Process hardening removed from Codex CLI (resolves bash execution issues)
+
+---
+
+## v0.80.0-termux Updates
+
+### Upstream Changes Affecting Termux
+
+#### Process Hardening Removal
+**Upstream Commit**: `d3ff668f6` - "fix: remove existing process hardening from Codex CLI (#8951)"
+**Impact**: Termux Patch #8 (bash execution in Agent mode) is no longer needed
+
+The upstream team removed `codex_process_hardening::pre_main_hardening()` from the Codex CLI. This resolves the bash execution issues on Termux that required Patch #8 in previous versions. The process hardening is still used in `codex-responses-api-proxy` but not in the main CLI.
+
+**Benefits for Termux:**
+- Bash commands in Agent mode now work correctly without patches
+- Environment variables like `LD_LIBRARY_PATH` are properly inherited
+- No need for shell detection or LD_*/sandbox workarounds
+
+**Previous Patch #8 Status:**
+- ❌ No longer required
+- ✅ Resolved by upstream PR #8951
+- Documentation retained for historical reference
+
+### Test Results
+
+**CODEX_TEST_REPORT_v0.80.0.md Summary:**
+- Total Tests: 49
+- ✅ Passed: 49
+- ❌ Failed: 0
+- ⚠️ Skipped: 0
+- **VERDICT: PASS**
+
+All Termux patches verified functional on v0.80.0.
