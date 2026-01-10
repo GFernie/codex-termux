@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.80.0-termux] - 2026-01-10
+
+### Upstream
+- OpenAI Codex rust-v0.80.0 release: https://github.com/openai/codex/releases/tag/rust-v0.80.0
+- Upstream release notes and details are maintained in the link above.
+- **Important**: Process hardening removed from Codex CLI (upstream PR #8951)
+- New features:
+  * Thread/fork endpoints (conversation branching)
+  * Requirements/list API
+  * Elevated sandbox onboarding NUX
+  * Skills explicit invocation via V2 API
+  * Metrics capabilities (otel/metrics module)
+
+### Termux Patches
+- Termux patches (#1–#6, #9) revalidated via `verify-patches.sh`.
+- **Patch #8 (bash execution)**: No longer required - resolved by upstream PR #8951 (process hardening removal)
+- This improves bash execution in Agent mode without custom patches.
+
+### Testing
+- CODEX_TEST_SUITE v1.2 on Termux (2026-01-10): 49 tests, 49 passed / 0 failed / 0 skipped.
+- Package & Binary 8/8 passed; Termux-specific 10/10 passed.
+- All binaries verified: codex (60M), codex-tui (42M), codex-exec (35M), codex-app-server (38M).
+
+### Documentation
+- Updated patches/README.md for v0.80.0 with Patch #8 resolution notes
+- Updated README.md with v0.80.0 version references
+- Removed outdated CODEX_TEST_REPORT_v0.79.0.md
+
+---
 ## [0.79.0-termux] - 2026-01-08
 
 ### Upstream

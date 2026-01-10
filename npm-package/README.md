@@ -217,7 +217,7 @@ Common Termux issues and the fastest places to check.
 
 ## 🧪 Testing & Validation
 
-Latest validation (2026-01-10): 47 passed / 0 failed / 2 skipped — see [CODEX_TEST_REPORT_v0.79.0.md](./CODEX_TEST_REPORT_v0.79.0.md).
+Latest validation (2026-01-10): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.80.0.md).
 
 <details>
 <summary>Details: automated test suite, coverage, and sample report</summary>
