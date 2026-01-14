@@ -143,7 +143,6 @@ pub async fn process_sse(
     telemetry: Option<Arc<dyn SseTelemetry>>,
 ) {
     let mut stream = stream.eventsource();
-    let mut response_completed: Option<ResponseCompleted> = None;
     let mut response_error: Option<ApiError> = None;
 
     loop {
@@ -160,21 +159,10 @@ pub async fn process_sse(
                 return;
             }
             Ok(None) => {
-                match response_completed.take() {
-                    Some(ResponseCompleted { id, usage }) => {
-                        let event = ResponseEvent::Completed {
-                            response_id: id,
-                            token_usage: usage.map(Into::into),
-                        };
-                        let _ = tx_event.send(Ok(event)).await;
-                    }
-                    None => {
-                        let error = response_error.unwrap_or(ApiError::Stream(
-                            "stream closed before response.completed".into(),
-                        ));
-                        let _ = tx_event.send(Err(error)).await;
-                    }
-                }
+                let error = response_error.unwrap_or(ApiError::Stream(
+                    "stream closed before response.completed".into(),
+                ));
+                let _ = tx_event.send(Err(error)).await;
                 return;
             }
             Err(_) => {
@@ -274,8 +262,15 @@ pub async fn process_sse(
             "response.completed" => {
                 if let Some(resp_val) = event.response {
                     match serde_json::from_value::<ResponseCompleted>(resp_val) {
-                        Ok(r) => {
-                            response_completed = Some(r);
+                        Ok(resp) => {
+                            let event = ResponseEvent::Completed {
+                                response_id: resp.id,
+                                token_usage: resp.usage.map(Into::into),
+                            };
+                            if tx_event.send(Ok(event)).await.is_err() {
+                                return;
+                            }
+                            return;
                         }
                         Err(e) => {
                             let error = format!("failed to parse ResponseCompleted: {e}");
@@ -285,6 +280,37 @@ pub async fn process_sse(
                         }
                     };
                 };
+            }
+            "response.done" => {
+                if let Some(resp_val) = event.response {
+                    match serde_json::from_value::<ResponseDone>(resp_val) {
+                        Ok(resp) => {
+                            let event = ResponseEvent::Completed {
+                                response_id: resp.id.unwrap_or_default(),
+                                token_usage: resp.usage.map(Into::into),
+                            };
+                            if tx_event.send(Ok(event)).await.is_err() {
+                                return;
+                            }
+                            return;
+                        }
+                        Err(e) => {
+                            let error = format!("failed to parse ResponseDone: {e}");
+                            debug!(error);
+                            response_error = Some(ApiError::Stream(error));
+                            continue;
+                        }
+                    };
+                } else {
+                    let event = ResponseEvent::Completed {
+                        response_id: String::new(),
+                        token_usage: None,
+                    };
+                    if tx_event.send(Ok(event)).await.is_err() {
+                        return;
+                    }
+                    return;
+                }
             }
             "response.output_item.added" => {
                 let Some(item_val) = event.item else { continue };
@@ -365,7 +391,9 @@ fn rate_limit_regex() -> &'static regex_lite::Regex {
 mod tests {
     use super::*;
     use assert_matches::assert_matches;
+    use bytes::Bytes;
     use codex_protocol::models::ResponseItem;
+    use futures::stream;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use tokio::sync::mpsc;
@@ -505,6 +533,99 @@ mod tests {
                 assert_eq!(msg, "stream closed before response.completed")
             }
             other => panic!("unexpected second event: {other:?}"),
+        }
+    }
+
+    #[tokio::test]
+    async fn response_done_emits_completed() {
+        let done = json!({
+            "type": "response.done",
+            "response": {
+                "usage": {
+                    "input_tokens": 1,
+                    "input_tokens_details": null,
+                    "output_tokens": 2,
+                    "output_tokens_details": null,
+                    "total_tokens": 3
+                }
+            }
+        })
+        .to_string();
+
+        let sse1 = format!("event: response.done\ndata: {done}\n\n");
+        let events = collect_events(&[sse1.as_bytes()]).await;
+
+        assert_eq!(events.len(), 1);
+        match &events[0] {
+            Ok(ResponseEvent::Completed {
+                response_id,
+                token_usage,
+            }) => {
+                assert_eq!(response_id, "");
+                assert!(token_usage.is_some());
+            }
+            other => panic!("unexpected event: {other:?}"),
+        }
+    }
+
+    #[tokio::test]
+    async fn response_done_without_payload_emits_completed() {
+        let done = json!({
+            "type": "response.done"
+        })
+        .to_string();
+
+        let sse1 = format!("event: response.done\ndata: {done}\n\n");
+        let events = collect_events(&[sse1.as_bytes()]).await;
+
+        assert_eq!(events.len(), 1);
+        match &events[0] {
+            Ok(ResponseEvent::Completed {
+                response_id,
+                token_usage,
+            }) => {
+                assert_eq!(response_id, "");
+                assert!(token_usage.is_none());
+            }
+            other => panic!("unexpected event: {other:?}"),
+        }
+    }
+
+    #[tokio::test]
+    async fn emits_completed_without_stream_end() {
+        let completed = json!({
+            "type": "response.completed",
+            "response": { "id": "resp1" }
+        })
+        .to_string();
+
+        let sse1 = format!("event: response.completed\ndata: {completed}\n\n");
+        let stream = stream::iter(vec![Ok(Bytes::from(sse1))]).chain(stream::pending());
+        let stream: ByteStream = Box::pin(stream);
+
+        let (tx, mut rx) = mpsc::channel::<Result<ResponseEvent, ApiError>>(8);
+        tokio::spawn(process_sse(stream, tx, idle_timeout(), None));
+
+        let events = tokio::time::timeout(Duration::from_millis(1000), async {
+            let mut events = Vec::new();
+            while let Some(ev) = rx.recv().await {
+                events.push(ev);
+            }
+            events
+        })
+        .await
+        .expect("timed out collecting events");
+
+        assert_eq!(events.len(), 1);
+        match &events[0] {
+            Ok(ResponseEvent::Completed {
+                response_id,
+                token_usage,
+            }) => {
+                assert_eq!(response_id, "resp1");
+                assert!(token_usage.is_none());
+            }
+            other => panic!("unexpected event: {other:?}"),
         }
     }
 
