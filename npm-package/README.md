@@ -13,16 +13,16 @@
 Built from upstream OpenAI Codex source, compiled for Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
 
 ### What We Do:
-✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
-✅ **Compile for ARM64** (Android Termux native)
-✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
-✅ **Package as npm** for easy installation
-✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
+✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)  
+✅ **Compile for ARM64** (Android Termux native)  
+✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream  
+✅ **Package as npm** for easy installation  
+✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution  
 
 ### What We DON'T Do:
-❌ **NO new features**
-❌ **NO behavior modifications** (works exactly like upstream)
-❌ **NO replacement** of official Codex
+❌ **NO new features**  
+❌ **NO behavior modifications** (works exactly like upstream)  
+❌ **NO replacement** of official Codex  
 
 ### 🔧 Compatibility Patches
 
@@ -52,7 +52,7 @@ pkg install nodejs-lts -y
 
 # Verify
 node --version  # v18+ (recommended v22+)
-npm --version   # v6+
+npm --version   # v9+
 ```
 
 **Requirements:**
@@ -71,11 +71,35 @@ npm --version   # v6+
 npm install -g @mmmbuto/codex-cli-termux
 ```
 
+### Version policy (Stable vs Latest)
+
+For now we keep **two tracks**:
+
+- **Stable:** `0.80.0-termux` (recommended for reliability on Termux)
+- **Latest:** newer upstream-based releases (e.g. `0.86.0-termux` and above)
+
+Install a specific version when needed:
+
+```bash
+# Stable (known-good)
+npm install -g @mmmbuto/codex-cli-termux@0.80.0-termux
+
+# Latest (tracks upstream)
+npm install -g @mmmbuto/codex-cli-termux@latest
+```
+
+Tip: check what npm considers “latest”:
+
+```bash
+npm view @mmmbuto/codex-cli-termux dist-tags
+npm view @mmmbuto/codex-cli-termux versions --json
+```
+
 ### Verify Installation
 
 ```bash
 codex --version
-# Output: codex-cli 0.80.0-termux
+# Example: codex-cli 0.80.0-termux
 
 codex login
 # Opens browser for authentication
@@ -90,41 +114,19 @@ codex login
 ---
 
 ## ⚡ 2-Minute Quickstart / ⚡ 2分钟快速开始
+
 Get a first session running fast. Choose the path that matches your account.
 快速完成首次运行。选择与你的账号/网关匹配的路径。
 
 ### Path 1 — OpenAI (default)
+
 ```bash
 codex login
 codex
 ```
 
-### Path 2 — GLM-4.7 (Zhipu ZAI) / GLM-4.7 (智谱 ZAI)
-Use Zhipu's GLM-4.7 model optimized for coding scenarios.
-使用智谱的 GLM-4.7 模型（专为编程场景优化）。
+### Path 2 — OpenRouter & OpenAI-compatible gateways / OpenRouter 与兼容网关
 
-**Quick setup / 快速配置:**
-```bash
-# 1. Add API key to ~/.zshrc (bash users: use ~/.bashrc)
-echo 'export ZAI_API_KEY="your-zai-api-key"' >> ~/.zshrc
-
-# 2. Add alias for GLM-4.7
-cat >> ~/.zshrc << 'ALIAS_EOF'
-
-# Codex CLI with GLM-4.7 (Coding Plan - dedicated endpoint)
-alias codex-glm='OPENAI_API_KEY="$ZAI_API_KEY" codex -m "GLM-4.7" -c model_provider="zai"'
-ALIAS_EOF
-
-# 3. Reload shell and test
-source ~/.zshrc
-codex-glm "Say hello in Chinese"
-```
-
-If your ZAI setup requires a base URL, export `OPENAI_BASE_URL=...` — see [docs/GLM4.7-quickstart.md](./docs/GLM4.7-quickstart.md).
-
-**Full docs / 完整文档:** [docs/GLM4.7-quickstart.md](./docs/GLM4.7-quickstart.md)
-
-### Path 3 — OpenRouter & gateways / OpenRouter 与兼容网关
 For OpenRouter or other OpenAI-compatible providers.
 适用于 OpenRouter 或其他 OpenAI 兼容的提供商。
 
@@ -136,20 +138,26 @@ source ~/.codex/.env
 codex --profile or-fast
 ```
 
-Caution: model slugs/names can change on providers—verify the current model list first.
+Caution: model slugs/names can change on providers—verify the current model list first.  
 注意：模型名称可能变化，请以提供商模型列表为准。
+
+#### Gateways that don’t fully match Codex “Responses API” (Codex > 0.80.0)
+
+Some gateways may not fully implement the endpoints/event-stream format expected by newer Codex versions.
+If you see issues like unexpected 404/502 on `/v1/responses`, use the community bridge proxy:
+
+- **zai-codex-bridge**: https://github.com/DioNanos/zai-codex-bridge
+
+This keeps **codex-termux** minimal (no behavior changes) while allowing compatibility fixes to live in a separate project.
 
 ---
 
 ## 🧭 OpenRouter & gateways note / 🧭 OpenRouter 与兼容网关说明
-This Termux port only adds Android compatibility; it does not change Codex behavior.
-本 Termux 版本仅提供 Android 兼容性，不改变 Codex 行为。
-Providers/models are determined by your own config and backend.
-提供商与模型由你的配置与后端决定。
 
-For detailed setup guides, see:
-- **GLM-4.7**: [docs/GLM4.7-quickstart.md](./docs/GLM4.7-quickstart.md)
-- **OpenRouter**: [docs/openrouter-quickstart.md](./docs/openrouter-quickstart.md)
+This Termux port only adds Android compatibility; it does not change Codex behavior.  
+本 Termux 版本仅提供 Android 兼容性，不改变 Codex 行为。  
+Providers/models are determined by your own config and backend.  
+提供商与模型由你的配置与后端决定。
 
 ---
 
@@ -204,25 +212,31 @@ See the [Execpolicy quickstart](./docs/execpolicy.md) to set up rules that gover
 ---
 
 ## 🔧 Troubleshooting (Termux) / 🔧 故障排查（Termux）
+
 Common Termux issues and the fastest places to check.
 常见 Termux 问题与最快排查入口。
 
 - Upgrade alerts or shared library errors: see [docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md)
 - Basic usage/setup: see [docs/getting-started.md](./docs/getting-started.md)
 - Authentication/login problems: see [docs/authentication.md](./docs/authentication.md)
-- GLM-4.7 setup: see [docs/GLM4.7-quickstart.md](./docs/GLM4.7-quickstart.md)
+- Provider/gateway incompatibilities on **Codex > 0.80.0**: use **zai-codex-bridge** (link above)
 - Still stuck? Open an issue with repro steps: [GitHub Issues](https://github.com/DioNanos/codex-termux/issues)
 
 ---
 
 ## 🧪 Testing & Validation
 
-Latest validation (2026-01-10): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.80.0.md).
+Stable validation (2026-01-10): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.80.0.md).
+
+## 🧪 Testing & Validation
+
+Latest validation (2026-01-16): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.86.0.md).
 
 <details>
 <summary>Details: automated test suite, coverage, and sample report</summary>
 
 ### Automated Test Suite
+
 [CODEX_TEST_SUITE.md](./CODEX_TEST_SUITE.md) - Universal test suite compatible with all Codex versions
 
 **Coverage**:
@@ -276,32 +290,12 @@ Codex will automatically:
 - ✅ Browser opener availability (Patch #1 validation)
 - ✅ Architecture detection (aarch64/ARM64)
 
-**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-10) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
+**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes the applicable subset; see the report linked above for the last run.
 
 **Success Criteria**:
 - All System, Files, Shell, and Termux tests must pass
 - At least 80% overall pass rate
 - No critical crashes
-
-**Example Report** (v0.80.0-termux, 2026-01-10):
-```
-CODEX CLI TEST SUITE - FINAL REPORT
-====================================
-Platform: Android Termux ARM64
-Codex Version: 0.80.0-termux
-Total Tests: 49
-✅ Passed: 49
-❌ Failed: 0
-⚠️ Skipped: 0
-✅ Passed: 47
-❌ Failed: 0
-⚠️ Skipped: 2 (WebSearch unavailable, git info skipped in non-repo workspace)
-
-Termux-Specific: 10/10 passed ✅
-Package & Binary: 8/8 passed ✅
-
-VERDICT: ✅ PASS
-```
 
 </details>
 
@@ -313,7 +307,7 @@ VERDICT: ✅ PASS
   - [CLI usage](./docs/getting-started.md#cli-usage)
   - [Slash Commands](./docs/slash_commands.md)
   - [Running with a prompt as input](./docs/getting-started.md#running-with-a-prompt-as-input)
-  - [Example prompts](./docs/getting-started.md#example-prompts)
+  - [Example prompts](./docs/getting-started.md#running-with-a-prompt-as-input)
   - [Custom prompts](./docs/prompts.md)
   - [Memory with AGENTS.md](./docs/getting-started.md#memory-with-agentsmd)
 - [**Configuration**](./docs/config.md)
@@ -348,10 +342,10 @@ See [BUILDING.md](./BUILDING.md) for compilation instructions.
 **Codex-Termux** is a community-maintained port enabling AI-powered coding on Android Termux.
 
 **Maintenance activities:**
-- 🔨 **ARM64 compilation** - Building native binaries for each upstream release (~18min per build)
+- 🔨 **ARM64 compilation** - Building native binaries for each upstream release
 - 🔄 **Upstream synchronization** - Tracking OpenAI Codex updates and merging changes
 - 🐛 **Compatibility patches** - Maintaining Android-specific fixes for Termux environment
-- 📱 **Device testing** - Verification on real ARM64 hardware (ARM64 flagship device, other devices)
+- 📱 **Device testing** - Verification on real ARM64 hardware
 - 📚 **Documentation & support** - Maintaining docs, responding to GitHub issues
 
 **Time investment:** Approximately 20 hours per month for project upkeep.
@@ -364,7 +358,7 @@ See [BUILDING.md](./BUILDING.md) for compilation instructions.
 
 This project maintains full compliance with the Apache 2.0 license from OpenAI Codex.
 
-**Original work**: Copyright OpenAI (https://github.com/openai/codex)
+**Original work**: Copyright OpenAI (https://github.com/openai/codex)  
 **Termux port**: Minimal patches for Android compatibility
 
 See [LICENSE](./LICENSE) file for details.
@@ -379,18 +373,17 @@ See [LICENSE](./LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex main (rust-v0.80.0) with Termux compatibility patches
-**Platform**: Android Termux ARM64
-**Maintained**: Community-driven, not affiliated with OpenAI
+**Version**: Based on OpenAI Codex main (Termux-compatible builds)  
+**Platform**: Android Termux ARM64  
+**Maintained**: Community-driven, not affiliated with OpenAI  
 
 ---
 
 ## 📜 Changelog
 
-Upstream Codex releases: https://github.com/openai/codex/releases
-
+Upstream Codex releases: https://github.com/openai/codex/releases  
 Termux-specific changes: see [CHANGELOG.md](./CHANGELOG.md).
 
 ---
 
-**Testing**: Comprehensive test suite v1.2 with 82 tests (incl. Termux + Package) in [`CODEX_TEST_SUITE.md`](./CODEX_TEST_SUITE.md)
+**Testing**: Comprehensive test suite in [`CODEX_TEST_SUITE.md`](./CODEX_TEST_SUITE.md)
