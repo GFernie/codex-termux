@@ -194,26 +194,10 @@ fn maybe_push_chat_wire_api_deprecation(
     post_session_configured_events: &mut Vec<Event>,
 ) {
     if config.model_provider.wire_api != WireApi::Chat {
-        return;
+    // LTS 0.80.0: Chat wire API is fully supported.
+    // No deprecation warning needed for LTS release.
     }
 
-    if CHAT_WIRE_API_DEPRECATION_EMITTED
-        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
-        .is_err()
-    {
-        return;
-    }
-
-    post_session_configured_events.push(Event {
-        id: INITIAL_SUBMIT_ID.to_owned(),
-        msg: EventMsg::DeprecationNotice(DeprecationNoticeEvent {
-            summary: CHAT_WIRE_API_DEPRECATION_SUMMARY.to_string(),
-            details: None,
-        }),
-    });
-}
-
-impl Codex {
     /// Spawn a new [`Codex`] and initialize the session.
     pub(crate) async fn spawn(
         config: Config,
