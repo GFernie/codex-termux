@@ -1,16 +1,16 @@
-# 🤖 Codex CLI - Termux Edition
+# 🤖 Codex CLI - LTS Edition
 
-> **Built from upstream OpenAI Codex source, compiled for Android Termux (ARM64)**
+> **Built from upstream OpenAI Codex source, compiled for Linux x64 + Android Termux (ARM64)**
 
-[![npm](https://img.shields.io/npm/v/@mmmbuto/codex-cli-termux?style=flat-square&logo=npm)](https://www.npmjs.com/package/@mmmbuto/codex-cli-termux)
-[![downloads](https://img.shields.io/npm/dt/@mmmbuto/codex-cli-termux?style=flat-square)](https://www.npmjs.com/package/@mmmbuto/codex-cli-termux)
+[![npm](https://img.shields.io/npm/v/@mmmbuto/codex-cli-lts?style=flat-square&logo=npm)](https://www.npmjs.com/package/@mmmbuto/codex-cli-lts)
+[![downloads](https://img.shields.io/npm/dt/@mmmbuto/codex-cli-lts?style=flat-square)](https://www.npmjs.com/package/@mmmbuto/codex-cli-lts)
 [![ko-fi](https://img.shields.io/badge/☕_Support-Ko--fi-FF5E5B?style=flat-square&logo=ko-fi)](https://ko-fi.com/dionanos)
 
 ---
 
 ## What This Is
 
-Built from upstream OpenAI Codex source, compiled for Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
+Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
 
 ### LTS Line (0.80.0)
 
@@ -22,7 +22,7 @@ This repo maintains **two release lines**:
 
 ### What We Do:
 ✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
-✅ **Compile for ARM64** (Android Termux native)
+✅ **Compile for Linux x64 + ARM64** (Android Termux native)
 ✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
 ✅ **Package as npm** for easy installation
 ✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
@@ -51,6 +51,25 @@ and fix strategies.
 
 ## 📋 Prerequisites
 
+### Linux (x64)
+
+```bash
+# Install Node.js (example for Debian/Ubuntu)
+sudo apt-get update
+sudo apt-get install -y nodejs npm
+
+# Verify
+node --version  # v18+ (recommended v22+)
+npm --version   # v6+
+```
+
+**Requirements:**
+- Linux x64
+- Node.js >=18 (recommended >=22)
+- ~80MB storage
+
+### Termux (Android ARM64)
+
 ```bash
 # Update Termux packages
 pkg update && pkg upgrade -y
@@ -76,7 +95,7 @@ npm --version   # v6+
 ### Via npm (Recommended)
 
 ```bash
-npm install -g @mmmbuto/codex-cli-termux
+npm install -g @mmmbuto/codex-cli-lts
 ```
 
 ### Verify Installation
@@ -90,7 +109,7 @@ codex login
 ```
 
 **Links:**
-- npm: https://www.npmjs.com/package/@mmmbuto/codex-cli-termux
+- npm: https://www.npmjs.com/package/@mmmbuto/codex-cli-lts
 - Releases: https://github.com/DioNanos/codex-termux/releases
 - Upstream: https://github.com/openai/codex
 - Web UI: [NexusCLI](https://github.com/DioNanos/nexuscli) - Optional web interface for Codex/Claude/Gemini
