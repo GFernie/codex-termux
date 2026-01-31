@@ -34,9 +34,9 @@ else
     echo "❌ MISSING!"; exit 1
 fi
 
-# Patch #6
-echo -n "Patch #6 (NPM Package): "
-if grep -q "@mmmbuto/codex-cli-termux" codex-rs/tui/src/update_action.rs; then
+# Patch #6 (LTS) - Updated for codex-cli-lts
+echo -n "Patch #6 (LTS Package): "
+if grep -q "@mmmbuto/codex-cli-lts" codex-rs/tui/src/update_action.rs && grep -q "ends_with(\"-lts\")" codex-rs/tui/src/updates.rs; then
     echo "✅ PRESENT"
 else
     echo "❌ MISSING!"; exit 1
