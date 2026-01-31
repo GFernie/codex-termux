@@ -1,9 +1,9 @@
 /// Update action the CLI should perform after the TUI exits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpdateAction {
-    /// Update via `npm install -g @mmmbuto/codex-cli-termux@latest`.
+    /// Update via `npm install -g @mmmbuto/codex-cli-lts@latest`.
     NpmGlobalLatest,
-    /// Update via `bun install -g @mmmbuto/codex-cli-termux@latest`.
+    /// Update via `bun install -g @mmmbuto/codex-cli-lts@latest`.
     BunGlobalLatest,
     /// Update via `brew upgrade codex`.
     BrewUpgrade,
@@ -15,11 +15,11 @@ impl UpdateAction {
         match self {
             UpdateAction::NpmGlobalLatest => (
                 "npm",
-                &["install", "-g", "@mmmbuto/codex-cli-termux@latest"],
+                &["install", "-g", "@mmmbuto/codex-cli-lts@latest"],
             ),
             UpdateAction::BunGlobalLatest => (
                 "bun",
-                &["install", "-g", "@mmmbuto/codex-cli-termux@latest"],
+                &["install", "-g", "@mmmbuto/codex-cli-lts@latest"],
             ),
             UpdateAction::BrewUpgrade => ("brew", &["upgrade", "--cask", "codex"]),
         }

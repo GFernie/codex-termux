@@ -58,8 +58,9 @@ const VERSION_FILENAME: &str = "version.json";
 // We use the latest version from the cask if installation is via homebrew - homebrew does not immediately pick up the latest release and can lag behind.
 const HOMEBREW_CASK_URL: &str =
     "https://raw.githubusercontent.com/Homebrew/homebrew-cask/HEAD/Casks/c/codex.rb";
-const LATEST_RELEASE_URL: &str =
-    "https://api.github.com/repos/DioNanos/codex-termux/releases/latest";
+// Get all releases to filter for LTS versions only
+const ALL_RELEASES_URL: &str =
+    "https://api.github.com/repos/DioNanos/codex-termux/releases";
 
 #[derive(Deserialize, Debug, Clone)]
 struct ReleaseInfo {
@@ -88,16 +89,25 @@ async fn check_for_update(version_file: &Path) -> anyhow::Result<()> {
             extract_version_from_cask(&cask_contents)?
         }
         _ => {
-            let ReleaseInfo {
-                tag_name: latest_tag_name,
-            } = create_client()
-                .get(LATEST_RELEASE_URL)
+            // Fetch all releases and filter for LTS versions
+            let releases: Vec<ReleaseInfo> = create_client()
+                .get(ALL_RELEASES_URL)
                 .send()
                 .await?
                 .error_for_status()?
-                .json::<ReleaseInfo>()
+                .json::<Vec<ReleaseInfo>>()
                 .await?;
-            extract_version_from_latest_tag(&latest_tag_name)?
+            
+            // Find the latest LTS release (tag ending with -lts)
+            let latest_lts = releases
+                .iter()
+                .filter(|r| r.tag_name.ends_with("-lts"))
+                .map(|r| extract_version_from_latest_tag(&r.tag_name))
+                .filter_map(Result::ok)
+                .max()
+                .ok_or_else(|| anyhow::anyhow!("No LTS releases found"))?;
+            
+            latest_lts
         }
     };
 
