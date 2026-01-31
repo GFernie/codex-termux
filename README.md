@@ -244,7 +244,7 @@ Common Termux issues and the fastest places to check.
 
 ## 🧪 Testing & Validation
 
-Latest validation (2026-01-10): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.80.0.md).
+Latest validation (2026-01-31): 49 passed / 0 failed / 0 skipped — see [CODEX_TEST_REPORT_v0.80.0.md](./CODEX_TEST_REPORT_v0.80.0.md).
 
 <details>
 <summary>Details: automated test suite, coverage, and sample report</summary>
@@ -303,19 +303,19 @@ Codex will automatically:
 - ✅ Browser opener availability (Patch #1 validation)
 - ✅ Architecture detection (aarch64/ARM64)
 
-**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-10) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
+**Suite size**: 82 tests defined (includes optional/manual). Automated run on Termux executes 49 applicable tests; last run (2026-01-31) completed with 47 ✅ / 0 ❌ / 2 ⚠️ skipped (WebSearch unavailable, git info skipped in non-repo workspace).
 
 **Success Criteria**:
 - All System, Files, Shell, and Termux tests must pass
 - At least 80% overall pass rate
 - No critical crashes
 
-**Example Report** (v0.80.2-lts, 2026-01-10):
+**Example Report** (v0.80.3-lts, 2026-01-31):
 ```
 CODEX CLI TEST SUITE - FINAL REPORT
 ====================================
 Platform: Android Termux ARM64
-Codex Version: 0.80.2-lts
+Codex Version: 0.80.3-lts
 Total Tests: 49
 ✅ Passed: 49
 ❌ Failed: 0
