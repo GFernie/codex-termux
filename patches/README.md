@@ -1,7 +1,7 @@
 # 🔧 Termux Compatibility Patches
 
 This document describes the Termux‑specific patches applied to the official OpenAI Codex CLI so that it works well on Android Termux (ARM64).
-Validated for: **v0.93.0-termux** (built from upstream `rust-v0.93.0`).
+Validated for: **v0.95.0-termux** (built from upstream `rust-v0.95.0`).
 
 ---
 
@@ -722,7 +722,7 @@ All Termux patches verified functional on v0.80.0.
 
 ### Upstream Changes Affecting Termux
 
-#### Major New Features (rust-v0.91.0 → rust-v0.93.0)
+#### Major New Features (rust-v0.91.0 → rust-v0.95.0)
 - SOCKS5 proxy listener with policy enforcement and config gating (#9803)
 - Plan mode streaming with dedicated TUI view (#9786, #10103)
 - `/apps` command to browse connectors in TUI (#9728)
@@ -750,5 +750,5 @@ All Termux patches verified and functional:
 - Conflicts resolved: 30
 
 **Last Updated**: 2026-02-01
-**Based on**: OpenAI Codex rust-v0.93.0
+**Based on**: OpenAI Codex rust-v0.95.0
 **Platform**: Android Termux ARM64

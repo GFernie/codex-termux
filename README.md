@@ -16,7 +16,7 @@ Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Term
 
 This repo maintains **two release lines**:
 
-- **Latest (main)**: Termux-only, tracks upstream more closely (current: **v0.93.0-termux** based on `rust-v0.93.0`).
+- **Latest (main)**: Termux-only, tracks upstream more closely (current: **v0.95.0-termux** based on `rust-v0.95.0`).
 - **LTS (lts)**: Long-term support based on upstream `rust-v0.80.0`, stable for compatibility.
   The LTS line supports **both /chat and /responses** wire APIs, and receives **security and stability backports only**.
 
@@ -245,7 +245,7 @@ Common Termux issues and the fastest places to check.
 
 ## 🧪 Testing & Validation
 
-**v0.93.0-termux** (2026-02-01): 18 tests, 18 passed / 0 failed / 1 warning — see [CODEX_TEST_REPORT_v0.93.0.md](./CODEX_TEST_REPORT_v0.93.0.md)
+**v0.95.0-termux** (2026-02-01): 18 tests, 18 passed / 0 failed / 1 warning — see [CODEX_TEST_REPORT_v0.93.0.md](./CODEX_TEST_REPORT_v0.93.0.md)
 **LTS validation** (2026-02-02): All categories PASS — see [CODEX_TEST_REPORT_v0.80.3-lts_termux.md](./CODEX_TEST_REPORT_v0.80.3-lts_termux.md)
 **LTS Linux** (2026-01-31): 62 tests, 60 passed / 0 failed / 11 skipped — see [CODEX_TEST_REPORT_v0.80.3-lts_linux.md](./CODEX_TEST_REPORT_v0.80.3-lts_linux.md)
 
