@@ -259,8 +259,10 @@ pub async fn process_sse(
                         } else if is_usage_not_included(&error) {
                             response_error = Some(ApiError::UsageNotIncluded);
                         } else if is_invalid_prompt_error(&error) {
-                            let message =
-                                error.message.clone().unwrap_or_else(|| "Invalid request.".into());
+                            let message = error
+                                .message
+                                .clone()
+                                .unwrap_or_else(|| "Invalid request.".into());
                             response_error = Some(ApiError::InvalidRequest { message });
                         } else {
                             let delay = try_parse_retry_after(&error);

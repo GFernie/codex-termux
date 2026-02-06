@@ -37,6 +37,24 @@ pub fn get_upgrade_version(config: &Config) -> Option<String> {
     }
 
     info.and_then(|info| {
+        // Guard against stale caches or channel mismatches. LTS builds must never surface
+        // updates to non-LTS tags (even if a previous run cached a Termux "latest" version).
+        if CODEX_CLI_VERSION.contains("-lts") {
+            if !info.latest_version.contains("-lts") {
+                return None;
+            }
+            if let (Some(latest), Some(current)) = (
+                parse_version(&info.latest_version),
+                parse_version(CODEX_CLI_VERSION),
+            ) {
+                if latest.0 != current.0 || latest.1 != current.1 {
+                    return None;
+                }
+            } else {
+                return None;
+            }
+        }
+
         if is_newer(&info.latest_version, CODEX_CLI_VERSION).unwrap_or(false) {
             Some(info.latest_version)
         } else {
@@ -60,7 +78,7 @@ const HOMEBREW_CASK_URL: &str =
     "https://raw.githubusercontent.com/Homebrew/homebrew-cask/HEAD/Casks/c/codex.rb";
 // Get all releases to filter for LTS versions only
 const ALL_RELEASES_URL: &str =
-    "https://api.github.com/repos/DioNanos/codex-termux/releases";
+    "https://api.github.com/repos/DioNanos/codex-termux/releases?per_page=100";
 
 #[derive(Deserialize, Debug, Clone)]
 struct ReleaseInfo {
@@ -89,7 +107,7 @@ async fn check_for_update(version_file: &Path) -> anyhow::Result<()> {
             extract_version_from_cask(&cask_contents)?
         }
         _ => {
-            // Fetch all releases and filter for LTS versions
+            // Fetch all releases and filter for LTS versions.
             let releases: Vec<ReleaseInfo> = create_client()
                 .get(ALL_RELEASES_URL)
                 .send()
@@ -97,16 +115,29 @@ async fn check_for_update(version_file: &Path) -> anyhow::Result<()> {
                 .error_for_status()?
                 .json::<Vec<ReleaseInfo>>()
                 .await?;
-            
-            // Find the latest LTS release (tag ending with -lts)
+
+            let (cur_maj, cur_min, _) = parse_version(CODEX_CLI_VERSION)
+                .ok_or_else(|| anyhow::anyhow!("Failed to parse current version"))?;
+
+            // Find the latest LTS release (tag ending with -lts) within the same major.minor
+            // line as the current build (e.g. 0.80.x). This prevents accidental jumps to
+            // mainline tags.
             let latest_lts = releases
                 .iter()
                 .filter(|r| r.tag_name.ends_with("-lts"))
-                .map(|r| extract_version_from_latest_tag(&r.tag_name))
-                .filter_map(Result::ok)
-                .max()
-                .ok_or_else(|| anyhow::anyhow!("No LTS releases found"))?;
-            
+                .filter_map(|r| {
+                    let v = normalize_version_from_tag(&r.tag_name).ok()?;
+                    let t = parse_version(&v)?;
+                    if t.0 == cur_maj && t.1 == cur_min {
+                        Some((v, t))
+                    } else {
+                        None
+                    }
+                })
+                .max_by_key(|(_, t)| *t)
+                .map(|(v, _)| v)
+                .ok_or_else(|| anyhow::anyhow!("No matching LTS releases found"))?;
+
             latest_lts
         }
     };
@@ -147,15 +178,20 @@ fn extract_version_from_cask(cask_contents: &str) -> anyhow::Result<String> {
 }
 
 fn extract_version_from_latest_tag(latest_tag_name: &str) -> anyhow::Result<String> {
-    // Support both "rust-v" (upstream) and "v" (Termux fork)
-    let version = latest_tag_name
-        .strip_prefix("rust-v")
-        .or_else(|| latest_tag_name.strip_prefix("v"))
-        .ok_or_else(|| anyhow::anyhow!("Failed to parse latest tag name '{latest_tag_name}'"))?;
+    // Backwards-compatible name kept for existing callers/tests.
+    normalize_version_from_tag(latest_tag_name)
+}
 
-    // Remove -termux suffix if present (e.g., "0.58.0-termux" -> "0.58.0")
-    let clean_version = version.split('-').next().unwrap_or(version);
-    Ok(clean_version.to_string())
+fn normalize_version_from_tag(tag_name: &str) -> anyhow::Result<String> {
+    // Support both "rust-v*" (upstream) and "v*" (Termux fork).
+    //
+    // Important: preserve suffixes such as `-termux` and `-lts` so the update
+    // banner reflects the actual channel.
+    let version = tag_name
+        .strip_prefix("rust-v")
+        .or_else(|| tag_name.strip_prefix('v'))
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse latest tag name '{tag_name}'"))?;
+    Ok(version.to_string())
 }
 
 /// Returns the latest version to show in a popup, if it should be shown.
@@ -232,7 +268,15 @@ mod tests {
     fn extracts_version_from_termux_tag() {
         assert_eq!(
             extract_version_from_latest_tag("v0.58.0-termux").expect("failed to parse version"),
-            "0.58.0"
+            "0.58.0-termux"
+        );
+    }
+
+    #[test]
+    fn preserves_lts_suffix() {
+        assert_eq!(
+            extract_version_from_latest_tag("v0.80.3-lts").expect("failed to parse version"),
+            "0.80.3-lts"
         );
     }
 

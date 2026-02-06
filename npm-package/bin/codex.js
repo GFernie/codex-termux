@@ -34,7 +34,10 @@ if (!bin || !existsSync(bin)) {
   process.exit(1);
 }
 
-const result = spawnSync(bin, process.argv.slice(2), { stdio: 'inherit' });
+// Let the Rust updater logic detect that this binary is managed by an npm package,
+// even on macOS where the global npm prefix is typically under /opt/homebrew.
+const env = { ...process.env, CODEX_MANAGED_BY_NPM: '1' };
+const result = spawnSync(bin, process.argv.slice(2), { stdio: 'inherit', env });
 if (result.error) {
   console.error(result.error.message);
   process.exit(1);
