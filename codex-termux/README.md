@@ -1,6 +1,6 @@
 # @mmmbuto/codex-cli-termux
 
-> **Latest release line tracking upstream OpenAI closely, compiled for Android Termux ARM64**
+> **Latest release line for Android Termux (ARM64), tracking upstream OpenAI closely**
 
 [![npm](https://img.shields.io/npm/v/@mmmbuto/codex-cli-termux?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-termux)
 [![downloads](https://img.shields.io/npm/dt/@mmmbuto/codex-cli-termux?style=flat-square)](https://www.npmjs.org/package/@mmmbuto/codex-cli-termux)
@@ -8,7 +8,7 @@
 
 ---
 
-## What This Is
+## About
 
 Latest release line tracking upstream OpenAI Codex closely, compiled specifically for Android Termux (ARM64).
 
@@ -16,21 +16,33 @@ Latest release line tracking upstream OpenAI Codex closely, compiled specificall
 
 - Android Termux (ARM64) only
 
-### What We Do:
+---
+
+## Project Scope
+
+### Latest (Termux-only)
+- Compiles for ARM64 native on Android Termux
+- Tracks upstream OpenAI closely
+- Applies minimal patches for Termux-specific compatibility
+
+### What We Do
 ✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
 ✅ **Compile for ARM64** (Android Termux native)
 ✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
 ✅ **Package as npm** for easy installation
 ✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
 
-### What We DON'T Do:
+### What We DON'T Do
 ❌ **NO new features**
 ❌ **NO behavior modifications** (works exactly like upstream)
 ❌ **NO replacement** of official Codex
 
-### 🔧 Compatibility Patches
+---
 
-We only apply patches for issues that:
+## Patches & Updates
+
+### Latest Patches
+We apply patches for issues that:
 - **Prevent Codex from working on Termux**
 - **Are not addressed by upstream** (Termux is not officially supported)
 - **Are minimal and well-documented**
@@ -66,21 +78,9 @@ codex login
 
 ---
 
-## 🚀 Quickstart
-
-Get started with Codex in 2 minutes. Choose your setup:
-
-- **Path 1**: OpenAI (default) - `codex login && codex`
-- **Path 2**: OpenRouter & gateways
-
-See [../docs/quickstart.md](../docs/quickstart.md) for complete instructions.
-
----
-
 ## 📚 Documentation
 
 - [Installation Details](../docs/installation.md)
-- [Quickstart](../docs/quickstart.md)
 - [Testing](../docs/testing.md)
 - [Building from Source](../BUILDING.md)
 - [Test Reports](../test-reports/)

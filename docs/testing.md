@@ -1,18 +1,34 @@
 # Testing
 
-## Test Suite
+## Test Reports
 
-This project includes a comprehensive test suite validating all functionality on Termux.
+Comprehensive test validation for all platforms and release lines.
 
-### Overview
+### Latest (Termux)
 
-- ✅ **82 total tests** defined (includes optional/manual)
-- ✅ **49 automated tests** on Termux
-- ✅ **12 categories** including Termux-specific and Package validation
-- ✅ **10 Termux-specific tests** validating all active compatibility patches
-- ✅ **8 Package & Binary tests** for npm installation verification
+- **v0.98.0-termux**: [test-reports/latest/0.98.0-termux/CODEX_TEST_REPORT_v0.98.0-termux.md](../test-reports/latest/0.98.0-termux/CODEX_TEST_REPORT_v0.98.0-termux.md)
+- **Extended**: [test-reports/latest/0.98.0-termux/CODEX_TEST_REPORT_v0.98.0-termux_extended.md](../test-reports/latest/0.98.0-termux/CODEX_TEST_REPORT_v0.98.0-termux_extended.md)
+- **Suite**: [test-reports/suites/latest/termux.md](../test-reports/suites/latest/termux.md)
 
-### Test Categories
+### LTS
+
+#### Linux
+- **v0.80.4-lts**: [test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_linux.md](../test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_linux.md)
+- **Suite**: [test-reports/suites/lts/linux.md](../test-reports/suites/lts/linux.md)
+
+#### Termux
+- **v0.80.4-lts**: [test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_termux.md](../test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_termux.md)
+- **Suite**: [test-reports/suites/lts/termux.md](../test-reports/suites/lts/termux.md)
+
+#### macOS
+- **v0.80.4-lts**: [test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_mac.md](../test-reports/lts/0.80.4-lts/CODEX_TEST_REPORT_v0.80.4-lts_mac.md)
+- **Suite**: [test-reports/suites/lts/macos.md](../test-reports/suites/lts/macos.md)
+
+---
+
+## Test Suite Overview
+
+### Categories
 
 1. System Information (3 tests)
 2. File Operations (8 tests)
@@ -27,14 +43,14 @@ This project includes a comprehensive test suite validating all functionality on
 11. Cleanup (1 test)
 12. **Package & Binary (8 tests)** ⭐ - Validates npm installation and binaries
 
-### How to Use
+### How to Run Tests
 
 ```bash
 # Start Codex
 codex
 
 # Feed the test suite
-> Read and execute all tests in https://github.com/DioNanos/codex-termux/blob/main/test-reports/CODEX_TEST_SUITE.md
+> Read and execute all tests in https://github.com/DioNanos/codex-termux/blob/main/test-reports/suites/latest/termux.md
 ```
 
 Codex will automatically:
@@ -48,17 +64,40 @@ Codex will automatically:
 - At least 80% overall pass rate
 - No critical crashes
 
-### Test Reports
+---
 
-**Latest (v0.95.0-termux, 2026-02-04):** 20 tests, 20 passed / 0 failed / 1 warning
-- See [CODEX_TEST_REPORT_v0.95.0.md](../test-reports/CODEX_TEST_REPORT_v0.95.0.md)
+## Platform-Specific Notes
 
-**LTS Validation (2026-02-02):** All categories PASS
-- See [CODEX_TEST_REPORT_v0.80.3-lts_termux.md](../test-reports/CODEX_TEST_REPORT_v0.80.3-lts_termux.md)
+### Termux
 
-**LTS Linux (2026-01-31):** 62 tests, 60 passed / 0 failed / 11 skipped
-- See [CODEX_TEST_REPORT_v0.80.3-lts_linux.md](../test-reports/CODEX_TEST_REPORT_v0.80.3-lts_linux.md)
+Tests validate:
+- Environment paths (`$PREFIX`, `$HOME`, `$LD_LIBRARY_PATH`)
+- Shell detection (bash/zsh on Android)
+- Package manager (`pkg` commands)
+- Storage access (`/sdcard`, `~/storage`)
+- Android permissions and sandbox isolation
+- Library path preservation
+- Browser opener availability
+- Architecture detection (aarch64/ARM64)
 
-### Full Test Suite
+### Linux
 
-See [../test-reports/CODEX_TEST_SUITE.md](../test-reports/CODEX_TEST_SUITE.md) for complete test definitions.
+Tests validate:
+- Standard Linux filesystem structure
+- npm installation and binary verification
+- Shell execution in typical Linux environment
+- Network access and package management
+
+### macOS
+
+Tests validate:
+- macOS-specific filesystem paths
+- Homebrew integration
+- ARM64 compatibility
+- Standard Unix tools availability
+
+---
+
+## All Test Reports
+
+See [test-reports/](../test-reports/) directory for all test reports and suites.

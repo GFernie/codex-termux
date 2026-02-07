@@ -1,4 +1,4 @@
-# 🤖 Codex CLI - Termux Edition
+# 🤖 Codex CLI - Android Termux & Linux
 
 > **Built from upstream OpenAI Codex source, compiled for Linux x64 + Android Termux (ARM64)**
 
@@ -10,7 +10,7 @@
 
 ---
 
-## What This Is
+## About
 
 Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
 
@@ -19,26 +19,54 @@ Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Term
 - **Latest**: Termux-only, tracks upstream OpenAI closely
 - **LTS**: Long-term support based on upstream rust-v0.80.0, minimal features + security patches to maintain /chat compatibility
 
-### What We Do:
+**Supported Platforms:**
+- Android Termux (ARM64): Latest + LTS
+- Linux x64: LTS
+- macOS arm64: LTS (via GitHub releases/CI artifacts)
+
+---
+
+## Project Scope
+
+### Latest (Termux-only)
+- Compiles for ARM64 native on Android Termux
+- Tracks upstream OpenAI closely
+- Applies minimal patches for Termux-specific compatibility
+
+### LTS (Multi-platform)
+- Based on upstream rust-v0.80.0
+- Supports /chat and /responses wire APIs
+- Minimal features + security patches only
+- Stable for compatibility-focused use cases
+
+### What We Do
 ✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
 ✅ **Compile for Linux x64 + ARM64** (Android Termux native)
 ✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
 ✅ **Package as npm** for easy installation
 ✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
 
-### What We DON'T Do:
+### What We DON'T Do
 ❌ **NO new features**
 ❌ **NO behavior modifications** (works exactly like upstream)
 ❌ **NO replacement** of official Codex
 
-### 🔧 Compatibility Patches
+---
 
-We only apply patches for issues that:
+## Patches & Updates
+
+### Latest Patches
+We apply patches for issues that:
 - **Prevent Codex from working on Termux**
 - **Are not addressed by upstream** (Termux is not officially supported)
 - **Are minimal and well-documented**
 
 **Current patches**: See [patches/](./patches/) directory for full documentation.
+
+### LTS Updates
+- Based on rust-v0.80.0 (minimal features + security only)
+- Maintains /chat wire API compatibility
+- Stability-focused for production use
 
 Need help debugging upgrade alerts? See
 [docs/termux-upgrade-checks.md](./docs/termux-upgrade-checks.md) for known causes
@@ -93,26 +121,27 @@ codex login
 
 ### macOS (arm64)
 
-Download from GitHub [releases](https://github.com/DioNanos/codex-termux/releases) or use CI artifacts.
+```bash
+# Using Homebrew
+brew install node
 
----
+# Download and install LTS from GitHub releases
+curl -L https://github.com/DioNanos/codex-termux/releases/latest/download/codex-cli-lts-macos-arm64.tar.gz -o codex-cli-lts-macos-arm64.tar.gz
+tar -xzf codex-cli-lts-macos-arm64.tar.gz
+sudo mv codex codex-exec /usr/local/bin/
 
-## 🚀 Quickstart
+# Verify
+codex --version
+codex login
+```
 
-Get started with Codex in 2 minutes. Choose your setup:
-
-- **Path 1**: OpenAI (default) - `codex login && codex`
-- **Path 2**: /chat providers with codex-lts (dual install)
-- **Path 3**: OpenRouter & gateways
-
-See [docs/quickstart.md](./docs/quickstart.md) for complete instructions.
+**Requirements:** macOS arm64, Node.js >=18 (recommended v22+), ~100MB storage
 
 ---
 
 ## 📚 Documentation
 
 - [Installation Details](./docs/installation.md)
-- [Quickstart](./docs/quickstart.md)
 - [Testing](./docs/testing.md)
 - [Building from Source](./BUILDING.md)
 - [Test Reports](./test-reports/)
@@ -130,7 +159,7 @@ Community-maintained port enabling AI-powered coding on Android Termux. Activiti
 
 ## 📝 License
 
-This project maintains full compliance with the Apache 2.0 license from OpenAI Codex.
+This project maintains full compliance with Apache 2.0 license from OpenAI Codex.
 
 **Original work**: Copyright OpenAI (https://github.com/openai/codex)
 **Termux port**: Minimal patches for Android compatibility
