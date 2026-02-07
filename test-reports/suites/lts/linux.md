@@ -2,6 +2,9 @@
 
 Purpose: validate an installed LTS build (both `codex` and `codex-exec`) on Linux.
 
+WARNING: This release may ship with incomplete re-validation. Run this suite
+before relying on it in production.
+
 ## Command Selection
 
 This suite assumes you have a shell function/alias in `~/.zshrc` that selects

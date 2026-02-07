@@ -4,6 +4,9 @@ Purpose: validate an LTS build on macOS arm64 using your `~/.zshrc` wrappers for
 
 - `codex-glm-a` (wraps `codex`)
 
+WARNING: This release may ship with incomplete re-validation. Run this suite
+before relying on it in production.
+
 This suite is written to avoid provider-specific instructions. It only assumes
 your wrappers set whatever environment you need and then run the binaries.
 

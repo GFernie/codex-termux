@@ -3,6 +3,9 @@
 Purpose: validate an installed LTS build on Termux, using your `~/.zshrc` wrappers
 for both `codex` and `codex-exec`.
 
+WARNING: This release may ship with incomplete re-validation. Run this suite
+before relying on it in production.
+
 ## Command Selection
 
 This suite assumes you have a shell function/alias in `~/.zshrc` that selects

@@ -3,6 +3,9 @@
 Purpose: validate the Latest Termux-only build (`@mmmbuto/codex-cli-termux`) using
 the global `codex` and `codex-exec` commands.
 
+WARNING: This release may ship with incomplete re-validation. Run this suite
+before relying on it in production.
+
 ## Install Guard (Required)
 
 Confirm you are testing the Termux package (not upstream):
