@@ -12,11 +12,11 @@
 
 Built from upstream OpenAI Codex source, compiled for Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
 
-### Termux Edition (0.95.0)
+### Termux Edition (0.98.0)
 
 This repo maintains **two release lines**:
 
-- **Latest (main)**: Termux-only, tracks upstream more closely (current: **v0.95.0-termux** based on `rust-v0.95.0`).
+- **Latest (main)**: Termux-only, tracks upstream more closely (current: **v0.98.0-termux** based on `rust-v0.98.0`).
 - **LTS (lts)**: Long-term support based on upstream `rust-v0.80.0`, stable for compatibility.
   The LTS line supports **both /chat and /responses** wire APIs, and receives **security and stability backports only**.
 
@@ -84,7 +84,7 @@ npm install -g @mmmbuto/codex-cli-termux
 This repo maintains **two release lines**:
 
 - **LTS:** `@mmmbuto/codex-cli-lts` - based on upstream `rust-v0.80.0`, stable for long-term compatibility
-- **Latest:** `@mmmbuto/codex-cli-termux` - tracks upstream more closely (current: **v0.95.0-termux** based on `rust-v0.95.0`)
+- **Latest:** `@mmmbuto/codex-cli-termux` - tracks upstream more closely (current: **v0.98.0-termux** based on `rust-v0.98.0`)
 
 Install a specific version when needed:
 
@@ -107,7 +107,7 @@ npm view @mmmbuto/codex-cli-termux versions --json
 
 ```bash
 codex --version
-# Output: codex-cli 0.95.0
+# Output: codex-cli 0.98.0
 
 codex login
 # Opens browser for authentication
@@ -150,7 +150,7 @@ codex --json "List files in current directory"
 
 ## 🧪 Testing & Validation
 
-**v0.95.0-termux** (2026-02-04): 20 tests, 20 passed / 0 failed / 1 warning — see [CODEX_TEST_REPORT_v0.95.0.md](../CODEX_TEST_REPORT_v0.95.0.md)
+**v0.98.0-termux** (pending): run tests after build — report will be added as `CODEX_TEST_REPORT_v0.98.0.md`
 
 **LTS validation** (2026-02-02): All categories PASS — see [CODEX_TEST_REPORT_v0.80.3-lts_termux.md](../CODEX_TEST_REPORT_v0.80.3-lts_termux.md)
 
@@ -164,6 +164,6 @@ See [LICENSE](../LICENSE) file for details.
 
 ---
 
-**Version**: Based on OpenAI Codex rust-v0.95.0 with Termux compatibility patches
+**Version**: Based on OpenAI Codex rust-v0.98.0 with Termux compatibility patches
 **Platform**: Android Termux ARM64
 **Maintained**: Community-driven, not affiliated with OpenAI

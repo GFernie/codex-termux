@@ -605,6 +605,30 @@
             },
             "method": {
               "enum": [
+                "thread/compact/start"
+              ],
+              "title": "Thread/compact/startRequestMethod",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/definitions/v2/ThreadCompactStartParams"
+            }
+          },
+          "required": [
+            "id",
+            "method",
+            "params"
+          ],
+          "title": "Thread/compact/startRequest",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/RequestId"
+            },
+            "method": {
+              "enum": [
                 "thread/rollback"
               ],
               "title": "Thread/rollbackRequestMethod",
@@ -2288,6 +2312,50 @@
       ],
       "type": "object"
     },
+    "DynamicToolCallOutputContentItem": {
+      "oneOf": [
+        {
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "inputText"
+              ],
+              "title": "InputTextDynamicToolCallOutputContentItemType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "text",
+            "type"
+          ],
+          "title": "InputTextDynamicToolCallOutputContentItem",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "imageUrl": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "inputImage"
+              ],
+              "title": "InputImageDynamicToolCallOutputContentItemType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "imageUrl",
+            "type"
+          ],
+          "title": "InputImageDynamicToolCallOutputContentItem",
+          "type": "object"
+        }
+      ]
+    },
     "DynamicToolCallParams": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "properties": {
@@ -2318,15 +2386,18 @@
     "DynamicToolCallResponse": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "properties": {
-        "output": {
-          "type": "string"
+        "contentItems": {
+          "items": {
+            "$ref": "#/definitions/DynamicToolCallOutputContentItem"
+          },
+          "type": "array"
         },
         "success": {
           "type": "boolean"
         }
       },
       "required": [
-        "output",
+        "contentItems",
         "success"
       ],
       "title": "DynamicToolCallResponse",
@@ -5020,6 +5091,19 @@
       "title": "ForkConversationResponse",
       "type": "object"
     },
+    "FunctionCallOutputBody": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/definitions/FunctionCallOutputContentItem"
+          },
+          "type": "array"
+        }
+      ]
+    },
     "FunctionCallOutputContentItem": {
       "description": "Responses API compatible content items that can be returned by a tool call. This is a subset of ContentItem with the types we support as function call outputs.",
       "oneOf": [
@@ -5066,19 +5150,10 @@
       ]
     },
     "FunctionCallOutputPayload": {
-      "description": "The payload we send back to OpenAI when reporting a tool call result.\n\n`content` preserves the historical plain-string payload so downstream integrations (tests, logging, etc.) can keep treating tool output as `String`. When an MCP server returns richer data we additionally populate `content_items` with the structured form that the Responses API understands.",
+      "description": "The payload we send back to OpenAI when reporting a tool call result.\n\n`body` serializes directly as the wire value for `function_call_output.output`. `success` remains internal metadata for downstream handling.",
       "properties": {
-        "content": {
-          "type": "string"
-        },
-        "content_items": {
-          "items": {
-            "$ref": "#/definitions/FunctionCallOutputContentItem"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
+        "body": {
+          "$ref": "#/definitions/FunctionCallOutputBody"
         },
         "success": {
           "type": [
@@ -5088,7 +5163,7 @@
         }
       },
       "required": [
-        "content"
+        "body"
       ],
       "type": "object"
     },
@@ -11222,6 +11297,19 @@
         ],
         "type": "string"
       },
+      "FunctionCallOutputBody": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/v2/FunctionCallOutputContentItem"
+            },
+            "type": "array"
+          }
+        ]
+      },
       "FunctionCallOutputContentItem": {
         "description": "Responses API compatible content items that can be returned by a tool call. This is a subset of ContentItem with the types we support as function call outputs.",
         "oneOf": [
@@ -11268,19 +11356,10 @@
         ]
       },
       "FunctionCallOutputPayload": {
-        "description": "The payload we send back to OpenAI when reporting a tool call result.\n\n`content` preserves the historical plain-string payload so downstream integrations (tests, logging, etc.) can keep treating tool output as `String`. When an MCP server returns richer data we additionally populate `content_items` with the structured form that the Responses API understands.",
+        "description": "The payload we send back to OpenAI when reporting a tool call result.\n\n`body` serializes directly as the wire value for `function_call_output.output`. `success` remains internal metadata for downstream handling.",
         "properties": {
-          "content": {
-            "type": "string"
-          },
-          "content_items": {
-            "items": {
-              "$ref": "#/definitions/v2/FunctionCallOutputContentItem"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
+          "body": {
+            "$ref": "#/definitions/v2/FunctionCallOutputBody"
           },
           "success": {
             "type": [
@@ -11290,7 +11369,7 @@
           }
         },
         "required": [
-          "content"
+          "body"
         ],
         "type": "object"
       },
@@ -12096,6 +12175,7 @@
       },
       "Personality": {
         "enum": [
+          "none",
           "friendly",
           "pragmatic"
         ],
@@ -13853,6 +13933,24 @@
       "ThreadArchiveResponse": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "ThreadArchiveResponse",
+        "type": "object"
+      },
+      "ThreadCompactStartParams": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId"
+        ],
+        "title": "ThreadCompactStartParams",
+        "type": "object"
+      },
+      "ThreadCompactStartResponse": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "ThreadCompactStartResponse",
         "type": "object"
       },
       "ThreadForkParams": {
