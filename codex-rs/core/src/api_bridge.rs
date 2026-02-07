@@ -27,6 +27,7 @@ pub(crate) fn map_api_error(err: ApiError) -> CodexErr {
             body: message,
             request_id: None,
         }),
+        ApiError::InvalidRequest { message } => CodexErr::InvalidRequest(message),
         ApiError::Transport(transport) => match transport {
             TransportError::Http {
                 status,

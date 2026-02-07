@@ -558,6 +558,56 @@ strings codex-tui | grep "Updating Codex"
 ```
 
 **End-to-end test:**
+
+---
+
+### 10. LTS Update Channel Guard (TUI2 + TUI)
+
+**Files**:
+- `codex-rs/tui2/src/updates.rs`
+- `codex-rs/tui/src/updates.rs`
+
+**Date Applied**: 2026-02-06
+**Issue**: LTS builds could show updates to non-LTS releases (e.g. `0.80.4-lts -> 0.96.0`)
+
+#### Problem
+
+When running an LTS build (version contains `-lts`), the update checker could still resolve the "latest"
+Termux release tag from GitHub releases. This is especially visible in the TUI v2 code path, which
+queried:
+
+- `.../releases/latest`
+
+That endpoint returns the newest Termux/mainline tag (e.g. `v0.95.0-termux`), which gets normalized
+to a plain semver and then compared against `0.80.x`. The result is a misleading update banner and an
+unsafe jump between channels.
+
+#### Root Cause
+
+1. `tui2` used `releases/latest` unconditionally for non-brew installs.
+2. Both `tui` and `tui2` normalized tags by stripping suffixes like `-termux` or `-lts`, losing the
+   channel signal in the banner and in comparison.
+3. The LTS selection logic did not restrict updates to the current major.minor line.
+4. On macOS with a Homebrew-managed Node.js, the global npm shim can live under `/opt/homebrew/bin`.
+   Upstream auto-detection treated that path as "brew-managed" and compared against the Homebrew cask
+   (`0.96.0` at the time), even when the binary actually came from an npm package wrapper.
+
+#### Solution
+
+For builds where `CODEX_CLI_VERSION` contains `-lts`:
+- Fetch `.../releases?per_page=100` and filter only tags ending in `-lts`
+- Keep updates within the current major.minor line (example: `0.80.x` only)
+- Preserve suffixes in the normalized version string (`0.80.3-lts`, `0.58.0-termux`)
+
+For non-LTS builds:
+- Keep using `releases/latest` (Termux channel) and preserve suffixes for the banner.
+
+#### Notes
+
+- This is intentionally conservative: it prevents accidental channel switching from LTS to mainline.
+- The update action itself (npm/bun package name) is handled separately in `update_action.rs`.
+- Npm wrappers in this repo now export `CODEX_MANAGED_BY_NPM=1` when spawning the Rust binary, so the
+  updater consistently prefers the npm update path over the Homebrew cask heuristic on macOS.
 ```bash
 # Install old version:
 npm install -g @mmmbuto/codex-cli-termux@0.58.4-termux

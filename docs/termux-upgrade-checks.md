@@ -59,3 +59,16 @@ curl -s -H 'User-Agent: codex-termux-debug' \
 and verify that the `tag_name` field matches one of the formats supported by
 the parser.
 
+## LTS Channel Note
+
+If you are testing an LTS build (version contains `-lts`), the update checker must only consider
+`*-lts` releases and must not jump to the latest `*-termux` tag. On 2026-02-06 we updated the logic
+to:
+
+- For LTS builds: list releases and filter tags ending with `-lts` within the same major.minor line.
+- For Termux builds: keep using `releases/latest`.
+
+If you are on macOS with a Homebrew-managed Node.js, note that the global npm shim can live under
+`/opt/homebrew/bin`. Upstream update-action detection can treat that as a Homebrew install unless the
+launcher sets `CODEX_MANAGED_BY_NPM=1`. This repo's npm wrappers set that env var to ensure the
+updater uses the npm update path consistently.

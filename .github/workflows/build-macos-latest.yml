@@ -1,0 +1,47 @@
+name: build-macos-latest
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "lts-macos-v*"
+
+jobs:
+  build:
+    name: Build macOS arm64 (release)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: codex-rs
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cargo build (release)
+        run: cargo build -v --release --bin codex --bin codex-exec --target aarch64-apple-darwin
+
+      - name: Package artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          dist_root="${{ github.workspace }}/dist"
+          pkg_dir="${dist_root}/codex-macos-aarch64"
+
+          rm -rf "${pkg_dir}"
+          mkdir -p "${pkg_dir}"
+
+          cp "target/aarch64-apple-darwin/release/codex" "${pkg_dir}/"
+          cp "target/aarch64-apple-darwin/release/codex-exec" "${pkg_dir}/"
+
+          (cd "${dist_root}" && tar -czf codex-macos-aarch64.tar.gz codex-macos-aarch64)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-macos-aarch64
+          path: dist/codex-macos-aarch64.tar.gz

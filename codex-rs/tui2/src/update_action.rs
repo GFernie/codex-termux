@@ -1,9 +1,9 @@
 /// Update action the CLI should perform after the TUI exits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpdateAction {
-    /// Update via `npm install -g @mmmbuto/codex-cli-termux@latest`.
+    /// Update via `npm install -g @mmmbuto/codex-cli-lts@latest`.
     NpmGlobalLatest,
-    /// Update via `bun install -g @mmmbuto/codex-cli-termux@latest`.
+    /// Update via `bun install -g @mmmbuto/codex-cli-lts@latest`.
     BunGlobalLatest,
     /// Update via `brew upgrade codex`.
     BrewUpgrade,
@@ -27,14 +27,12 @@ impl UpdateAction {
     /// Returns the list of command-line arguments for invoking the update.
     pub fn command_args(self) -> (&'static str, &'static [&'static str]) {
         match self {
-            UpdateAction::NpmGlobalLatest => (
-                "npm",
-                &["install", "-g", "@mmmbuto/codex-cli-termux@latest"],
-            ),
-            UpdateAction::BunGlobalLatest => (
-                "bun",
-                &["install", "-g", "@mmmbuto/codex-cli-termux@latest"],
-            ),
+            UpdateAction::NpmGlobalLatest => {
+                ("npm", &["install", "-g", "@mmmbuto/codex-cli-lts@latest"])
+            }
+            UpdateAction::BunGlobalLatest => {
+                ("bun", &["install", "-g", "@mmmbuto/codex-cli-lts@latest"])
+            }
             UpdateAction::BrewUpgrade => ("brew", &["upgrade", "codex"]),
         }
     }
@@ -84,6 +82,17 @@ fn detect_update_action(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn update_action_uses_lts_package() {
+        let (_, npm_args) = UpdateAction::NpmGlobalLatest.command_args();
+        let npm_cmd = npm_args.join(" ");
+        assert!(npm_cmd.contains("@mmmbuto/codex-cli-lts@latest"));
+
+        let (_, bun_args) = UpdateAction::BunGlobalLatest.command_args();
+        let bun_cmd = bun_args.join(" ");
+        assert!(bun_cmd.contains("@mmmbuto/codex-cli-lts@latest"));
+    }
 
     #[test]
     fn detects_update_action_without_env_mutation() {
