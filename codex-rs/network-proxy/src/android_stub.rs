@@ -9,6 +9,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde::Deserialize;
 use serde::Serialize;
+use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -162,10 +164,17 @@ pub trait ConfigReloader: Send + Sync {
     async fn reload_now(&self) -> Result<ConfigState>;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct NetworkProxyState {
     state: ConfigState,
     _reloader: Arc<dyn ConfigReloader>,
+}
+
+impl std::fmt::Debug for NetworkProxyState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Avoid printing trait object details; this is a stub on Android anyway.
+        f.debug_struct("NetworkProxyState").finish_non_exhaustive()
+    }
 }
 
 impl NetworkProxyState {
@@ -194,9 +203,23 @@ impl Args {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct NetworkProxy {
     _state: Option<Arc<NetworkProxyState>>,
+    http_addr: SocketAddr,
+    socks_addr: SocketAddr,
+    admin_addr: SocketAddr,
+}
+
+impl Default for NetworkProxy {
+    fn default() -> Self {
+        Self {
+            _state: None,
+            http_addr: SocketAddr::from(([127, 0, 0, 1], 3128)),
+            socks_addr: SocketAddr::from(([127, 0, 0, 1], 8081)),
+            admin_addr: SocketAddr::from(([127, 0, 0, 1], 8080)),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone)]
@@ -211,6 +234,22 @@ impl NetworkProxy {
     pub fn builder() -> NetworkProxyBuilder {
         NetworkProxyBuilder { state: None }
     }
+
+    pub fn http_addr(&self) -> SocketAddr {
+        self.http_addr
+    }
+
+    pub fn socks_addr(&self) -> SocketAddr {
+        self.socks_addr
+    }
+
+    pub fn admin_addr(&self) -> SocketAddr {
+        self.admin_addr
+    }
+
+    pub fn apply_to_env(&self, _env: &mut HashMap<String, String>) {
+        // Android/Termux: managed proxy is disabled; do not inject proxy env vars.
+    }
 }
 
 impl NetworkProxyBuilder {
@@ -220,12 +259,17 @@ impl NetworkProxyBuilder {
     }
 
     pub async fn build(self) -> Result<NetworkProxy> {
-        Ok(NetworkProxy { _state: self.state })
+        Ok(NetworkProxy {
+            _state: self.state,
+            http_addr: SocketAddr::from(([127, 0, 0, 1], 3128)),
+            socks_addr: SocketAddr::from(([127, 0, 0, 1], 8081)),
+            admin_addr: SocketAddr::from(([127, 0, 0, 1], 8080)),
+        })
     }
 }
 
 impl NetworkProxy {
-    pub async fn run(self) -> Result<NetworkProxyHandle> {
+    pub async fn run(&self) -> Result<NetworkProxyHandle> {
         Ok(NetworkProxyHandle)
     }
 }
@@ -258,4 +302,3 @@ pub fn host_and_port_from_network_addr(network_addr: &str, default_port: u16) ->
         format!("{without_scheme}:{default_port}")
     }
 }
-
