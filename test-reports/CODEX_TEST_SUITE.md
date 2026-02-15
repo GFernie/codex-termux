@@ -860,7 +860,12 @@ ls -la $(npm root -g)/@mmmbuto/codex-cli-termux/bin/
 
 ## 📊 Final Report Template
 
-After completing all tests, **save the report to a file**: `~/CODEX_TEST_REPORT_v0.60.1.md`
+After completing all tests, **save the report to**:
+
+- Latest (Termux): `test-reports/latest/<version>/CODEX_TEST_REPORT_v<version>.md`
+- LTS: `test-reports/lts/<version>/CODEX_TEST_REPORT_v<version>_termux.md`
+
+Where `<version>` is the installed package version (example: `0.101.0-termux`).
 
 Provide report in this format:
 
@@ -911,7 +916,7 @@ NOTES:
 VERDICT: ✅ PASS / ⚠️ PASS WITH WARNINGS / ❌ FAIL
 ```
 
-**IMPORTANT**: Save this complete report to `~/CODEX_TEST_REPORT_v0.60.1.md`
+**IMPORTANT**: Save this complete report under `test-reports/` using the versioned path above.
 
 ---
 

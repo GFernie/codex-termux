@@ -15,7 +15,7 @@
 ## Notes
 - No `git` trusted-directory / `safe.directory` (“dubious ownership”) behavior encountered in logs.
 - Suite header claims 82 tests, but the file contains 50 `TEST-xxxx` sections; all `TEST-xxxx` sections present were executed sequentially.
-- Report saved to: `/data/data/com.termux/files/home/CODEX_TEST_REPORT_v0.60.1.md`
+- Report saved to: `test-reports/latest/0.100.0-termux/CODEX_TEST_REPORT_v0.100.0-termux_extended.md` (suite template path was updated after this run)
 - Runner log: `/data/data/com.termux/files/usr/tmp/codex-test-run-20260213T000649/run.log`
 
 ## Environment Summary
