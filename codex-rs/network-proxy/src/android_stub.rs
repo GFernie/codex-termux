@@ -311,37 +311,22 @@ pub fn host_and_port_from_network_addr(network_addr: &str, default_port: u16) ->
         format!("{without_scheme}:{default_port}")
     }
 }
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// Stubs for v0.104.0 compatibility
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NetworkDecision {
     Allow,
     Deny,
     Ask,
 }
 
-impl NetworkDecision {
-    pub fn allow() -> Self {
-        Self::Allow
-    }
-
-    pub fn deny() -> Self {
-        Self::Deny
-    }
-
-    pub fn ask(reason: &str) -> Self {
-        let _ = reason;
-        Self::Ask
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NetworkDecisionSource {
     Policy,
     User,
     Decider,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NetworkPolicyDecision {
     pub decision: NetworkDecision,
     pub source: NetworkDecisionSource,
@@ -350,47 +335,25 @@ pub struct NetworkPolicyDecision {
 
 impl NetworkPolicyDecision {
     pub fn allow() -> Self {
-        Self {
-            decision: NetworkDecision::Allow,
-            source: NetworkDecisionSource::Policy,
-            reason: None,
-        }
+        Self { decision: NetworkDecision::Allow, source: NetworkDecisionSource::Policy, reason: None }
     }
-
     pub fn deny() -> Self {
-        Self {
-            decision: NetworkDecision::Deny,
-            source: NetworkDecisionSource::Policy,
-            reason: None,
-        }
+        Self { decision: NetworkDecision::Deny, source: NetworkDecisionSource::Policy, reason: None }
     }
-
     pub fn ask(reason: &str) -> Self {
-        Self {
-            decision: NetworkDecision::Ask,
-            source: NetworkDecisionSource::Policy,
-            reason: Some(reason.to_string()),
-        }
+        Self { decision: NetworkDecision::Ask, source: NetworkDecisionSource::Policy, reason: Some(reason.to_string()) }
     }
-
-    // Android stub variants
-    pub const Deny: Self = Self {
-        decision: NetworkDecision::Deny,
-        source: NetworkDecisionSource::Policy,
-        reason: None,
-    };
-
-    pub const Ask: Self = Self {
-        decision: NetworkDecision::Ask,
-        source: NetworkDecisionSource::Policy,
-        reason: None,
-    };
+    pub const Deny: Self = Self { decision: NetworkDecision::Deny, source: NetworkDecisionSource::Policy, reason: None };
+    pub const Ask: Self = Self { decision: NetworkDecision::Ask, source: NetworkDecisionSource::Policy, reason: None };
 }
 
 #[derive(Debug, Clone)]
 pub struct NetworkPolicyRequest {
     pub url: String,
     pub method: String,
+    pub attempt_id: Option<String>,
+    pub host: String,
+    pub protocol: NetworkProtocol,
 }
 
 #[derive(Debug, Clone)]
@@ -399,11 +362,14 @@ pub struct NetworkPolicyRequestArgs {
     pub method: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NetworkProtocol {
     Http,
     Https,
+    HttpsConnect,
     Socks5,
+    Socks5Tcp,
+    Socks5Udp,
 }
 
 #[derive(Debug, Clone)]
@@ -411,6 +377,7 @@ pub struct BlockedRequest {
     pub url: String,
     pub host: String,
     pub reason: String,
+    pub attempt_id: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -421,11 +388,17 @@ pub struct BlockedRequestArgs {
 }
 
 #[async_trait]
+pub trait BlockedRequestObserver: Send + Sync + 'static {
+    async fn on_blocked(&self, _blocked: &BlockedRequest) {}
+}
+
+#[async_trait]
 pub trait NetworkPolicyDecider: Send + Sync + 'static {
     async fn evaluate(&self, _request: &NetworkPolicyRequest) -> NetworkPolicyDecision;
 }
 
-#[async_trait]
-pub trait BlockedRequestObserver: Send + Sync + 'static {
-    async fn on_blocked(&self, _blocked: &BlockedRequest);
+impl NetworkProxyBuilder {
+    pub fn policy_decider_arc(self, _decider: Arc<dyn NetworkPolicyDecider>) -> Self { self }
+    pub fn policy_decider(self, _decider: Box<dyn NetworkPolicyDecider>) -> Self { self }
+    pub fn blocked_request_observer_arc(self, _observer: Arc<dyn BlockedRequestObserver>) -> Self { self }
 }
