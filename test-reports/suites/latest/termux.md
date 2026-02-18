@@ -64,6 +64,44 @@ codex-exec --sandbox workspace-write --skip-git-repo-check --json "print current
 codex-exec --sandbox workspace-write --skip-git-repo-check --json "create hello.txt with content 'hello' and then read it"
 ```
 
+## v0.104.0 Regression Guard (Android network policy stub)
+
+Binary architecture guard:
+
+```bash
+file "$(command -v codex)"
+file "$(command -v codex-exec)"
+```
+
+Expected:
+- both binaries are Linux/Android ELF
+- architecture is `aarch64`/`ARM64`
+
+Network-path smoke (must not panic):
+
+```bash
+codex-exec --sandbox workspace-write --skip-git-repo-check --json \
+  "run one network check with curl -I https://example.com and report the first HTTP status line only"
+```
+
+Expected:
+- no crash/panic
+- no errors referencing missing network policy symbols (for example
+  `NetworkDecision::ask`, `NetworkDecision::deny`, or `BlockedRequest.decision`)
+- command may succeed or be blocked by policy, but failure must be graceful
+
+Maintainer-only compile guard (optional, from source repo):
+
+```bash
+cd ~/Dev/codex-termux/codex-rs
+cargo check -p codex-network-proxy --target aarch64-linux-android
+cargo check -p codex-core --target aarch64-linux-android
+cargo check -p codex-cli --target aarch64-linux-android
+```
+
+Expected:
+- all checks complete without compile errors
+
 Termux checks:
 
 ```bash
