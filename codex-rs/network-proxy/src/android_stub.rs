@@ -154,7 +154,10 @@ pub fn build_config_state(
     config: NetworkProxyConfig,
     constraints: NetworkProxyConstraints,
 ) -> Result<ConfigState> {
-    Ok(ConfigState { config, constraints })
+    Ok(ConfigState {
+        config,
+        constraints,
+    })
 }
 
 #[async_trait]
