@@ -173,5 +173,6 @@ See [LICENSE](./LICENSE) file for details.
 
 ## License
 
-MIT License — Copyright (c) 2026 Davide A. Guglielmi<br>
+Apache License 2.0 (upstream OpenAI Codex) with Termux-port maintenance by Davide A. Guglielmi.<br>
+Original project by OpenAI: https://github.com/openai/codex<br>
 Made in Italy 🇮🇹
