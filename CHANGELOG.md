@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.110.0-termux] - 2026-03-05
+
+### Upstream
+- OpenAI Codex rust-v0.110.0 release: https://github.com/openai/codex/releases/tag/rust-v0.110.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
+- Termux patches (#1, #2, #4, #5, #6, #9, #10) revalidated after merge.
+- Android audio/linker guard retained (`cpal` with `oboe-shared-stdcxx`).
+- Launcher hardening retained (`codex.bin` / `codex-exec.bin` + safe `LD_LIBRARY_PATH`).
+
+### Version
+- npm package bumped: `@mmmbuto/codex-cli-termux@0.110.0-termux`
+- Upstream base: `rust-v0.110.0`
+
+---
+
 ## [0.108.0-termux] - 2026-03-04
 
 ### Upstream

@@ -6,6 +6,7 @@ Comprehensive test validation for all platforms and release lines.
 
 ### Latest (Termux)
 
+- **v0.110.0-termux**: [test-reports/latest/0.110.0-termux/CODEX_TEST_REPORT_v0.110.0-termux.md](../test-reports/latest/0.110.0-termux/CODEX_TEST_REPORT_v0.110.0-termux.md)
 - **v0.108.0-termux**: [test-reports/latest/0.108.0-termux/CODEX_TEST_REPORT_v0.108.0-termux.md](../test-reports/latest/0.108.0-termux/CODEX_TEST_REPORT_v0.108.0-termux.md)
 - **v0.101.0-termux**: [test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux.md](../test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux.md)
 - **Extended**: [test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux_extended.md](../test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux_extended.md)

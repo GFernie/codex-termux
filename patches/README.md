@@ -4,9 +4,9 @@ This file tracks fork-specific changes against upstream OpenAI Codex.
 
 - Fork repo: `DioNanos/codex-termux`
 - Upstream repo: `openai/codex`
-- Baseline used for this inventory: `rust-v0.108.0`
-- Current fork release: `v0.108.0-termux`
-- Last update: 2026-03-04
+- Baseline used for this inventory: `rust-v0.110.0`
+- Current fork release: `v0.110.0-termux`
+- Last update: 2026-03-05
 
 Scope note:
 - This inventory is Termux-fork only.
@@ -103,8 +103,8 @@ Recommended audit commands:
 
 ```bash
 git fetch upstream --tags --prune
-git log --oneline rust-v0.108.0..main
-git diff --name-status rust-v0.108.0..main
+git log --oneline rust-v0.110.0..main
+git diff --name-status rust-v0.110.0..main
 ```
 
 Use this output to decide whether a delta is:

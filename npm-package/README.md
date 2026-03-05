@@ -1,6 +1,6 @@
 # 🤖 Codex CLI - Latest Termux & LTS Termux/Linux/macOS
 
-> **Built from upstream OpenAI Codex v0.108.0, compiled for Android Termux (ARM64) + LTS Termux/Linux/macOS**
+> **Built from upstream OpenAI Codex v0.110.0, compiled for Android Termux (ARM64) + LTS Termux/Linux/macOS**
 
 [![npm termux](https://img.shields.io/npm/v/@mmmbuto/codex-cli-termux?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-termux)
 [![npm lts](https://img.shields.io/npm/v/@mmmbuto/codex-cli-lts?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-lts)
