@@ -6,6 +6,7 @@ Comprehensive test validation for all platforms and release lines.
 
 ### Latest (Termux)
 
+- **v0.111.0-termux**: report pending after on-device Termux validation
 - **v0.110.0-termux**: [test-reports/latest/0.110.0-termux/CODEX_TEST_REPORT_v0.110.0-termux.md](../test-reports/latest/0.110.0-termux/CODEX_TEST_REPORT_v0.110.0-termux.md)
 - **v0.108.0-termux**: [test-reports/latest/0.108.0-termux/CODEX_TEST_REPORT_v0.108.0-termux.md](../test-reports/latest/0.108.0-termux/CODEX_TEST_REPORT_v0.108.0-termux.md)
 - **v0.101.0-termux**: [test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux.md](../test-reports/latest/0.101.0-termux/CODEX_TEST_REPORT_v0.101.0-termux.md)
@@ -86,6 +87,7 @@ Tests validate:
 - Library path preservation
 - Browser opener availability
 - Architecture detection (aarch64/ARM64)
+- Absence of Android-only voice/audio linker dependencies in the published latest build
 
 ### Linux
 

@@ -47,7 +47,7 @@ Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Term
 
 ### What We DON'T Do
 ❌ **NO new features**
-❌ **NO behavior modifications** (works exactly like upstream)
+❌ **NO broad behavior modifications** outside required Termux compatibility
 ❌ **NO replacement** of official Codex
 
 ---
@@ -61,6 +61,10 @@ We apply patches for issues that:
 - **Are minimal and well-documented**
 
 **Current patches**: See [patches/README.md](./patches/README.md) for full documentation.
+
+**Termux build note:** the published latest Termux package disables voice/realtime audio.
+This avoids Android linker failures such as missing `libOpenSLES.so` while keeping the
+rest of the upstream CLI behavior intact.
 
 ### LTS Updates
 - Based on rust-v0.80.0 (minimal features + security only)
@@ -96,6 +100,10 @@ codex login
 ```
 
 **Requirements:** Android 7+, ARM64, Node.js >=18 (recommended v22+), ~50MB storage
+
+**Current latest limitation:** voice/realtime audio is intentionally disabled in the
+published Termux build to keep packaged binaries free of Android-only audio linker
+dependencies.
 
 ---
 

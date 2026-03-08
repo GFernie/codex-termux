@@ -47,6 +47,11 @@ cd codex-rs
 cargo build --release -p codex-cli -p codex-exec
 ```
 
+For the published Termux package, Android consumers build `codex-tui` with
+default features disabled. This intentionally excludes voice/realtime audio
+from the npm release so the packaged binaries do not depend on Android audio
+linker paths such as `libOpenSLES.so`.
+
 Termux-specific optimizations are already baked into `codex-rs/Cargo.toml`:
 
 - `lto = false`
@@ -99,7 +104,8 @@ For maintainers who publish `@mmmbuto/codex-cli-termux`:
 2. **Update versions**:
    - `codex-rs/Cargo.toml` → `[workspace.package] version`
    - `npm-package/package.json` → `"version": "<same>-termux"`
-3. **Build the Termux binary** as in section 3.
+3. **Build the Termux binary** as in section 3 and keep the Android `no-voice`
+   dependency policy in place for published npm artifacts.
 4. **Copy the binary into the npm wrapper** as in section 4.
 5. **Publish** from `npm-package/` (for authorized maintainers only):
 

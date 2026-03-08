@@ -4,9 +4,9 @@ This file tracks fork-specific changes against upstream OpenAI Codex.
 
 - Fork repo: `DioNanos/codex-termux`
 - Upstream repo: `openai/codex`
-- Baseline used for this inventory: `rust-v0.110.0`
-- Current fork release: `v0.110.0-termux`
-- Last update: 2026-03-05
+- Baseline used for this inventory: `rust-v0.111.0`
+- Current fork release: `v0.111.0-termux`
+- Last update: 2026-03-08
 
 Scope note:
 - This inventory is Termux-fork only.
@@ -60,6 +60,17 @@ These are the practical fork deltas most relevant for end users.
   - `CANNOT LINK EXECUTABLE ... libc++_shared.so not found`
   when tools invoke binaries directly without Node wrapper env.
 
+### Patch #11 - Disable voice/realtime audio in published Termux builds (0.111.0)
+- Files:
+  - `codex-rs/cli/Cargo.toml`
+  - `codex-rs/cloud-tasks/Cargo.toml`
+- Change:
+  - Android consumers of `codex-tui` use `default-features = false`.
+  - This keeps `voice-input`, `cpal`, `oboe`, and `oboe-sys` out of the published Termux path.
+- Goal: avoid runtime linker failures like:
+  - `CANNOT LINK EXECUTABLE ... cannot find "libOpenSLES.so"`
+  on Termux devices that do not expose that Android audio dependency to the packaged ELF.
+
 ## 2) Historical patches
 
 ### Patch #7 - Manual update instruction fallback
@@ -103,8 +114,8 @@ Recommended audit commands:
 
 ```bash
 git fetch upstream --tags --prune
-git log --oneline rust-v0.110.0..main
-git diff --name-status rust-v0.110.0..main
+git log --oneline rust-v0.111.0..main
+git diff --name-status rust-v0.111.0..main
 ```
 
 Use this output to decide whether a delta is:

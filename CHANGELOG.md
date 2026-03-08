@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.111.0-termux] - 2026-03-08
+
+### Upstream
+- OpenAI Codex rust-v0.111.0 release: https://github.com/openai/codex/releases/tag/rust-v0.111.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
+- Termux patches (#1, #2, #4, #5, #6, #9, #10) revalidated after merge.
+- Termux release now excludes `voice-input` on Android consumers to avoid runtime linkage on `libOpenSLES.so`.
+- Launcher hardening retained (`codex.bin` / `codex-exec.bin` + safe `LD_LIBRARY_PATH`).
+
+### Version
+- npm package bumped: `@mmmbuto/codex-cli-termux@0.111.0-termux`
+- Upstream base: `rust-v0.111.0`
+
+### Verification
+- Android consumer manifests disable `codex-tui` default features on Termux builds.
+- Runtime validation and published test report are pending on-device Termux verification.
+
+---
+
 ## [0.110.0-termux] - 2026-03-05
 
 ### Upstream

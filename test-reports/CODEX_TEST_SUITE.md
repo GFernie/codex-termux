@@ -688,24 +688,27 @@ cd ~/codex-test-workspace
 
 ---
 
-### TEST-1011: Android Dependency Feature Guard (v0.108.0)
+### TEST-1011: Android Dependency Feature Guard (v0.111.0)
 
-**Action**: Verify audio dependency chain uses shared C++ runtime features
+**Action**: Verify published Termux consumers exclude Android voice/audio dependencies
 
 **Tasks**:
 1. Go to source repo `~/Dev/codex-termux/codex-rs`
 2. Run:
-   `cargo tree -p codex-tui -e features --target aarch64-linux-android`
-3. Confirm feature lines include:
-   - `cpal feature "oboe-shared-stdcxx"`
-   - `oboe feature "shared-stdcxx"`
-   - `oboe-sys feature "shared-stdcxx"`
+   `cargo tree -p codex-cli -e features --target aarch64-linux-android`
+3. Run:
+   `cargo tree -p codex-cloud-tasks -e features --target aarch64-linux-android`
+4. Confirm output does not include:
+   - `voice-input`
+   - `cpal`
+   - `oboe`
+   - `oboe-sys`
 
-**Expected**: shared-stdcxx feature chain present for Android audio path
+**Expected**: Android Termux release path excludes voice/audio dependency chain
 
-**Verify**: All 3 feature markers appear in output
+**Verify**: none of the 4 markers appear in output
 
-**Note**: Critical to prevent static C++ linker failures seen in v0.108.0 merge cycle
+**Note**: Critical to prevent runtime linker failures such as missing `libOpenSLES.so`
 
 ---
 
@@ -728,6 +731,8 @@ cd ~/codex-test-workspace
 **Verify**:
 - Output does not contain `libc++_static`
 - If `libc++` appears, it is `libc++_shared.so`
+- Output does not contain `libOpenSLES.so`
+- Output does not contain `liboboe.so`
 - `codex --version` and `codex-exec --version` run without linker/runtime crash
 
 **Note**: Skip only if neither `readelf` nor `llvm-readelf` exists
@@ -986,12 +991,16 @@ VERDICT: ✅ PASS / ⚠️ PASS WITH WARNINGS / ❌ FAIL
 
 ---
 
-**Version**: 1.3
-**Last Updated**: 2026-03-05
+**Version**: 1.4
+**Last Updated**: 2026-03-08
 **License**: Apache 2.0 (same as Codex CLI)
 
+**Changelog v1.4**:
+- Updated TEST-1011 to verify Termux Android consumers exclude `voice-input`, `cpal`, `oboe`, and `oboe-sys`
+- Updated TEST-1012 to verify packaged binaries do not reference `libOpenSLES.so` or `liboboe.so`
+
 **Changelog v1.3**:
-- Added TEST-1011: Android dependency feature guard (`oboe-shared-stdcxx`)
+- Added TEST-1011: Android dependency feature guard for Android audio linkage
 - Added TEST-1012: Android ELF linkage guard (no `libc++_static`)
 
 **Changelog v1.2**:
