@@ -3286,6 +3286,56 @@
       ],
       "type": "object"
     },
+    "ElicitationRequest": {
+      "oneOf": [
+        {
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "mode": {
+              "enum": [
+                "form"
+              ],
+              "type": "string"
+            },
+            "requested_schema": true
+          },
+          "required": [
+            "message",
+            "mode",
+            "requested_schema"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "elicitation_id": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "mode": {
+              "enum": [
+                "url"
+              ],
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "elicitation_id",
+            "message",
+            "mode",
+            "url"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "ErrorNotification": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "properties": {
@@ -4156,6 +4206,60 @@
           "type": "object"
         },
         {
+          "properties": {
+            "call_id": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "image_generation_begin"
+              ],
+              "title": "ImageGenerationBeginEventMsgType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "call_id",
+            "type"
+          ],
+          "title": "ImageGenerationBeginEventMsg",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "call_id": {
+              "type": "string"
+            },
+            "result": {
+              "type": "string"
+            },
+            "revised_prompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "image_generation_end"
+              ],
+              "title": "ImageGenerationEndEventMsgType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "call_id",
+            "result",
+            "status",
+            "type"
+          ],
+          "title": "ImageGenerationEndEventMsg",
+          "type": "object"
+        },
+        {
           "description": "Notification that the server is about to execute a command.",
           "properties": {
             "call_id": {
@@ -4677,8 +4781,8 @@
             "id": {
               "$ref": "#/definitions/RequestId"
             },
-            "message": {
-              "type": "string"
+            "request": {
+              "$ref": "#/definitions/ElicitationRequest"
             },
             "server_name": {
               "type": "string"
@@ -4693,7 +4797,7 @@
           },
           "required": [
             "id",
-            "message",
+            "request",
             "server_name",
             "type"
           ],
@@ -12263,6 +12367,40 @@
             "id": {
               "type": "string"
             },
+            "result": {
+              "type": "string"
+            },
+            "revisedPrompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "imageGeneration"
+              ],
+              "title": "ImageGenerationThreadItemType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "result",
+            "status",
+            "type"
+          ],
+          "title": "ImageGenerationThreadItem",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
             "review": {
               "type": "string"
             },
@@ -13743,6 +13881,40 @@
             "type"
           ],
           "title": "WebSearchTurnItem",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "result": {
+              "type": "string"
+            },
+            "revised_prompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "ImageGeneration"
+              ],
+              "title": "ImageGenerationTurnItemType",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "result",
+            "status",
+            "type"
+          ],
+          "title": "ImageGenerationTurnItem",
           "type": "object"
         },
         {
