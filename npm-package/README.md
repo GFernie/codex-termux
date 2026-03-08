@@ -180,6 +180,7 @@ See [LICENSE](./LICENSE) file for details.
 
 ## License
 
-Apache License 2.0 (upstream OpenAI Codex) with Termux-port maintenance by Davide A. Guglielmi.<br>
 Original project by OpenAI: https://github.com/openai/codex<br>
+Apache License 2.0 (upstream OpenAI Codex)<br>
+Termux-port maintenance by WellaNet.Dev<br>
 Made in Italy 🇮🇹
