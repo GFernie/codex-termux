@@ -1,7 +1,7 @@
 {
   "name": "@mmmbuto/codex-cli-termux",
-  "version": "0.111.0-termux",
-  "description": "OpenAI Codex CLI (upstream rust-v0.111.0) packaged as 0.111.0-termux – TUI + automation for Android Termux (ARM64). Termux build excludes voice/realtime audio to avoid Android linker failures. Use 'codex' for TUI, 'codex exec --json' for automation.",
+  "version": "0.112.0-termux",
+  "description": "OpenAI Codex CLI (upstream rust-v0.112.0) packaged as 0.112.0-termux – TUI + automation for Android Termux (ARM64). Termux build excludes voice/realtime audio to avoid Android linker failures. Use 'codex' for TUI, 'codex exec --json' for automation.",
   "type": "module",
   "main": "bin/codex.js",
   "bin": {

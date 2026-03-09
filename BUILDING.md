@@ -107,7 +107,24 @@ For maintainers who publish `@mmmbuto/codex-cli-termux`:
 3. **Build the Termux binary** as in section 3 and keep the Android `no-voice`
    dependency policy in place for published npm artifacts.
 4. **Copy the binary into the npm wrapper** as in section 4.
-5. **Publish** from `npm-package/` (for authorized maintainers only):
+5. **Run release gates** from repo root:
+
+   ```bash
+   bash verify-patches.sh
+   cd npm-package
+   npm pack
+   ```
+
+   Smoke-test the generated tarball before publish:
+
+   ```bash
+   env -u LD_LIBRARY_PATH ./bin/codex --version
+   env -u LD_LIBRARY_PATH ./bin/codex-exec --version
+   node ./bin/codex.js fork --help
+   node ./bin/codex.js debug --help
+   ```
+
+6. **Publish** from `npm-package/` (for authorized maintainers only):
 
    ```bash
    npm publish

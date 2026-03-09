@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.112.0-termux] - 2026-03-09
+
+### Upstream
+- OpenAI Codex rust-v0.112.0 release: https://github.com/openai/codex/releases/tag/rust-v0.112.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
+- Termux patches (#1, #2, #4, #5, #6, #9, #10, #11) revalidated after merge.
+- Added patch #12: npm launcher now discovers root subcommands dynamically from `codex --help`.
+- Maintained Android no-voice policy (`default-features = false` for `codex-tui` consumers on Android).
+- Maintained launcher hardening (`codex.bin` / `codex-exec.bin` + sanitized `LD_LIBRARY_PATH`).
+
+### Version
+- npm package bumped: `@mmmbuto/codex-cli-termux@0.112.0-termux`
+- Upstream base: `rust-v0.112.0`
+
+### Verification
+- `bash verify-patches.sh` passes.
+- Wrapper routing guard passes (`codex.js fork --help` and `codex.js debug --help` route correctly).
+- Build, tarball smoke checks, release tag, and npm publish are pending on the remote build host.
+
+---
+
 ## [0.111.0-termux] - 2026-03-08
 
 ### Upstream

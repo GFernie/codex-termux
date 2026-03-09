@@ -77,6 +77,16 @@ else
   fail
 fi
 
+# Patch #12
+printf "Patch #12 (Dynamic subcommand routing): "
+if grep -q "spawnSync(binaryPath" npm-package/bin/codex.js \
+  && grep -q "detectSubcommands" npm-package/bin/codex.js \
+  && grep -q "aliasesMatch" npm-package/bin/codex.js; then
+  pass
+else
+  fail
+fi
+
 # Bazel/Toolchain patch set declared in MODULE.bazel
 printf "Bazel declared patch files: "
 DECLARED_PATCHES=$(grep -o "//patches:[^\" ]*\\.patch" MODULE.bazel | sed 's#//patches:##' | sort -u || true)

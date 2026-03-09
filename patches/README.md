@@ -4,9 +4,9 @@ This file tracks fork-specific changes against upstream OpenAI Codex.
 
 - Fork repo: `DioNanos/codex-termux`
 - Upstream repo: `openai/codex`
-- Baseline used for this inventory: `rust-v0.111.0`
-- Current fork release: `v0.111.0-termux`
-- Last update: 2026-03-08
+- Baseline used for this inventory: `rust-v0.112.0`
+- Current fork release: `v0.112.0-termux`
+- Last update: 2026-03-09
 
 Scope note:
 - This inventory is Termux-fork only.
@@ -71,6 +71,16 @@ These are the practical fork deltas most relevant for end users.
   - `CANNOT LINK EXECUTABLE ... cannot find "libOpenSLES.so"`
   on Termux devices that do not expose that Android audio dependency to the packaged ELF.
 
+### Patch #12 - Dynamic npm wrapper command routing (0.112.0)
+- File: `npm-package/bin/codex.js`
+- Change:
+  - `codex.js` now discovers root subcommands from `codex --help` at runtime.
+  - command aliases from help output are recognized.
+  - unknown first arg still falls back to `exec` for prompt convenience.
+  - if help parsing fails, launcher uses pass-through (safe fallback, no misrouting).
+- Goal: avoid routing valid commands (for example `fork` or `debug`) to
+  `codex exec`, which caused incorrect behavior in previous npm builds.
+
 ## 2) Historical patches
 
 ### Patch #7 - Manual update instruction fallback
@@ -114,8 +124,8 @@ Recommended audit commands:
 
 ```bash
 git fetch upstream --tags --prune
-git log --oneline rust-v0.111.0..main
-git diff --name-status rust-v0.111.0..main
+git log --oneline rust-v0.112.0..main
+git diff --name-status rust-v0.112.0..main
 ```
 
 Use this output to decide whether a delta is:

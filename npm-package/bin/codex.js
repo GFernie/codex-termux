@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -8,38 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const binaryPath = join(__dirname, 'codex');
-
-// Default behavior:
-// - `codex` (no args) starts to TUI
-// - `codex <prompt>` runs `codex exec <prompt>` for convenience
-// - `codex <known-subcommand|--flag>` passes args through unchanged
-const knownSubcommands = new Set([
-  'exec',
-  'review',
-  'login',
-  'logout',
-  'mcp',
-  'mcp-server',
-  'app-server',
-  'completion',
-  'sandbox',
-  'execpolicy',
-  'apply',
-  'resume',
-  'cloud',
-  'responses-api-proxy',
-  'stdio-to-uds',
-  'features',
-  'tui'
-]);
-
-const args = process.argv.slice(2);
-const first = args[0];
-const isOption = first?.startsWith('-');
-const isKnownSubcommand = first && knownSubcommands.has(first);
-
-const finalArgs =
-  args.length === 0 ? [] : isOption || isKnownSubcommand ? args : ['exec', ...args];
 
 const TERMUX_PREFIX = process.env.PREFIX || '/data/data/com.termux/files/usr';
 
@@ -62,6 +30,79 @@ function sanitizeLdLibraryPath(binDir) {
 const env = { ...process.env, CODEX_MANAGED_BY_NPM: '1' };
 const binDir = __dirname;
 env.LD_LIBRARY_PATH = sanitizeLdLibraryPath(binDir);
+
+let cachedSubcommands;
+
+function detectSubcommands() {
+  if (cachedSubcommands !== undefined) {
+    return cachedSubcommands;
+  }
+
+  const helpResult = spawnSync(binaryPath, ['--help'], {
+    encoding: 'utf8',
+    env
+  });
+
+  if (helpResult.error || helpResult.status !== 0) {
+    cachedSubcommands = null;
+    return cachedSubcommands;
+  }
+
+  const output = `${helpResult.stdout || ''}\n${helpResult.stderr || ''}`;
+  const commands = new Set();
+  let inCommandsSection = false;
+
+  for (const line of output.split(/\r?\n/)) {
+    if (!inCommandsSection) {
+      if (/^\s*Commands:\s*$/.test(line)) {
+        inCommandsSection = true;
+      }
+      continue;
+    }
+
+    if (/^\s*(Arguments|Options):\s*$/.test(line)) {
+      break;
+    }
+
+    const commandMatch = line.match(/^\s{2,}([a-z0-9][a-z0-9-]*)\s{2,}/i);
+    if (!commandMatch) {
+      continue;
+    }
+
+    commands.add(commandMatch[1]);
+
+    const aliasesMatch = line.match(/\[aliases?: ([^\]]+)\]/);
+    if (aliasesMatch?.[1]) {
+      for (const alias of aliasesMatch[1].split(',')) {
+        const cleanAlias = alias.trim();
+        if (cleanAlias) {
+          commands.add(cleanAlias);
+        }
+      }
+    }
+  }
+
+  cachedSubcommands = commands.size > 0 ? commands : null;
+  return cachedSubcommands;
+}
+
+const args = process.argv.slice(2);
+const first = args[0];
+const isOption = first?.startsWith('-');
+const knownSubcommands = detectSubcommands();
+const isKnownSubcommand = Boolean(first && knownSubcommands?.has(first));
+
+// Default behavior:
+// - `codex` (no args) starts the TUI
+// - `codex <prompt>` runs `codex exec <prompt>` for convenience
+// - `codex <known-subcommand|--flag>` passes args through unchanged
+// - if detection fails, pass through unchanged (safer than misrouting)
+const finalArgs =
+  args.length === 0
+    ? []
+    : isOption || isKnownSubcommand || knownSubcommands === null
+      ? args
+      : ['exec', ...args];
 
 const child = spawn(binaryPath, finalArgs, {
   stdio: 'inherit',

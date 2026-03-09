@@ -128,6 +128,21 @@ Expected:
 - no reference to `liboboe.so`
 - no missing-library runtime errors when invoking `codex`/`codex-exec`
 
+## v0.112.0 Wrapper Routing Guard (npm launcher)
+
+The Node launcher must not misroute valid root subcommands to `codex exec`.
+
+```bash
+PKG_BIN_DIR="$(npm root -g)/@mmmbuto/codex-cli-termux/bin"
+node "$PKG_BIN_DIR/codex.js" fork --help | sed -n '1,6p'
+node "$PKG_BIN_DIR/codex.js" debug --help | sed -n '1,6p'
+```
+
+Expected:
+- first command includes `Usage: codex fork`
+- second command includes `Usage: codex debug`
+- output does not start with `Usage: codex exec`
+
 Maintainer-only compile guard (optional, from source repo):
 
 ```bash
