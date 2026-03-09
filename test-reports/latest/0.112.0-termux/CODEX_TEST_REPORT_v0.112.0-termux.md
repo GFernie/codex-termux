@@ -85,17 +85,17 @@ RESULTS:
 
 CRITICAL FAILURES:
 ------------------
-Nessun errore critico.
+No critical failures.
 
 WARNINGS:
 ---------
-- Test non-eseguiti in pieno: `TEST-601` non ha effettuato una query real-time (è stato verificato solo il supporto `--search`).
-- `TEST-701` conferma workspace di test non git repository, quindi solo rilevamento stato.
-- `TEST-1208` è stato declassato da errore a check deprecato/non applicabile in questo contesto (`codex-rs/target/release/codex*`), perché la validazione locale npm non richiede i binari crate compilati.
+- `TEST-601` was not fully exercised: no real-time web query was executed; only `--search` support was verified.
+- `TEST-701` confirms the test workspace is not a git repository, so only state detection was checked.
+- `TEST-1208` was downgraded from failure to deprecated/non-applicable in this context (`codex-rs/target/release/codex*`), because local npm validation does not require locally built crate binaries.
 
 NOTES:
 ------
-- I test sono stati eseguiti manualmente con `codex`/`codex-exec` installati globalmente.
-- Workspace usato: `/data/data/com.termux/files/home/codex-test-workspace`.
+- Tests were executed manually with globally installed `codex` / `codex-exec`.
+- Workspace used: `/data/data/com.termux/files/home/codex-test-workspace`.
 
 VERDICT: ⚠️ PASS WITH WARNINGS

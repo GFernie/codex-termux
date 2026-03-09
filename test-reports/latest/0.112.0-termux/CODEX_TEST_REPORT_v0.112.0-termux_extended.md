@@ -32,9 +32,9 @@ Category totals:
 Verdict: ⚠️ PASS WITH WARNINGS
 
 Primary failures:
-- Nessun failure critico. `TEST-1208` declassato a controllo deprecato/non applicabile per validazione npm locale.
+- No critical failures. `TEST-1208` downgraded to deprecated/non-applicable check for local npm validation.
 
 Notes:
 - `TEST-601` marked pass with note: search flag exists in help; no live web query executed.
 - `TEST-702` skipped because workspace is not a git repo.
-- `TEST-1208` deprecato: check su `codex-rs/target/release/codex*` non più obbligatorio per la validazione locale npm.
+- `TEST-1208` deprecated: `codex-rs/target/release/codex*` check is no longer required for local npm validation.
