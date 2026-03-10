@@ -42,6 +42,7 @@ codex exec --help
 ## Documentation
 
 - Configuration: `docs/configuration.md`
+- LTS changelog: `CHANGELOG_LTS.md`
 - Patch notes: `patches/README.md`
 - Build notes: `BUILDING.md`
 - Test reports: `test-reports/`

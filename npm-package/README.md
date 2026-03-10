@@ -35,5 +35,6 @@ codex exec --help
 - LTS line is stability-focused
 - Backports are restricted to reliability/security fixes
 - `/chat` compatibility is treated as release-blocking
+- Release history is tracked in `CHANGELOG_LTS.md` in the repository root
 
 Full docs, test reports, and patch history are in the GitHub repository.

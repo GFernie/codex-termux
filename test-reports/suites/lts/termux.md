@@ -8,30 +8,36 @@ before relying on it in production.
 
 ## Command Selection
 
-This suite assumes you have a shell function/alias in `~/.zshrc` that selects
-your preferred provider/profile for the `codex` CLI. The example wrapper name
-used below is `codex-glm-a`. Adjust to whatever you actually use.
+This suite assumes dedicated LTS commands in `~/.zshrc`:
+
+- `codex-lts`
+- `codex-lts-exec`
+- `codex-qwen35`
+- `codex-glm5`
 
 Verify:
 
 ```bash
-command -v codex-glm-a
-command -v codex-exec
-
-# Optional: if you also wrap codex-exec via ~/.zshrc, keep using it.
-command -v codex-glm-a-exec || true
+command -v codex-lts
+command -v codex-lts-exec
+command -v codex-qwen35
+command -v codex-glm5
 ```
 
 ## Version Family Guard (Required)
 
-Both must be `-lts`:
+Both LTS binaries must be `-lts`:
 
 ```bash
-codex-glm-a --version
-codex-glm-a --version | rg --fixed-strings "-lts"
+codex-lts --version
+codex-lts --version | rg --fixed-strings "-lts"
 
-codex-exec --version
-codex-exec --version | rg --fixed-strings "-lts"
+codex-lts-exec --version
+codex-lts-exec --version | rg --fixed-strings "-lts"
+
+# Provider alias smoke
+codex-qwen35 --version
+codex-glm5 --version
 ```
 
 ## Termux Environment
@@ -49,16 +55,16 @@ npm --version
 Help:
 
 ```bash
-codex-glm-a --help
-codex-glm-a exec --help
-codex-exec --help
+codex-lts --help
+codex-lts exec --help
+codex-lts-exec --help
 ```
 
 Non-interactive sanity:
 
 ```bash
-codex-exec --json "print current directory and list files"
-codex-exec --json "create a file hello.txt with content 'hello' and then read it"
+codex-lts-exec --json "print current directory and list files"
+codex-lts-exec --json "create a file hello.txt with content 'hello' and then read it"
 ```
 
 Termux-specific checks (optional but useful):
@@ -75,7 +81,7 @@ If you see an update jump to a non-LTS version (for example `0.80.4-lts -> 0.96.
 capture:
 
 ```bash
-codex-glm-a --version
+codex-lts --version
 cat ~/.config/codex/version.json 2>/dev/null || true
 ```
 
