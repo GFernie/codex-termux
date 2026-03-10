@@ -1,0 +1,153 @@
+name: lts-npm-build-publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish the packed tarball to npm"
+        required: true
+        type: boolean
+        default: false
+      npm_tag:
+        description: "npm dist-tag to use when publish=true"
+        required: true
+        type: string
+        default: "lts"
+
+jobs:
+  build-linux-x64:
+    name: Build Linux x64 binaries
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: codex-rs
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Build release binaries
+        run: cargo build --release --bin codex --bin codex-exec --target x86_64-unknown-linux-gnu
+
+      - name: Stage Linux binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="${GITHUB_WORKSPACE}/dist/linux-x64"
+          mkdir -p "${out}"
+          cp "target/x86_64-unknown-linux-gnu/release/codex" "${out}/codex"
+          cp "target/x86_64-unknown-linux-gnu/release/codex-exec" "${out}/codex-exec"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64-binaries
+          path: dist/linux-x64/
+
+  build-darwin-arm64:
+    name: Build macOS arm64 binaries
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: codex-rs
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Build release binaries
+        run: cargo build --release --bin codex --bin codex-exec --target aarch64-apple-darwin
+
+      - name: Stage macOS binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="${GITHUB_WORKSPACE}/dist/darwin-arm64"
+          mkdir -p "${out}"
+          cp "target/aarch64-apple-darwin/release/codex" "${out}/codex"
+          cp "target/aarch64-apple-darwin/release/codex-exec" "${out}/codex-exec"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: darwin-arm64-binaries
+          path: dist/darwin-arm64/
+
+  package-npm:
+    name: Pack and optionally publish npm LTS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs:
+      - build-linux-x64
+      - build-darwin-arm64
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-x64-binaries
+          path: /tmp/lts-linux-x64
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: darwin-arm64-binaries
+          path: /tmp/lts-darwin-arm64
+
+      - name: Inject built binaries into npm package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p npm-package/bin/linux-x64 npm-package/bin/darwin-arm64
+
+          cp /tmp/lts-linux-x64/codex npm-package/bin/linux-x64/codex
+          cp /tmp/lts-linux-x64/codex-exec npm-package/bin/linux-x64/codex-exec
+          cp /tmp/lts-darwin-arm64/codex npm-package/bin/darwin-arm64/codex
+          cp /tmp/lts-darwin-arm64/codex-exec npm-package/bin/darwin-arm64/codex-exec
+
+          chmod +x \
+            npm-package/bin/linux-x64/codex \
+            npm-package/bin/linux-x64/codex-exec \
+            npm-package/bin/darwin-arm64/codex \
+            npm-package/bin/darwin-arm64/codex-exec
+
+      - name: Verify Termux binaries are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x npm-package/bin/android-arm64/codex
+          test -x npm-package/bin/android-arm64/codex-exec
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: npm pack
+        id: npm_pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd npm-package
+          tarball="$(npm pack)"
+          echo "tarball=${tarball}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-lts-tarball
+          path: npm-package/${{ steps.npm_pack.outputs.tarball }}
+
+      - name: npm publish
+        if: ${{ inputs.publish }}
+        working-directory: npm-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "${{ steps.npm_pack.outputs.tarball }}" --tag "${{ inputs.npm_tag }}"

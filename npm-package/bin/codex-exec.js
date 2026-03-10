@@ -21,8 +21,8 @@ function resolveBinary(name) {
   if (process.platform === 'linux' && process.arch === 'x64') {
     return path.join(__dirname, 'linux-x64', name);
   }
-  if (process.platform === 'linux' && process.arch === 'arm64') {
-    return path.join(__dirname, 'linux-arm64', name);
+  if (process.platform === 'darwin' && process.arch === 'arm64') {
+    return path.join(__dirname, 'darwin-arm64', name);
   }
   return null;
 }
@@ -30,7 +30,7 @@ function resolveBinary(name) {
 const bin = resolveBinary('codex-exec');
 if (!bin || !existsSync(bin)) {
   console.error(`Unsupported platform/arch: ${process.platform}/${process.arch}.`);
-  console.error('Supported: linux-x64, android-arm64 (Termux).');
+  console.error('Supported: android-arm64 (Termux), linux-x64, darwin-arm64.');
   process.exit(1);
 }
 

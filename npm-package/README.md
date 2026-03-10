@@ -1,61 +1,39 @@
-# codex-termux
+# @mmmbuto/codex-cli-lts
 
-Repackaged builds of the upstream Codex CLI with minimal compatibility patches
-for Android Termux.
+LTS packaging of upstream OpenAI Codex for stable Termux and desktop usage.
 
-## Release Lines
+[![npm lts](https://img.shields.io/npm/v/@mmmbuto/codex-cli-lts?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-lts)
 
-- **Latest (Termux-only)**: `@mmmbuto/codex-cli-termux`
-- **LTS (stability-focused)**: `@mmmbuto/codex-cli-lts`
+---
 
-Both packages expose:
+## Supported Targets
+
+- Android Termux (`android-arm64`)
+- Linux (`linux-x64`)
+- macOS (`darwin-arm64`)
+
+This package exposes:
 
 - `codex` (interactive TUI)
 - `codex-exec` (automation, e.g. `codex exec --json ...`)
 
 ## Install
 
-Latest (Termux):
-
-```bash
-npm install -g @mmmbuto/codex-cli-termux
-```
-
-LTS (Linux x64 + Termux ARM64 via npm; macOS arm64 is distributed via CI artifacts/releases when available):
-
 ```bash
 npm install -g @mmmbuto/codex-cli-lts
 ```
 
-Verify:
+## Verify
 
 ```bash
 codex --version
 codex exec --help
 ```
 
-## Configuration (Provider-Neutral)
+## Policy
 
-All configuration guidance is kept in one place:
+- LTS line is stability-focused
+- Backports are restricted to reliability/security fixes
+- `/chat` compatibility is treated as release-blocking
 
-- `docs/configuration.md`
-
-Note: when reading this file on npm, the `docs/` and `test-reports/` folders are
-in the GitHub repository (see the `repository` link on the package page).
-
-## Test Reports
-
-Human-run validation reports live under:
-
-- `test-reports/`
-
-## Patches And Building
-
-- Termux patch notes: `patches/`
-- Build notes: `BUILDING.md`
-
-## Notes
-
-- This repo aims to preserve upstream behavior. Patches are limited to platform
-  compatibility and safety fixes, with documentation under `patches/` and
-  `docs/`.
+Full docs, test reports, and patch history are in the GitHub repository.

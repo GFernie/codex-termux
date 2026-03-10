@@ -89,6 +89,14 @@ struct ResponseCompleted {
 }
 
 #[derive(Debug, Deserialize)]
+struct ResponseDone {
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    usage: Option<ResponseCompletedUsage>,
+}
+
+#[derive(Debug, Deserialize)]
 struct ResponseCompletedUsage {
     input_tokens: i64,
     input_tokens_details: Option<ResponseCompletedInputTokensDetails>,
