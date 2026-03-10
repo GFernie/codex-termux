@@ -21,7 +21,7 @@ Stability-first packaging of upstream OpenAI Codex for Android Termux and LTS de
 ## Distribution Channels (LTS)
 
 - Android Termux (ARM64): npm package `@mmmbuto/codex-cli-lts`
-- Linux/macOS: primary channel is Homebrew tap `homebrew-codex-lts`
+- Linux/macOS: primary channel is Homebrew tap `DioNanos/codex-lts` (`homebrew-codex-lts`)
 - Linux x64 + macOS arm64 npm artifacts: optional channel built via GitHub Actions
 
 ## Install
@@ -37,6 +37,13 @@ Verify:
 ```bash
 codex --version
 codex exec --help
+```
+
+Linux/macOS (Homebrew tap):
+
+```bash
+brew tap DioNanos/codex-lts
+brew install codex-lts
 ```
 
 ## Documentation
