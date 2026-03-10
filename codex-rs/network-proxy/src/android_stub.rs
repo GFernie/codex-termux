@@ -94,7 +94,9 @@ pub struct NetworkProxyConstraints {
     pub dangerously_allow_non_loopback_admin: Option<bool>,
     pub dangerously_allow_all_unix_sockets: Option<bool>,
     pub allowed_domains: Option<Vec<String>>,
+    pub allowlist_expansion_enabled: Option<bool>,
     pub denied_domains: Option<Vec<String>>,
+    pub denylist_expansion_enabled: Option<bool>,
     pub allow_unix_sockets: Option<Vec<String>>,
     pub allow_local_binding: Option<bool>,
 }
@@ -289,6 +291,14 @@ impl NetworkProxy {
 
     pub async fn add_denied_domain(&self, _host: &str) -> Result<()> {
         Ok(())
+    }
+
+    pub async fn current_cfg(&self) -> Result<NetworkProxyConfig> {
+        Ok(self
+            ._state
+            .as_ref()
+            .map(|state| state.state.config.clone())
+            .unwrap_or_default())
     }
 
     pub fn apply_to_env(&self, _env: &mut HashMap<String, String>) {

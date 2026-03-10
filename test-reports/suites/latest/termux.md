@@ -128,7 +128,7 @@ Expected:
 - no reference to `liboboe.so`
 - no missing-library runtime errors when invoking `codex`/`codex-exec`
 
-## v0.112.0 Wrapper Routing Guard (npm launcher)
+## v0.113.0 Wrapper Routing Guard (npm launcher)
 
 The Node launcher must not misroute valid root subcommands to `codex exec`.
 

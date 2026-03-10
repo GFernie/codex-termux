@@ -40,7 +40,7 @@ supports-color = { workspace = true }
 codex-tui = { path = "../tui", default-features = false }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-codex-tui = { path = "../tui" }
+codex-tui = { path = "../tui", default-features = false }
 
 [dependencies.async-trait]
 workspace = true

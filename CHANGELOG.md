@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.113.0-termux] - 2026-03-10
+
+### Upstream
+- OpenAI Codex rust-v0.113.0 release: https://github.com/openai/codex/releases/tag/rust-v0.113.0
+- Upstream release notes and details are maintained in the link above.
+
+### Termux Patches
+- Termux patches (#1, #2, #4, #5, #6, #9, #10, #11, #12) revalidated after merge.
+- Maintained Android no-voice policy (`default-features = false` for `codex-tui` consumers on Android).
+- Maintained launcher hardening (`codex.bin` / `codex-exec.bin` + sanitized `LD_LIBRARY_PATH`).
+
+### Version
+- npm package bumped: `@mmmbuto/codex-cli-termux@0.113.0-termux`
+- Upstream base: `rust-v0.113.0`
+
+### Verification
+- `bash verify-patches.sh` passes.
+- Wrapper routing guard still passes (`codex.js fork --help` and `codex.js debug --help` route correctly).
+- Termux on-device TUI regression validation remains required before closing the incident gate.
+
+---
+
 ## [0.112.0-termux] - 2026-03-09
 
 ### Upstream
