@@ -7,7 +7,6 @@
 
 use codex_api::Provider as ApiProvider;
 use codex_api::WireApi as ApiWireApi;
-use codex_api::is_azure_responses_wire_base_url;
 use codex_api::provider::RetryConfig as ApiRetryConfig;
 use codex_app_server_protocol::AuthMode;
 use http::HeaderMap;
@@ -163,15 +162,6 @@ impl ModelProviderInfo {
             retry,
             stream_idle_timeout: self.stream_idle_timeout(),
         })
-    }
-
-    pub(crate) fn is_azure_responses_endpoint(&self) -> bool {
-        let wire = match self.wire_api {
-            WireApi::Responses => ApiWireApi::Responses,
-            WireApi::Chat => ApiWireApi::Chat,
-        };
-
-        is_azure_responses_wire_base_url(wire, &self.name, self.base_url.as_deref())
     }
 
     /// If `env_key` is Some, returns the API key for this provider if present
@@ -426,6 +416,7 @@ env_http_headers = { "X-Example-Env-Header" = "EXAMPLE_ENV_VAR" }
         let provider: ModelProviderInfo = toml::from_str(azure_provider_toml).unwrap();
         assert_eq!(expected_provider, provider);
     }
+
     #[test]
     fn detects_azure_responses_base_urls() {
         let positive_cases = [

@@ -94,25 +94,17 @@ impl Provider {
     }
 
     pub fn is_azure_responses_endpoint(&self) -> bool {
-        is_azure_responses_wire_base_url(self.wire.clone(), &self.name, Some(&self.base_url))
+        if self.wire != WireApi::Responses {
+            return false;
+        }
+
+        if self.name.eq_ignore_ascii_case("azure") {
+            return true;
+        }
+
+        self.base_url.to_ascii_lowercase().contains("openai.azure.")
+            || matches_azure_responses_base_url(&self.base_url)
     }
-}
-
-pub fn is_azure_responses_wire_base_url(wire: WireApi, name: &str, base_url: Option<&str>) -> bool {
-    if wire != WireApi::Responses {
-        return false;
-    }
-
-    if name.eq_ignore_ascii_case("azure") {
-        return true;
-    }
-
-    let Some(base_url) = base_url else {
-        return false;
-    };
-
-    let base = base_url.to_ascii_lowercase();
-    base.contains("openai.azure.") || matches_azure_responses_base_url(&base)
 }
 
 fn matches_azure_responses_base_url(base_url: &str) -> bool {
@@ -123,54 +115,6 @@ fn matches_azure_responses_base_url(base_url: &str) -> bool {
         "azurefd.",
         "windows.net/openai",
     ];
-    AZURE_MARKERS.iter().any(|marker| base_url.contains(marker))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn detects_azure_responses_base_urls() {
-        let positive_cases = [
-            "https://foo.openai.azure.com/openai",
-            "https://foo.openai.azure.us/openai/deployments/bar",
-            "https://foo.cognitiveservices.azure.cn/openai",
-            "https://foo.aoai.azure.com/openai",
-            "https://foo.openai.azure-api.net/openai",
-            "https://foo.z01.azurefd.net/",
-        ];
-
-        for base_url in positive_cases {
-            assert!(
-                is_azure_responses_wire_base_url(WireApi::Responses, "test", Some(base_url)),
-                "expected {base_url} to be detected as Azure"
-            );
-        }
-
-        assert!(is_azure_responses_wire_base_url(
-            WireApi::Responses,
-            "Azure",
-            Some("https://example.com")
-        ));
-
-        let negative_cases = [
-            "https://api.openai.com/v1",
-            "https://example.com/openai",
-            "https://myproxy.azurewebsites.net/openai",
-        ];
-
-        for base_url in negative_cases {
-            assert!(
-                !is_azure_responses_wire_base_url(WireApi::Responses, "test", Some(base_url)),
-                "expected {base_url} not to be detected as Azure"
-            );
-        }
-
-        assert!(!is_azure_responses_wire_base_url(
-            WireApi::Chat,
-            "Azure",
-            Some("https://foo.openai.azure.com/openai")
-        ));
-    }
+    let base = base_url.to_ascii_lowercase();
+    AZURE_MARKERS.iter().any(|marker| base.contains(marker))
 }
