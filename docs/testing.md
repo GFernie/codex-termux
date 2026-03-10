@@ -54,6 +54,11 @@ Comprehensive test validation for all platforms and release lines.
 
 ### How to Run Tests
 
+Manual execution policy for Latest Termux:
+- Run tests manually, command-by-command.
+- Do not use local automation scripts or custom runners.
+- Write reports only from manually executed results.
+
 ```bash
 # Start Codex
 codex
@@ -62,10 +67,10 @@ codex
 > Read and execute all tests in https://github.com/DioNanos/codex-termux/blob/main/test-reports/suites/latest/termux.md
 ```
 
-Codex will automatically:
-1. Execute all applicable tests sequentially
-2. Report PASS/FAIL for each test
-3. Generate a final summary with total passed/failed counts
+For each test, record:
+1. PASS/FAIL/SKIP
+2. Command(s) run
+3. Short evidence/output note
 
 ### Success Criteria
 

@@ -1,0 +1,52 @@
+TEST-000	PASS	Environment Preparation (Workspace created at /data/data/com.termux/files/home/codex-test-workspace)
+TEST-101	PASS	Display Codex Version (codex-cli 0.113.0)
+TEST-102	PASS	Environment Context (PWD/USER/SHELL verified)
+TEST-103	PASS	Platform Detection (aarch64, Node v25.3.0)
+TEST-201	PASS	Create Text File
+TEST-202	PASS	Read File
+TEST-203	PASS	Modify File (Append)
+TEST-204	PASS	Modify File (Edit/Replace)
+TEST-205	PASS	Create Directory Structure
+TEST-206	PASS	List Directory Contents
+TEST-207	PASS	Create Multiple Files
+TEST-208	PASS	Delete File
+TEST-301	PASS	Find Files by Pattern
+TEST-302	PASS	Search File Contents (Grep)
+TEST-303	PASS	Recursive Directory Search
+TEST-401	PASS	Simple Shell Command
+TEST-402	PASS	Command with Output Capture
+TEST-403	PASS	Command Chain (Pipes)
+TEST-404	PASS	Package Manager Availability (pkg/apt in PATH)
+TEST-501	PASS	JSON File Operations
+TEST-502	PASS	Multi-line File Creation
+TEST-601	SKIPPED	Web search flag not exposed in local codex-exec help
+TEST-602	PASS	Network Connectivity (curl -I https://www.google.com -> HTTP/2 200)
+TEST-701	PASS	Git Repository Detection (not a git repo in workspace)
+TEST-702	SKIPPED	Git Information (workspace is not a git repo)
+TEST-801	PASS	Code Analysis (codex-exec json output)
+TEST-802	PASS	Problem Solving (python loop snippet returned)
+TEST-803	PASS	Documentation Generation (project/README.md created)
+TEST-901	PASS	Handle Non-existent File (expected failure path)
+TEST-902	PASS	Handle Invalid Command (expected failure path)
+TEST-903	PASS	Handle Permission Issues (/root inaccessible)
+TEST-1001	PASS	Termux Paths (PREFIX/HOME)
+TEST-1002	PASS	Termux Shell Detection
+TEST-1003	PASS	Termux-API Availability
+TEST-1004	PASS	Termux Package Manager
+TEST-1005	PASS	Termux Storage Paths
+TEST-1006	PASS	Termux Environment Variables
+TEST-1007	PASS	Android-Specific Commands (arch/sdk)
+TEST-1008	PASS	Library Path Preservation
+TEST-1009	PASS	Termux Browser Open
+TEST-1010	PASS	Android Permissions Model
+TEST-1011	PASS	Android Dependency Feature Guard
+TEST-1012	PASS	Android ELF Linkage Guard
+TEST-1201	PASS	Verify codex Binary
+TEST-1202	PASS	Verify codex-exec Binary
+TEST-1203	PASS	Verify codex-exec JSON Flag
+TEST-1204	PASS	NPM Package Structure
+TEST-1205	PASS	Binary Version Consistency
+TEST-1206	PASS	Package.json Bin Entries
+TEST-1207	PASS	Global Command Availability
+TEST-1208	SKIPPED	Legacy upstream crate inventory check deprecated for npm-only validation
+TEST-1101	PASS	Remove Test Files

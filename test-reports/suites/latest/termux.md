@@ -6,6 +6,11 @@ the global `codex` and `codex-exec` commands.
 WARNING: This release may ship with incomplete re-validation. Run this suite
 before relying on it in production.
 
+Manual execution policy:
+- Execute tests manually, command-by-command.
+- Do not run this suite via local automation scripts/custom runners.
+- Compile reports only from manually executed test evidence.
+
 ## Install Guard (Required)
 
 Confirm you are testing the Termux package (not upstream):
