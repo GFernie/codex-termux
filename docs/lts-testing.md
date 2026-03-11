@@ -88,10 +88,15 @@ Each platform has its own Core and Extended suite because the risks differ:
 
 - Linux Core: [`../test-reports/suites/lts/core/linux.md`](../test-reports/suites/lts/core/linux.md)
 - Linux Extended: [`../test-reports/suites/lts/extended/linux.md`](../test-reports/suites/lts/extended/linux.md)
+- Linux model suites: [`../test-reports/suites/lts/models/`](../test-reports/suites/lts/models/)
 - Termux Core: [`../test-reports/suites/lts/core/termux.md`](../test-reports/suites/lts/core/termux.md)
 - Termux Extended: [`../test-reports/suites/lts/extended/termux.md`](../test-reports/suites/lts/extended/termux.md)
 - macOS Core: [`../test-reports/suites/lts/core/macos.md`](../test-reports/suites/lts/core/macos.md)
 - macOS Extended: [`../test-reports/suites/lts/extended/macos.md`](../test-reports/suites/lts/extended/macos.md)
+
+Model-specific guidance:
+
+- [`lts-model-testing.md`](./lts-model-testing.md)
 
 ## Reports
 
@@ -100,6 +105,7 @@ Store release reports under `test-reports/lts/<version>/`.
 Use the shared template:
 
 - [`../test-reports/lts/REPORT_TEMPLATE.md`](../test-reports/lts/REPORT_TEMPLATE.md)
+- [`../test-reports/lts/MODEL_REPORT_TEMPLATE.md`](../test-reports/lts/MODEL_REPORT_TEMPLATE.md)
 
 Each report should capture:
 
@@ -111,3 +117,9 @@ Each report should capture:
 - blockers
 - advisory issues
 - raw error snippets when relevant
+
+For model-specific reports intended for commit history or public repo storage:
+
+- keep them neutral
+- remove hostnames, tester names, local absolute paths, and env var names
+- prefer generic wording such as `Configured via environment`

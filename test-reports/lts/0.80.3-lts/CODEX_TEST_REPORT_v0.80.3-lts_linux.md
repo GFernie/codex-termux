@@ -76,7 +76,7 @@ Category 7: Git Operations
 
 Category 8: AI Capabilities
 - TEST-801: API Key Detection - ✅ PASS (OPENAI_API_KEY found)
-- TEST-802: Configuration File - ✅ PASS (~/.codex/config.toml exists)
+- TEST-802: Configuration File - ✅ PASS (standard config file present)
 - TEST-803: Model Selection - ✅ PASS (gpt-5.2-codex configured)
 
 Category 9: Error Handling
@@ -119,7 +119,7 @@ Additional tests performed with codex-exec binary:
 
 PACKAGING DETAILS:
 ------------------
-Package Location: /home/dag/Dev/codex-termux/npm-package/
+Package Location: local npm package workspace
 Package Name: @mmmbuto/codex-cli-lts (0.80.3-lts)
 Package File: mmmbuto-codex-cli-lts-0.80.3-lts.tgz (78.8 MB)
 
@@ -201,15 +201,15 @@ Additional tests performed with GLM-4.7 provider via Zai API:
 GLM-4.7 Configuration:
 - Provider: Zai API
 - Model: GLM-4.7
-- API Key: $ZAI_API_KEY_P
-- Alias: codex-glm-p (defined in ~/.zshrc)
+- API Key: configured via environment
+- Alias: local GLM helper alias
 
 TEST-GLM-001: Version check with GLM-4.7
-- Command: OPENAI_API_KEY="$ZAI_API_KEY_P" codex -m "GLM-4.7" -c model_provider="zai" --version
+- Command: `codex -m "GLM-4.7" -c model_provider="zai" --version` with provider credentials configured via environment
 - Result: ✅ PASS (codex-cli 0.80.3-lts)
 
 TEST-GLM-002: codex-exec with GLM-4.7 --json flag
-- Command: OPENAI_API_KEY="$ZAI_API_KEY_P" codex-exec -m "GLM-4.7" -c model_provider="zai" --skip-git-repo-check --json "List files"
+- Command: `codex-exec -m "GLM-4.7" -c model_provider="zai" --skip-git-repo-check --json "List files"` with provider credentials configured via environment
 - Result: ✅ PASS (JSONL output working with GLM-4.7)
 
 TEST-GLM-003: File creation with GLM-4.7
