@@ -1259,7 +1259,7 @@ impl ChatComposer {
                     && let Some((_n, cmd)) = built_in_slash_commands()
                         .into_iter()
                         .find(|(command_name, _)| *command_name == name)
-                    && cmd == SlashCommand::Review
+                    && cmd.supports_inline_args()
                 {
                     return (InputResult::CommandWithArgs(cmd, rest.to_string()), true);
                 }
@@ -1912,6 +1912,15 @@ impl ChatComposer {
         }
         self.context_window_percent = percent;
         self.context_window_used_tokens = used_tokens;
+    }
+
+    pub(crate) fn set_placeholder_text(&mut self, placeholder: String) {
+        self.placeholder_text = placeholder;
+    }
+
+    #[cfg(test)]
+    pub(crate) fn placeholder_text(&self) -> &str {
+        &self.placeholder_text
     }
 
     pub(crate) fn set_esc_backtrack_hint(&mut self, show: bool) {
@@ -3114,6 +3123,80 @@ mod tests {
         assert!(composer.textarea.is_empty(), "composer should be cleared");
         composer.insert_str("@");
         assert_eq!(composer.textarea.text(), "@");
+    }
+
+    #[test]
+    fn slash_plan_with_inline_args_dispatches_command_with_args() {
+        use crossterm::event::KeyCode;
+        use crossterm::event::KeyEvent;
+        use crossterm::event::KeyModifiers;
+
+        let (tx, _rx) = unbounded_channel::<AppEvent>();
+        let sender = AppEventSender::new(tx);
+        let mut composer = ChatComposer::new(
+            true,
+            sender,
+            false,
+            "Ask Codex to do anything".to_string(),
+            false,
+        );
+
+        type_chars_humanlike(
+            &mut composer,
+            &[
+                '/', 'p', 'l', 'a', 'n', ' ', 'm', 'i', 'g', 'r', 'a', 't', 'e', ' ', 'a', 'u',
+                't', 'h', ' ', 'f', 'l', 'o', 'w',
+            ],
+        );
+
+        let (result, _needs_redraw) =
+            composer.handle_key_event(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+
+        match result {
+            InputResult::CommandWithArgs(cmd, args) => {
+                assert_eq!(cmd, SlashCommand::Plan);
+                assert_eq!(args, "migrate auth flow");
+            }
+            InputResult::Command(cmd) => {
+                panic!(
+                    "expected CommandWithArgs for '/plan ...', got plain command: {}",
+                    cmd.command()
+                )
+            }
+            InputResult::Submitted(text) => {
+                panic!("expected command dispatch, got literal submit: {text}")
+            }
+            InputResult::None => panic!("expected CommandWithArgs result for '/plan ...'"),
+        }
+        assert!(composer.textarea.is_empty(), "composer should be cleared");
+    }
+
+    #[test]
+    fn slash_code_dispatches_builtin_command() {
+        use crossterm::event::KeyCode;
+        use crossterm::event::KeyEvent;
+        use crossterm::event::KeyModifiers;
+
+        let (tx, _rx) = unbounded_channel::<AppEvent>();
+        let sender = AppEventSender::new(tx);
+        let mut composer = ChatComposer::new(
+            true,
+            sender,
+            false,
+            "Ask Codex to do anything".to_string(),
+            false,
+        );
+
+        type_chars_humanlike(&mut composer, &['/', 'c', 'o', 'd', 'e']);
+
+        let (result, _needs_redraw) =
+            composer.handle_key_event(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+
+        match result {
+            InputResult::Command(cmd) => assert_eq!(cmd, SlashCommand::Code),
+            other => panic!("expected Command result for '/code', got {other:?}"),
+        }
+        assert!(composer.textarea.is_empty(), "composer should be cleared");
     }
 
     #[test]

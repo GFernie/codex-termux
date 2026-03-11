@@ -119,6 +119,7 @@ use crate::protocol::TokenUsage;
 use crate::protocol::TokenUsageInfo;
 use crate::protocol::TurnDiffEvent;
 use crate::protocol::WarningEvent;
+use crate::protocol::ENVIRONMENT_CONTEXT_OPEN_TAG;
 use crate::rollout::RolloutRecorder;
 use crate::rollout::RolloutRecorderParams;
 use crate::rollout::map_session_init_error;
@@ -446,6 +447,9 @@ impl SessionConfiguration {
         if let Some(cwd) = updates.cwd.clone() {
             next_configuration.cwd = cwd;
         }
+        if let Some(developer_instructions) = updates.developer_instructions.clone() {
+            next_configuration.developer_instructions = developer_instructions;
+        }
         Ok(next_configuration)
     }
 }
@@ -458,6 +462,7 @@ pub(crate) struct SessionSettingsUpdate {
     pub(crate) model: Option<String>,
     pub(crate) reasoning_effort: Option<Option<ReasoningEffortConfig>>,
     pub(crate) reasoning_summary: Option<ReasoningSummaryConfig>,
+    pub(crate) developer_instructions: Option<Option<String>>,
     pub(crate) final_output_json_schema: Option<Option<Value>>,
 }
 
@@ -1336,6 +1341,24 @@ impl Session {
         items
     }
 
+    fn refresh_prompt_initial_context(
+        &self,
+        turn_context: &TurnContext,
+        prompt_items: Vec<ResponseItem>,
+    ) -> Vec<ResponseItem> {
+        let initial_context = self.build_initial_context(turn_context);
+        let first_non_initial_idx = prompt_items
+            .iter()
+            .position(|item| !is_initial_prompt_context_item(item))
+            .unwrap_or(prompt_items.len());
+
+        let mut refreshed =
+            Vec::with_capacity(initial_context.len() + prompt_items.len() - first_non_initial_idx);
+        refreshed.extend(initial_context);
+        refreshed.extend(prompt_items.into_iter().skip(first_non_initial_idx));
+        refreshed
+    }
+
     pub(crate) async fn persist_rollout_items(&self, items: &[RolloutItem]) {
         let recorder = {
             let guard = self.services.rollout.lock().await;
@@ -1618,6 +1641,22 @@ impl Session {
     }
 }
 
+fn is_initial_prompt_context_item(item: &ResponseItem) -> bool {
+    match item {
+        ResponseItem::Message { role, .. } if role == "developer" => true,
+        ResponseItem::Message { role, content, .. } if role == "user" => {
+            UserInstructions::is_user_instructions(content)
+                || content.iter().any(|content_item| match content_item {
+                    ContentItem::InputText { text } | ContentItem::OutputText { text } => {
+                        text.trim_start().starts_with(ENVIRONMENT_CONTEXT_OPEN_TAG)
+                    }
+                    ContentItem::InputImage { .. } => false,
+                })
+        }
+        _ => false,
+    }
+}
+
 async fn submission_loop(sess: Arc<Session>, config: Arc<Config>, rx_sub: Receiver<Submission>) {
     // Seed with context in case there is an OverrideTurnContext first.
     let mut previous_context: Option<Arc<TurnContext>> = Some(sess.new_default_turn().await);
@@ -1636,6 +1675,7 @@ async fn submission_loop(sess: Arc<Session>, config: Arc<Config>, rx_sub: Receiv
                 model,
                 effort,
                 summary,
+                developer_instructions,
             } => {
                 handlers::override_turn_context(
                     &sess,
@@ -1647,6 +1687,7 @@ async fn submission_loop(sess: Arc<Session>, config: Arc<Config>, rx_sub: Receiv
                         model,
                         reasoning_effort: effort,
                         reasoning_summary: summary,
+                        developer_instructions,
                         ..Default::default()
                     },
                 )
@@ -1804,6 +1845,7 @@ mod handlers {
                     model: Some(model),
                     reasoning_effort: Some(effort),
                     reasoning_summary: Some(summary),
+                    developer_instructions: None,
                     final_output_json_schema: Some(final_output_json_schema),
                 },
             ),
@@ -2374,7 +2416,8 @@ pub(crate) async fn run_task(
         let turn_input: Vec<ResponseItem> = {
             sess.record_conversation_items(&turn_context, &pending_input)
                 .await;
-            sess.clone_history().await.for_prompt()
+            let prompt_items = sess.clone_history().await.for_prompt();
+            sess.refresh_prompt_initial_context(&turn_context, prompt_items)
         };
 
         let turn_input_messages = turn_input

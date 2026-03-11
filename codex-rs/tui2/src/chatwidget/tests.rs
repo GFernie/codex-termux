@@ -380,6 +380,8 @@ async fn make_chatwidget_manual(
         active_cell: None,
         config: cfg,
         model: resolved_model.clone(),
+        default_placeholder_text: "Ask Codex to do anything".to_string(),
+        lts_mode: LtsMode::Code,
         auth_manager: auth_manager.clone(),
         models_manager: Arc::new(ModelsManager::new(codex_home, auth_manager)),
         session_header: SessionHeader::new(resolved_model),
@@ -1300,6 +1302,96 @@ async fn slash_resume_opens_picker() {
     chat.dispatch_command(SlashCommand::Resume);
 
     assert_matches!(rx.try_recv(), Ok(AppEvent::OpenResumePicker));
+}
+
+#[tokio::test]
+async fn slash_plan_enables_mode_and_overrides_developer_instructions() {
+    let (mut chat, _rx, mut op_rx) = make_chatwidget_manual(None).await;
+
+    chat.dispatch_command(SlashCommand::Plan);
+
+    match op_rx.try_recv() {
+        Ok(Op::OverrideTurnContext {
+            developer_instructions,
+            ..
+        }) => {
+            assert!(
+                developer_instructions
+                    .as_ref()
+                    .and_then(|value| value.as_deref())
+                    .is_some_and(|text| text.contains("Plan Mode")),
+                "expected Plan mode instructions, got: {developer_instructions:?}"
+            );
+        }
+        other => panic!("expected OverrideTurnContext for /plan, got {other:?}"),
+    }
+
+    assert_eq!(chat.bottom_pane.placeholder_text(), PLAN_MODE_PLACEHOLDER);
+}
+
+#[tokio::test]
+async fn slash_code_restores_baseline_developer_instructions() {
+    let (mut chat, _rx, mut op_rx) = make_chatwidget_manual(None).await;
+    chat.config.developer_instructions = Some("base instructions".to_string());
+
+    chat.dispatch_command(SlashCommand::Plan);
+    let _ = op_rx.try_recv();
+    chat.dispatch_command(SlashCommand::Code);
+
+    match op_rx.try_recv() {
+        Ok(Op::OverrideTurnContext {
+            developer_instructions,
+            ..
+        }) => {
+            assert!(
+                matches!(
+                    developer_instructions,
+                    Some(Some(ref text)) if text == "base instructions"
+                ),
+                "expected baseline developer instructions, got: {developer_instructions:?}"
+            );
+        }
+        other => panic!("expected OverrideTurnContext for /code, got {other:?}"),
+    }
+
+    assert_ne!(chat.bottom_pane.placeholder_text(), PLAN_MODE_PLACEHOLDER);
+}
+
+#[tokio::test]
+async fn slash_plan_with_args_switches_mode_then_submits_user_input() {
+    let (mut chat, _rx, mut op_rx) = make_chatwidget_manual(None).await;
+
+    chat.dispatch_command_with_args(SlashCommand::Plan, "migrate auth flow".to_string());
+
+    match op_rx.try_recv() {
+        Ok(Op::OverrideTurnContext {
+            developer_instructions,
+            ..
+        }) => {
+            assert!(
+                developer_instructions
+                    .as_ref()
+                    .and_then(|value| value.as_deref())
+                    .is_some_and(|text| text.contains("Plan Mode")),
+                "expected Plan mode instructions, got: {developer_instructions:?}"
+            );
+        }
+        other => panic!("expected OverrideTurnContext before user input, got {other:?}"),
+    }
+
+    match op_rx.try_recv() {
+        Ok(Op::UserInput { items, .. }) => {
+            let text = items
+                .iter()
+                .find_map(|item| match item {
+                    codex_protocol::user_input::UserInput::Text { text } => Some(text.as_str()),
+                    _ => None,
+                })
+                .unwrap_or("");
+            assert_eq!(text, "migrate auth flow");
+        }
+        other => panic!("expected UserInput after /plan args, got {other:?}"),
+    }
 }
 
 #[tokio::test]

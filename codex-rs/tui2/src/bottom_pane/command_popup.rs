@@ -118,6 +118,14 @@ impl CommandPopup {
     fn filtered(&self) -> Vec<(CommandItem, Option<Vec<usize>>, i32)> {
         let filter = self.command_filter.trim();
         let mut out: Vec<(CommandItem, Option<Vec<usize>>, i32)> = Vec::new();
+        let item_rank = |item: CommandItem| match item {
+            CommandItem::Builtin(cmd) => self
+                .builtins
+                .iter()
+                .position(|(_, builtin)| *builtin == cmd)
+                .unwrap_or(usize::MAX),
+            CommandItem::UserPrompt(idx) => self.builtins.len().saturating_add(idx),
+        };
         if filter.is_empty() {
             // Built-ins first, in presentation order.
             for (_, cmd) in self.builtins.iter() {
@@ -144,19 +152,35 @@ impl CommandPopup {
                 out.push((CommandItem::UserPrompt(idx), Some(indices), score));
             }
         }
-        // When filtering, sort by ascending score and then by name for stability.
+        // When filtering, prefer true prefix matches before generic fuzzy hits.
+        // This preserves established slash UX such as `/co` -> `/compact`
+        // even when shorter newcomers like `/code` are added later.
         out.sort_by(|a, b| {
-            a.2.cmp(&b.2).then_with(|| {
-                let an = match a.0 {
-                    CommandItem::Builtin(c) => c.command(),
-                    CommandItem::UserPrompt(i) => &self.prompts[i].name,
-                };
-                let bn = match b.0 {
-                    CommandItem::Builtin(c) => c.command(),
-                    CommandItem::UserPrompt(i) => &self.prompts[i].name,
-                };
-                an.cmp(bn)
-            })
+            let an = match a.0 {
+                CommandItem::Builtin(c) => c.command(),
+                CommandItem::UserPrompt(i) => &self.prompts[i].name,
+            };
+            let bn = match b.0 {
+                CommandItem::Builtin(c) => c.command(),
+                CommandItem::UserPrompt(i) => &self.prompts[i].name,
+            };
+            let a_prefix = an.starts_with(filter);
+            let b_prefix = bn.starts_with(filter);
+            let a_rank = item_rank(a.0);
+            let b_rank = item_rank(b.0);
+
+            b_prefix
+                .cmp(&a_prefix)
+                .then_with(|| {
+                    if a_prefix && b_prefix {
+                        a_rank.cmp(&b_rank)
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                })
+                .then_with(|| a.2.cmp(&b.2))
+                .then_with(|| a_rank.cmp(&b_rank))
+                .then_with(|| an.cmp(bn))
         });
         out
     }

@@ -142,6 +142,13 @@ pub enum Op {
         /// Updated reasoning summary preference (honored only for reasoning-capable models).
         #[serde(skip_serializing_if = "Option::is_none")]
         summary: Option<ReasoningSummaryConfig>,
+
+        /// Updated developer instructions for subsequent turns.
+        ///
+        /// Use `Some(Some(_))` to set instructions, `Some(None)` to clear
+        /// them, or `None` to leave the existing value unchanged.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        developer_instructions: Option<Option<String>>,
     },
 
     /// Approve a command execution

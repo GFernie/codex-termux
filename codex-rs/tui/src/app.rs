@@ -902,6 +902,7 @@ impl App {
                                         model: None,
                                         effort: None,
                                         summary: None,
+                                        developer_instructions: None,
                                     },
                                 ));
                                 self.app_event_tx

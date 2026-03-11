@@ -325,6 +325,7 @@ async fn overrides_turn_context_but_keeps_cached_prefix_and_key_constant() -> an
             model: Some("o3".to_string()),
             effort: Some(Some(ReasoningEffort::High)),
             summary: Some(ReasoningSummary::Detailed),
+            developer_instructions: None,
         })
         .await?;
 
@@ -405,6 +406,7 @@ async fn override_before_first_turn_emits_environment_context() -> anyhow::Resul
             model: None,
             effort: None,
             summary: None,
+            developer_instructions: None,
         })
         .await?;
 
@@ -479,6 +481,58 @@ async fn override_before_first_turn_emits_environment_context() -> anyhow::Resul
     assert!(
         user_texts.contains(&"first message"),
         "expected user message text, got {user_texts:?}"
+    );
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn override_before_first_turn_emits_developer_instructions() -> anyhow::Result<()> {
+    skip_if_no_network!(Ok(()));
+
+    let server = start_mock_server().await;
+    let req = mount_sse_once(&server, sse_completed("resp-dev-1")).await;
+
+    let TestCodex { codex, .. } = test_codex().build(&server).await?;
+    let override_text = "You are in Plan Mode. Do not execute changes.";
+
+    codex
+        .submit(Op::OverrideTurnContext {
+            cwd: None,
+            approval_policy: None,
+            sandbox_policy: None,
+            model: None,
+            effort: None,
+            summary: None,
+            developer_instructions: Some(Some(override_text.to_string())),
+        })
+        .await?;
+
+    codex
+        .submit(Op::UserInput {
+            items: vec![UserInput::Text {
+                text: "first planning request".into(),
+            }],
+            final_output_json_schema: None,
+        })
+        .await?;
+
+    wait_for_event(&codex, |ev| matches!(ev, EventMsg::TaskComplete(_))).await;
+
+    let body = req.single_request().body_json();
+    let input = body["input"]
+        .as_array()
+        .expect("input array must be present");
+    assert!(
+        input.iter().any(|msg| {
+            msg["role"] == "developer"
+                && msg["content"]
+                    .as_array()
+                    .and_then(|content| content.first())
+                    .and_then(|item| item["text"].as_str())
+                    .is_some_and(|text| text.contains(override_text))
+        }),
+        "expected overridden developer instructions in request input: {input:?}"
     );
 
     Ok(())

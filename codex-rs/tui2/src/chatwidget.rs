@@ -170,6 +170,14 @@ impl UnifiedExecWaitState {
 const RATE_LIMIT_WARNING_THRESHOLDS: [f64; 3] = [75.0, 90.0, 95.0];
 const NUDGE_MODEL_SLUG: &str = "gpt-5.1-codex-mini";
 const RATE_LIMIT_SWITCH_PROMPT_THRESHOLD: f64 = 90.0;
+const PLAN_MODE_INSTRUCTIONS: &str = include_str!("../prompt_for_plan_command.md");
+const PLAN_MODE_PLACEHOLDER: &str = "Plan mode active. Describe the plan or use /code to return.";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum LtsMode {
+    Code,
+    Plan,
+}
 
 #[derive(Default)]
 struct RateLimitWarningState {
@@ -288,6 +296,8 @@ pub(crate) struct ChatWidget {
     active_cell: Option<Box<dyn HistoryCell>>,
     config: Config,
     model: String,
+    default_placeholder_text: String,
+    lts_mode: LtsMode,
     auth_manager: Arc<AuthManager>,
     models_manager: Arc<ModelsManager>,
     session_header: SessionHeader,
@@ -372,6 +382,57 @@ fn create_initial_user_message(text: String, image_paths: Vec<PathBuf>) -> Optio
 }
 
 impl ChatWidget {
+    fn apply_lts_mode_ui(&mut self) {
+        let placeholder = match self.lts_mode {
+            LtsMode::Code => self.default_placeholder_text.clone(),
+            LtsMode::Plan => PLAN_MODE_PLACEHOLDER.to_string(),
+        };
+        self.bottom_pane.set_placeholder_text(placeholder);
+    }
+
+    fn enter_plan_mode(&mut self) {
+        let changed = self.lts_mode != LtsMode::Plan;
+        self.lts_mode = LtsMode::Plan;
+        self.apply_lts_mode_ui();
+        self.submit_op(Op::OverrideTurnContext {
+            cwd: None,
+            approval_policy: None,
+            sandbox_policy: None,
+            model: None,
+            effort: None,
+            summary: None,
+            developer_instructions: Some(Some(PLAN_MODE_INSTRUCTIONS.to_string())),
+        });
+        if changed {
+            self.add_info_message(
+                "Plan mode enabled. Future messages stay in planning mode until /code."
+                    .to_string(),
+                None,
+            );
+        }
+    }
+
+    fn enter_code_mode(&mut self) {
+        let changed = self.lts_mode != LtsMode::Code;
+        self.lts_mode = LtsMode::Code;
+        self.apply_lts_mode_ui();
+        self.submit_op(Op::OverrideTurnContext {
+            cwd: None,
+            approval_policy: None,
+            sandbox_policy: None,
+            model: None,
+            effort: None,
+            summary: None,
+            developer_instructions: Some(self.config.developer_instructions.clone()),
+        });
+        if changed {
+            self.add_info_message(
+                "Returned to normal coding mode.".to_string(),
+                None,
+            );
+        }
+    }
+
     fn flush_answer_stream_with_separator(&mut self) {
         if let Some(mut controller) = self.stream_controller.take()
             && let Some(cell) = controller.finalize()
@@ -1297,7 +1358,7 @@ impl ChatWidget {
                 app_event_tx,
                 has_input_focus: true,
                 enhanced_keys_supported,
-                placeholder_text: placeholder,
+                placeholder_text: placeholder.clone(),
                 disable_paste_burst: config.disable_paste_burst,
                 animations_enabled: config.animations,
                 skills: None,
@@ -1305,6 +1366,8 @@ impl ChatWidget {
             active_cell: None,
             config,
             model: model.clone(),
+            default_placeholder_text: placeholder.clone(),
+            lts_mode: LtsMode::Code,
             auth_manager,
             models_manager,
             session_header: SessionHeader::new(model),
@@ -1343,6 +1406,7 @@ impl ChatWidget {
         };
 
         widget.prefetch_rate_limits();
+        widget.apply_lts_mode_ui();
 
         widget
     }
@@ -1381,7 +1445,7 @@ impl ChatWidget {
                 app_event_tx,
                 has_input_focus: true,
                 enhanced_keys_supported,
-                placeholder_text: placeholder,
+                placeholder_text: placeholder.clone(),
                 disable_paste_burst: config.disable_paste_burst,
                 animations_enabled: config.animations,
                 skills: None,
@@ -1389,6 +1453,8 @@ impl ChatWidget {
             active_cell: None,
             config,
             model: model.clone(),
+            default_placeholder_text: placeholder.clone(),
+            lts_mode: LtsMode::Code,
             auth_manager,
             models_manager,
             session_header: SessionHeader::new(model),
@@ -1427,6 +1493,7 @@ impl ChatWidget {
         };
 
         widget.prefetch_rate_limits();
+        widget.apply_lts_mode_ui();
 
         widget
     }
@@ -1564,6 +1631,12 @@ impl ChatWidget {
             SlashCommand::Compact => {
                 self.clear_token_usage();
                 self.app_event_tx.send(AppEvent::CodexOp(Op::Compact));
+            }
+            SlashCommand::Plan => {
+                self.enter_plan_mode();
+            }
+            SlashCommand::Code => {
+                self.enter_code_mode();
             }
             SlashCommand::Review => {
                 self.open_review_popup();
@@ -1721,6 +1794,14 @@ impl ChatWidget {
 
         let trimmed = args.trim();
         match cmd {
+            SlashCommand::Plan if !trimmed.is_empty() => {
+                self.enter_plan_mode();
+                let user_message = UserMessage {
+                    text: trimmed.to_string(),
+                    image_paths: self.bottom_pane.take_recent_submission_images(),
+                };
+                self.submit_user_message(user_message);
+            }
             SlashCommand::Review if !trimmed.is_empty() => {
                 self.submit_op(Op::Review {
                     review_request: ReviewRequest {
@@ -2220,6 +2301,7 @@ impl ChatWidget {
                 model: Some(switch_model.clone()),
                 effort: Some(Some(default_effort)),
                 summary: None,
+                developer_instructions: None,
             }));
             tx.send(AppEvent::UpdateModel(switch_model.clone()));
             tx.send(AppEvent::UpdateReasoningEffort(Some(default_effort)));
@@ -2443,6 +2525,7 @@ impl ChatWidget {
                 model: Some(model_for_action.clone()),
                 effort: Some(effort_for_action),
                 summary: None,
+                developer_instructions: None,
             }));
             tx.send(AppEvent::UpdateModel(model_for_action.clone()));
             tx.send(AppEvent::UpdateReasoningEffort(effort_for_action));
@@ -2614,6 +2697,7 @@ impl ChatWidget {
                 model: Some(model.clone()),
                 effort: Some(effort),
                 summary: None,
+                developer_instructions: None,
             }));
         self.app_event_tx.send(AppEvent::UpdateModel(model.clone()));
         self.app_event_tx
@@ -2759,6 +2843,7 @@ impl ChatWidget {
                 model: None,
                 effort: None,
                 summary: None,
+                developer_instructions: None,
             }));
             tx.send(AppEvent::UpdateAskForApprovalPolicy(approval));
             tx.send(AppEvent::UpdateSandboxPolicy(sandbox_clone));

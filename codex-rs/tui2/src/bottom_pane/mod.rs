@@ -266,6 +266,16 @@ impl BottomPane {
         self.request_redraw();
     }
 
+    pub(crate) fn set_placeholder_text(&mut self, placeholder: String) {
+        self.composer.set_placeholder_text(placeholder);
+        self.request_redraw();
+    }
+
+    #[cfg(test)]
+    pub(crate) fn placeholder_text(&self) -> &str {
+        self.composer.placeholder_text()
+    }
+
     pub(crate) fn clear_composer_for_ctrl_c(&mut self) {
         self.composer.clear_for_ctrl_c();
         self.request_redraw();
