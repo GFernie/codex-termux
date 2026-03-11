@@ -105,6 +105,7 @@ pub use rollout::list::read_head_for_summary;
 mod function_tool;
 mod state;
 mod tasks;
+mod tool_arguments;
 mod user_notification;
 mod user_shell_command;
 pub mod util;

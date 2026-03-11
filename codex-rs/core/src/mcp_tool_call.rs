@@ -4,10 +4,12 @@ use tracing::error;
 
 use crate::codex::Session;
 use crate::codex::TurnContext;
+use crate::function_tool::FunctionCallError;
 use crate::protocol::EventMsg;
 use crate::protocol::McpInvocation;
 use crate::protocol::McpToolCallBeginEvent;
 use crate::protocol::McpToolCallEndEvent;
+use crate::tool_arguments::normalize_mcp_tool_arguments;
 use codex_protocol::models::FunctionCallOutputPayload;
 use codex_protocol::models::ResponseInputItem;
 
@@ -21,24 +23,30 @@ pub(crate) async fn handle_mcp_tool_call(
     tool_name: String,
     arguments: String,
 ) -> ResponseInputItem {
-    // Parse the `arguments` as JSON. An empty string is OK, but invalid JSON
-    // is not.
-    let arguments_value = if arguments.trim().is_empty() {
-        None
-    } else {
-        match serde_json::from_str::<serde_json::Value>(&arguments) {
-            Ok(value) => Some(value),
-            Err(e) => {
-                error!("failed to parse tool call arguments: {e}");
-                return ResponseInputItem::FunctionCallOutput {
-                    call_id: call_id.clone(),
-                    output: FunctionCallOutputPayload {
-                        content: format!("err: {e}"),
-                        success: Some(false),
-                        ..Default::default()
-                    },
-                };
-            }
+    let model = turn_context.client.get_model();
+    let arguments_value = match normalize_mcp_tool_arguments(&tool_name, &arguments, &model) {
+        Ok(value) => value,
+        Err(FunctionCallError::RespondToModel(content)) => {
+            error!("failed to normalize tool call arguments for {tool_name}: {content}");
+            return ResponseInputItem::FunctionCallOutput {
+                call_id: call_id.clone(),
+                output: FunctionCallOutputPayload {
+                    content,
+                    success: Some(false),
+                    ..Default::default()
+                },
+            };
+        }
+        Err(err) => {
+            error!("failed to normalize tool call arguments for {tool_name}: {err}");
+            return ResponseInputItem::FunctionCallOutput {
+                call_id: call_id.clone(),
+                output: FunctionCallOutputPayload {
+                    content: format!("err: {err}"),
+                    success: Some(false),
+                    ..Default::default()
+                },
+            };
         }
     };
 

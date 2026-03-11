@@ -5,6 +5,7 @@ use crate::protocol::TerminalInteractionEvent;
 use crate::sandboxing::SandboxPermissions;
 use crate::shell::Shell;
 use crate::shell::get_shell_by_model_provided_path;
+use crate::tool_arguments::normalize_exec_command_arguments;
 use crate::tools::context::ToolInvocation;
 use crate::tools::context::ToolOutput;
 use crate::tools::context::ToolPayload;
@@ -67,6 +68,14 @@ fn default_login() -> bool {
     true
 }
 
+fn parse_exec_command_args(
+    arguments: &str,
+    model: &str,
+) -> Result<ExecCommandArgs, FunctionCallError> {
+    let normalized = normalize_exec_command_arguments(arguments, model)?;
+    parse_arguments(&normalized)
+}
+
 #[async_trait]
 impl ToolHandler for UnifiedExecHandler {
     fn kind(&self) -> ToolKind {
@@ -86,7 +95,8 @@ impl ToolHandler for UnifiedExecHandler {
             return true;
         };
 
-        let Ok(params) = serde_json::from_str::<ExecCommandArgs>(arguments) else {
+        let model = invocation.turn.client.get_model();
+        let Ok(params) = parse_exec_command_args(arguments, &model) else {
             return true;
         };
         let command = get_command(&params, invocation.session.user_shell());
@@ -118,7 +128,8 @@ impl ToolHandler for UnifiedExecHandler {
 
         let response = match tool_name.as_str() {
             "exec_command" => {
-                let args: ExecCommandArgs = parse_arguments(&arguments)?;
+                let model = turn.client.get_model();
+                let args = parse_exec_command_args(&arguments, &model)?;
                 let process_id = manager.allocate_process_id().await;
                 let command = get_command(&args, session.user_shell());
 

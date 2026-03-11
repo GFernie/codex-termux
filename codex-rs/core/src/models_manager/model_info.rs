@@ -15,6 +15,7 @@ use tracing::warn;
 pub const BASE_INSTRUCTIONS: &str = include_str!("../../prompt.md");
 const BASE_INSTRUCTIONS_WITH_APPLY_PATCH: &str =
     include_str!("../../prompt_with_apply_patch_instructions.md");
+const QWEN_TOOL_JSON_INSTRUCTIONS: &str = include_str!("../../qwen_tool_json_prompt.md");
 
 const GPT_5_CODEX_INSTRUCTIONS: &str = include_str!("../../gpt_5_codex_prompt.md");
 const GPT_5_1_INSTRUCTIONS: &str = include_str!("../../gpt_5_1_prompt.md");
@@ -64,6 +65,10 @@ macro_rules! model_info {
         )*
         model
     }};
+}
+
+fn qwen_base_instructions() -> String {
+    [BASE_INSTRUCTIONS, QWEN_TOOL_JSON_INSTRUCTIONS].join("\n\n")
 }
 
 pub(crate) fn with_config_overrides(mut model: ModelInfo, config: &Config) -> ModelInfo {
@@ -159,6 +164,7 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
     {
         model_info!(
             slug,
+            base_instructions: qwen_base_instructions(),
             apply_patch_tool_type: Some(ApplyPatchToolType::Function),
             context_window: Some(CODING_CONTEXT_WINDOW_128K),
             auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
@@ -469,6 +475,10 @@ mod tests {
         assert_eq!(
             info.apply_patch_tool_type,
             Some(ApplyPatchToolType::Function)
+        );
+        assert!(
+            info.base_instructions
+                .contains("always send full JSON arguments")
         );
         assert_eq!(info.context_window, Some(128_000));
         assert_eq!(info.auto_compact_token_limit, Some(96_000));
