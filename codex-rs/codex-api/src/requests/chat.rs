@@ -152,6 +152,7 @@ impl<'a> ChatRequestBuilder<'a> {
         for (idx, item) in input.iter().enumerate() {
             match item {
                 ResponseItem::Message { role, content, .. } => {
+                    let wire_role = chat_message_role(role);
                     let mut text = String::new();
                     let mut items: Vec<Value> = Vec::new();
                     let mut saw_image = false;
@@ -172,7 +173,7 @@ impl<'a> ChatRequestBuilder<'a> {
                         }
                     }
 
-                    if role == "assistant" {
+                    if wire_role == "assistant" {
                         if let Some(prev) = &last_assistant_text
                             && prev == &text
                         {
@@ -181,7 +182,7 @@ impl<'a> ChatRequestBuilder<'a> {
                         last_assistant_text = Some(text.clone());
                     }
 
-                    let content_value = if role == "assistant" {
+                    let content_value = if wire_role == "assistant" {
                         json!(text)
                     } else if saw_image {
                         json!(items)
@@ -189,7 +190,7 @@ impl<'a> ChatRequestBuilder<'a> {
                         json!(text)
                     };
 
-                    if role == "assistant"
+                    if wire_role == "assistant"
                         && let Some(Value::Object(previous)) = messages.last_mut()
                         && previous.get("role").and_then(Value::as_str) == Some("assistant")
                         && previous.get("tool_calls").is_some()
@@ -227,8 +228,8 @@ impl<'a> ChatRequestBuilder<'a> {
                         continue;
                     }
 
-                    let mut msg = json!({"role": role, "content": content_value});
-                    if role == "assistant"
+                    let mut msg = json!({"role": wire_role, "content": content_value});
+                    if wire_role == "assistant"
                         && let Some(reasoning) = reasoning_by_anchor_index.get(&idx)
                         && let Some(obj) = msg.as_object_mut()
                     {
@@ -351,6 +352,16 @@ impl<'a> ChatRequestBuilder<'a> {
             body: payload,
             headers,
         })
+    }
+}
+
+fn chat_message_role(role: &str) -> &str {
+    match role {
+        // Chat-completions style providers often reject a top-level `developer` role.
+        // Preserve the internal role in the session model, but serialize it as `system`
+        // on the chat wire for compatibility.
+        "developer" => "system",
+        other => other,
     }
 }
 
@@ -746,5 +757,37 @@ mod tests {
             tool_calls[0]["function"]["arguments"],
             serde_json::Value::String("{}".to_string())
         );
+    }
+
+    #[test]
+    fn serializes_developer_messages_as_system_for_chat_wire() {
+        let prompt_input = vec![
+            ResponseItem::Message {
+                id: None,
+                role: "developer".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "plan mode instructions".to_string(),
+                }],
+            },
+            ResponseItem::Message {
+                id: None,
+                role: "user".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "hello".to_string(),
+                }],
+            },
+        ];
+
+        let req = ChatRequestBuilder::new("gpt-test", "base instructions", &prompt_input, &[])
+            .build(&provider())
+            .expect("request");
+        let messages = req.body["messages"].as_array().expect("messages array");
+
+        assert_eq!(messages[0]["role"], json!("system"));
+        assert_eq!(messages[0]["content"], json!("base instructions"));
+        assert_eq!(messages[1]["role"], json!("system"));
+        assert_eq!(messages[1]["content"], json!("plan mode instructions"));
+        assert_eq!(messages[2]["role"], json!("user"));
+        assert_eq!(messages[2]["content"], json!("hello"));
     }
 }

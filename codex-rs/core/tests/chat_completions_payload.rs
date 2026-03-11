@@ -147,6 +147,16 @@ fn assistant_message(text: &str) -> ResponseItem {
     }
 }
 
+fn developer_message(text: &str) -> ResponseItem {
+    ResponseItem::Message {
+        id: None,
+        role: "developer".to_string(),
+        content: vec![ContentItem::InputText {
+            text: text.to_string(),
+        }],
+    }
+}
+
 fn reasoning_item(text: &str) -> ResponseItem {
     ResponseItem::Reasoning {
         id: String::new(),
@@ -196,6 +206,13 @@ fn first_assistant(messages: &[Value]) -> &Value {
     }
 }
 
+fn first_message_with_role<'a>(messages: &'a [Value], role: &str) -> &'a Value {
+    match messages.iter().find(|msg| msg["role"] == role) {
+        Some(v) => v,
+        None => panic!("message with role {role} not present"),
+    }
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn omits_reasoning_when_none_present() {
     skip_if_no_network!();
@@ -206,6 +223,34 @@ async fn omits_reasoning_when_none_present() {
 
     assert_eq!(assistant["content"], Value::String("a1".into()));
     assert!(assistant.get("reasoning").is_none());
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn serializes_developer_messages_as_system_for_chat_wire() {
+    skip_if_no_network!();
+
+    let body = run_request(vec![
+        developer_message("plan mode instructions"),
+        user_message("hello"),
+    ])
+    .await;
+    let messages = messages_from(&body);
+
+    assert_eq!(messages[0]["role"], Value::String("system".into()));
+    assert!(messages.iter().all(|msg| msg["role"] != "developer"));
+
+    let system_messages: Vec<_> = messages
+        .iter()
+        .filter(|msg| msg["role"] == "system")
+        .collect();
+    assert_eq!(system_messages.len(), 2);
+    assert_eq!(
+        system_messages[1]["content"],
+        Value::String("plan mode instructions".into())
+    );
+
+    let user = first_message_with_role(&messages, "user");
+    assert_eq!(user["content"], Value::String("hello".into()));
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
