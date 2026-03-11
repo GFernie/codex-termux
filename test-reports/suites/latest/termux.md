@@ -19,7 +19,7 @@ Confirm you are testing the Termux package (not upstream):
 npm ls -g --depth=0 @mmmbuto/codex-cli-termux || true
 ```
 
-Expected: installed version ends with `-termux` (example `0.98.0-termux`).
+Expected: installed version ends with `-termux` (example `0.114.0-termux`).
 
 Confirm the commands you are running are the global ones:
 
@@ -133,7 +133,7 @@ Expected:
 - no reference to `liboboe.so`
 - no missing-library runtime errors when invoking `codex`/`codex-exec`
 
-## v0.113.0 Wrapper Routing Guard (npm launcher)
+## v0.113.0+ Wrapper Routing Guard (npm launcher)
 
 The Node launcher must not misroute valid root subcommands to `codex exec`.
 

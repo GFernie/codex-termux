@@ -77,6 +77,17 @@ else
   fail
 fi
 
+# Patch #11
+printf "Patch #11 (Android no-voice policy): "
+if grep -q "\[target.'cfg(target_os = \"android\")'.dependencies\]" codex-rs/cli/Cargo.toml \
+  && grep -q 'codex-tui = { path = "../tui", default-features = false }' codex-rs/cli/Cargo.toml \
+  && grep -q "\[target.'cfg(target_os = \"android\")'.dependencies\]" codex-rs/cloud-tasks/Cargo.toml \
+  && grep -q 'codex-tui = { path = "../tui", default-features = false }' codex-rs/cloud-tasks/Cargo.toml; then
+  pass
+else
+  fail
+fi
+
 # Patch #12
 printf "Patch #12 (Dynamic subcommand routing): "
 if grep -q "spawnSync(binaryPath" npm-package/bin/codex.js \

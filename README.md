@@ -1,6 +1,6 @@
-# 🤖 Codex CLI - Latest Termux & LTS Termux/Linux/macOS
+# Codex Termux
 
-> **Built from upstream OpenAI Codex v0.113.0, compiled for Android Termux (ARM64) + LTS Termux/Linux/macOS**
+> Latest line built from upstream OpenAI Codex `rust-v0.114.0` for Android Termux. The separate LTS line remains available for Termux, Linux, and macOS as `@mmmbuto/codex-cli-lts`.
 
 [![npm termux](https://img.shields.io/npm/v/@mmmbuto/codex-cli-termux?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-termux)
 [![npm lts](https://img.shields.io/npm/v/@mmmbuto/codex-cli-lts?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-lts)
@@ -11,7 +11,11 @@
 
 ## About
 
-Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Termux. Since Termux is not officially supported by upstream, we apply minimal patches only for critical compatibility issues.
+This fork keeps two release lines:
+- `main`: latest Termux-focused line published as `@mmmbuto/codex-cli-termux`
+- `lts`: long-term support line published as `@mmmbuto/codex-cli-lts`
+
+The latest line tracks upstream OpenAI Codex closely and applies only the compatibility patches required to keep Android Termux usable.
 
 ### Release Lines
 
@@ -20,8 +24,8 @@ Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Term
 
 **Supported Platforms:**
 - Android Termux (ARM64): Latest + LTS
-- Linux x64: LTS
-- macOS arm64: LTS (via npm + GitHub releases/CI artifacts)
+- Linux x64/arm64: LTS
+- macOS x64/arm64: LTS
 
 ---
 
@@ -39,16 +43,15 @@ Built from upstream OpenAI Codex source, compiled for Linux x64 and Android Term
 - Stable for compatibility-focused use cases
 
 ### What We Do
-✅ **Use official OpenAI Codex source** (https://github.com/openai/codex)
-✅ **Compile for Linux x64 + ARM64** (Android Termux native)
-✅ **Apply minimal patches** only for Termux-specific issues not addressed upstream
-✅ **Package as npm** for easy installation
-✅ **Maintain full Apache 2.0 compliance** with OpenAI attribution
+- Use official OpenAI Codex source: https://github.com/openai/codex
+- Compile native Android ARM64 binaries for Termux
+- Apply minimal compatibility patches only where upstream does not support Termux
+- Publish npm packages for the latest Termux line and the separate LTS line
 
-### What We DON'T Do
-❌ **NO new features**
-❌ **NO broad behavior modifications** outside required Termux compatibility
-❌ **NO replacement** of official Codex
+### What We Do Not Do
+- Maintain a divergent feature fork
+- Replace upstream Codex
+- Carry broad behavior changes unrelated to compatibility
 
 ---
 
@@ -88,10 +91,10 @@ and fix strategies.
 pkg update && pkg upgrade -y
 pkg install nodejs-lts -y
 
-# Latest (tracks upstream)
+# Latest Termux line
 npm install -g @mmmbuto/codex-cli-termux
 
-# OR LTS (stable, /chat compatible)
+# LTS line
 npm install -g @mmmbuto/codex-cli-lts
 
 # Verify
@@ -107,14 +110,14 @@ dependencies.
 
 ---
 
-### Linux (x64)
+### Linux
 
 ```bash
 # Install Node.js (example for Debian/Ubuntu)
 sudo apt-get update
 sudo apt-get install -y nodejs npm
 
-# LTS (Linux support)
+# LTS only
 npm install -g @mmmbuto/codex-cli-lts
 
 # Verify
@@ -122,14 +125,14 @@ codex --version
 codex login
 ```
 
-**Requirements:** Linux x64, Node.js >=18 (recommended v22+), ~80MB storage
+**Requirements:** Linux x64/arm64, Node.js >=18 (recommended v22+), ~80MB storage
 
 ---
 
-### macOS (arm64)
+### macOS
 
 ```bash
-# Using npm
+# LTS only
 npm install -g @mmmbuto/codex-cli-lts
 
 # Verify
@@ -137,7 +140,7 @@ codex --version
 codex login
 ```
 
-**Requirements:** macOS arm64, Node.js >=18 (recommended v22+), ~100MB storage
+**Requirements:** macOS x64/arm64, Node.js >=18 (recommended v22+), ~100MB storage
 
 ---
 
@@ -147,20 +150,19 @@ codex login
 - [Testing](./docs/testing.md)
 - [Building from Source](./BUILDING.md)
 - [Test Reports](./test-reports/)
+- [Latest Changelog](./CHANGELOG.md)
 - [LTS Changelog](https://github.com/DioNanos/codex-termux/blob/lts/CHANGELOG_LTS.md)
 - [Full Documentation](./docs/)
 
 ---
 
-## 🔧 Project Maintenance
+## Maintenance
 
 Community-maintained port enabling AI-powered coding on Android Termux. Activities include ARM64 compilation, upstream synchronization, Termux compatibility patches, and documentation.
 
-**Thank you** to all users who have reported issues, provided feedback, and helped improve this project.
-
 ---
 
-## 📝 License
+## License
 
 This project maintains full compliance with Apache 2.0 license from OpenAI Codex.
 
@@ -170,16 +172,3 @@ This project maintains full compliance with Apache 2.0 license from OpenAI Codex
 See [LICENSE](./LICENSE) file for details.
 
 ---
-
-## 🙏 Credits
-
-- **OpenAI** for the amazing Codex CLI
-- **Termux** community for Android terminal environment
-- All contributors to upstream Codex project
-
----
-
-## License
-
-Original project by OpenAI: https://github.com/openai/codex<br>
-Apache License 2.0 (upstream OpenAI Codex)<br>

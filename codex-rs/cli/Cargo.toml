@@ -59,7 +59,7 @@ tracing-subscriber = { workspace = true }
 codex-tui = { path = "../tui", default-features = false }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-codex-tui = { path = "../tui", default-features = false }
+codex-tui = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-sandbox-rs" }

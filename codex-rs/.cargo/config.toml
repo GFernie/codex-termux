@@ -11,6 +11,11 @@ rustflags = ["-C", "link-arg=/STACK:8388608", "-C", "link-arg=/arm64hazardfree"]
 rustflags = ["-C", "link-arg=-Wl,--stack,8388608"]
 
 [target.aarch64-linux-android]
-ar = "llvm-ar"
-linker = "aarch64-linux-android-clang"
+ar = "/home/dag/Android/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+linker = "/home/dag/Android/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
 rustflags = ["-C", "link-arg=-lc++_shared"]
+
+[env]
+AR_aarch64_linux_android = "/home/dag/Android/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+CC_aarch64_linux_android = "/home/dag/Android/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
+RANLIB_aarch64_linux_android = "/home/dag/Android/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib"
