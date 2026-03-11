@@ -23,6 +23,18 @@ All notable LTS changes are documented in this file.
 - `response.completed` / `response.done` handling remains explicitly supported in SSE.
 - `invalid_prompt` stays non-retryable and mapped to `InvalidRequest` in LTS behavior.
 - Multi-tool-call chat aggregation behavior is present in the 0.80.x base and verified unchanged.
+- chat/tool-call compatibility was hardened for third-party coding providers that require strict tool-call sequencing and JSON argument formatting.
+
+### LTS UX / Presets
+
+- `/plan` and `/code` are available in `tui2` as persistent runtime mode switches.
+- LTS now ships curated built-in provider presets for:
+  - `alibaba-coding`
+  - `zai-coding`
+  - `openrouter`
+  - `deepseek`
+- LTS now ships built-in profiles for common Qwen/GLM coding stacks.
+- Qwen/GLM/DeepSeek/Kimi model families now include conservative context-window and auto-compact defaults for better long-session behavior.
 
 ### Security Notes
 
@@ -38,6 +50,11 @@ All notable LTS changes are documented in this file.
 ### Packaging / Distribution
 
 - Package version bumped to `0.80.5-lts`.
-- LTS npm package continues to ship Termux ARM64 + Linux x64 binaries.
+- LTS npm package targets Termux ARM64 + Linux x64 + macOS arm64.
 - macOS arm64 npm packaging is built through the dedicated GitHub workflow.
 - Homebrew tap initialized at `https://github.com/DioNanos/homebrew-codex-lts` (formula `codex-lts`).
+
+### Documentation / Test Policy
+
+- Added repo docs for release lines, packaging, testing, `/plan`, context/compact behavior, and LTS provider presets.
+- LTS human validation is now split into `Core` and `Extended` suites per platform.

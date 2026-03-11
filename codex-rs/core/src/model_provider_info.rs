@@ -260,15 +260,41 @@ pub const DEFAULT_OLLAMA_PORT: u16 = 11434;
 
 pub const LMSTUDIO_OSS_PROVIDER_ID: &str = "lmstudio";
 pub const OLLAMA_OSS_PROVIDER_ID: &str = "ollama";
+pub const ALIBABA_CODING_PROVIDER_ID: &str = "alibaba-coding";
+pub const ZAI_CODING_PROVIDER_ID: &str = "zai-coding";
+pub const OPENROUTER_PROVIDER_ID: &str = "openrouter";
+pub const DEEPSEEK_PROVIDER_ID: &str = "deepseek";
+
+fn create_coding_provider(
+    name: &str,
+    base_url: &str,
+    env_key: &str,
+    wire_api: WireApi,
+    stream_idle_timeout_ms: Option<u64>,
+) -> ModelProviderInfo {
+    ModelProviderInfo {
+        name: name.into(),
+        base_url: Some(base_url.into()),
+        env_key: Some(env_key.into()),
+        env_key_instructions: None,
+        experimental_bearer_token: None,
+        wire_api,
+        query_params: None,
+        http_headers: None,
+        env_http_headers: None,
+        request_max_retries: None,
+        stream_max_retries: None,
+        stream_idle_timeout_ms,
+        requires_openai_auth: false,
+    }
+}
 
 /// Built-in default provider list.
 pub fn built_in_model_providers() -> HashMap<String, ModelProviderInfo> {
     use ModelProviderInfo as P;
 
-    // We do not want to be in the business of adjucating which third-party
-    // providers are bundled with Codex CLI, so we only include the OpenAI and
-    // open source ("oss") providers by default. Users are encouraged to add to
-    // `model_providers` in config.toml to add their own providers.
+    // LTS ships a small curated provider set for the coding-centric profiles
+    // that this fork maintains and tests regularly.
     [
         ("openai", P::create_openai_provider()),
         (
@@ -278,6 +304,46 @@ pub fn built_in_model_providers() -> HashMap<String, ModelProviderInfo> {
         (
             LMSTUDIO_OSS_PROVIDER_ID,
             create_oss_provider(DEFAULT_LMSTUDIO_PORT, WireApi::Responses),
+        ),
+        (
+            ALIBABA_CODING_PROVIDER_ID,
+            create_coding_provider(
+                "Alibaba Coding Plan",
+                "https://coding-intl.dashscope.aliyuncs.com/v1",
+                "ALIBABA_CODE_API_KEY",
+                WireApi::Chat,
+                Some(3_000_000),
+            ),
+        ),
+        (
+            ZAI_CODING_PROVIDER_ID,
+            create_coding_provider(
+                "Z.AI Coding Plan",
+                "https://api.z.ai/api/coding/paas/v4",
+                "ZAI_API_KEY",
+                WireApi::Chat,
+                Some(3_000_000),
+            ),
+        ),
+        (
+            OPENROUTER_PROVIDER_ID,
+            create_coding_provider(
+                "OpenRouter",
+                "https://openrouter.ai/api/v1",
+                "OPENROUTER_API_KEY",
+                WireApi::Chat,
+                None,
+            ),
+        ),
+        (
+            DEEPSEEK_PROVIDER_ID,
+            create_coding_provider(
+                "DeepSeek",
+                "https://api.deepseek.com/v1",
+                "DEEPSEEK_API_KEY",
+                WireApi::Chat,
+                None,
+            ),
         ),
     ]
     .into_iter()
@@ -495,5 +561,46 @@ env_http_headers = { "X-Example-Env-Header" = "EXAMPLE_ENV_VAR" }
                 "expected {base_url} not to be detected as Azure"
             );
         }
+    }
+
+    #[test]
+    fn built_in_provider_registry_contains_lts_coding_providers() {
+        let providers = built_in_model_providers();
+
+        let alibaba = providers
+            .get(ALIBABA_CODING_PROVIDER_ID)
+            .expect("alibaba-coding provider");
+        assert_eq!(
+            alibaba.base_url.as_deref(),
+            Some("https://coding-intl.dashscope.aliyuncs.com/v1")
+        );
+        assert_eq!(alibaba.env_key.as_deref(), Some("ALIBABA_CODE_API_KEY"));
+        assert_eq!(alibaba.wire_api, WireApi::Chat);
+
+        let zai = providers
+            .get(ZAI_CODING_PROVIDER_ID)
+            .expect("zai-coding provider");
+        assert_eq!(
+            zai.base_url.as_deref(),
+            Some("https://api.z.ai/api/coding/paas/v4")
+        );
+        assert_eq!(zai.env_key.as_deref(), Some("ZAI_API_KEY"));
+
+        let openrouter = providers
+            .get(OPENROUTER_PROVIDER_ID)
+            .expect("openrouter provider");
+        assert_eq!(
+            openrouter.base_url.as_deref(),
+            Some("https://openrouter.ai/api/v1")
+        );
+
+        let deepseek = providers
+            .get(DEEPSEEK_PROVIDER_ID)
+            .expect("deepseek provider");
+        assert_eq!(
+            deepseek.base_url.as_deref(),
+            Some("https://api.deepseek.com/v1")
+        );
+        assert_eq!(deepseek.env_key.as_deref(), Some("DEEPSEEK_API_KEY"));
     }
 }

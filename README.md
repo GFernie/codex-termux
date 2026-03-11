@@ -1,61 +1,112 @@
-# codex-termux LTS
+# codex-termux
 
-Stability-first packaging of upstream OpenAI Codex for Android Termux and LTS desktop usage.
+Stability-first fork of OpenAI Codex CLI with two maintained release lines:
+
+- `main`: latest Termux-focused line (`@mmmbuto/codex-cli-termux`)
+- `lts`: long-term support line based on upstream `0.80.x` (`@mmmbuto/codex-cli-lts`)
 
 [![npm lts](https://img.shields.io/npm/v/@mmmbuto/codex-cli-lts?style=flat-square&logo=npm)](https://www.npmjs.org/package/@mmmbuto/codex-cli-lts)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](./LICENSE)
 
----
+## What LTS Optimizes For
 
-## Scope
-
-- Upstream base: `openai/codex` (`rust-v0.80.0` line)
-- Branch goal: keep `/chat` compatibility and stable behavior over time
-- Backports policy: security and reliability only, no feature drift
+- preserve `/chat` usability and avoid silent stalls
+- keep tool and file-mutation flows compatible on third-party coding providers
+- provide stable Termux/Linux/macOS arm64 packaging
+- prefer conservative backports and predictable behavior over feature churn
 
 ## Release Lines
 
-- `main` branch: latest Termux line (`@mmmbuto/codex-cli-termux`)
-- `lts` branch: long-term support line (`@mmmbuto/codex-cli-lts`)
+- Release line guide: [`docs/release-lines.md`](./docs/release-lines.md)
+- Latest changelog: [`CHANGELOG.md`](./CHANGELOG.md)
+- LTS changelog: [`CHANGELOG_LTS.md`](./CHANGELOG_LTS.md)
 
-## Distribution Channels (LTS)
+## Distribution Matrix
 
-- Android Termux (ARM64): npm package `@mmmbuto/codex-cli-lts`
-- Linux/macOS: primary channel is Homebrew tap `DioNanos/codex-lts` (`homebrew-codex-lts`)
-- Linux x64 + macOS arm64 npm artifacts: optional channel built via GitHub Actions
+### Latest (`main`)
 
-## Install
+- npm: Termux / Android ARM64
 
-Termux:
+### LTS (`lts`)
 
-```bash
-npm install -g @mmmbuto/codex-cli-lts
-```
+- npm: Termux / Android ARM64
+- npm: Linux x64
+- npm: macOS arm64
+- GitHub Actions builds the macOS arm64 artifact used by the final npm package
+- Homebrew tap can be used as an additional distribution channel, not as the source of truth for npm packaging
 
-Verify:
+Build and packaging details live in:
 
-```bash
-codex --version
-codex exec --help
-```
+- [`BUILDING.md`](./BUILDING.md)
+- [`docs/install.md`](./docs/install.md)
+- [`docs/lts-packaging.md`](./docs/lts-packaging.md)
 
-Linux/macOS (Homebrew tap):
+## LTS Built-In Provider Presets
 
-```bash
-brew tap DioNanos/codex-lts
-brew install codex-lts
-```
+LTS now ships curated built-in providers and profiles for common coding stacks, so you can start with `--profile` instead of hand-writing every provider stanza.
 
-## Documentation
+Built-in providers:
 
-- Configuration: `docs/configuration.md`
-- LTS changelog: `CHANGELOG_LTS.md`
-- Patch notes: `patches/README.md`
-- Build notes: `BUILDING.md`
-- Test reports: `test-reports/`
+- `alibaba-coding`
+- `zai-coding`
+- `openrouter`
+- `deepseek`
 
-## Compatibility Rules
+Built-in profiles:
 
-- Preserve upstream behavior whenever possible
-- Keep Termux compatibility non-regressive
-- Treat `/chat` as release-blocking for LTS
+- `qwen35-coding`
+- `qwen35-plan`
+- `qwen3-coder-plus`
+- `qwen3-coder-next`
+- `glm5-coding`
+- `glm5-plan`
+- `glm5-zai-coding`
+- `glm47-zai-coding`
+- `openrouter-qwen`
+- `deepseek-coding`
+
+Provider and profile details:
+
+- [`docs/lts-provider-presets.md`](./docs/lts-provider-presets.md)
+- [`docs/lts-context-and-compact.md`](./docs/lts-context-and-compact.md)
+
+## LTS `/plan`
+
+LTS backports a persistent Plan mode adapted to the `0.80.x` codebase:
+
+- `/plan` enters planning mode
+- `/plan <request>` enters planning mode and submits the request
+- `/code` returns to normal coding mode
+
+Behavior notes:
+
+- it is a real runtime mode switch, not fake prompt text injected into chat
+- it is designed to avoid regressing normal `/chat` behavior
+
+Details:
+
+- [`docs/lts-plan-mode.md`](./docs/lts-plan-mode.md)
+- [`docs/slash_commands.md`](./docs/slash_commands.md)
+
+## Testing
+
+LTS validation is split into:
+
+- `Core`: release-blocking
+- `Extended`: broader regression coverage
+
+Suites and reports:
+
+- [`docs/lts-testing.md`](./docs/lts-testing.md)
+- [`test-reports/README.md`](./test-reports/README.md)
+- [`test-reports/suites/README.md`](./test-reports/suites/README.md)
+
+## Repo Docs
+
+- Config: [`docs/configuration.md`](./docs/configuration.md)
+- Install: [`docs/install.md`](./docs/install.md)
+- Build: [`BUILDING.md`](./BUILDING.md)
+- Slash commands: [`docs/slash_commands.md`](./docs/slash_commands.md)
+- Provider presets: [`docs/lts-provider-presets.md`](./docs/lts-provider-presets.md)
+- Context and compact: [`docs/lts-context-and-compact.md`](./docs/lts-context-and-compact.md)
+- Test policy: [`docs/lts-testing.md`](./docs/lts-testing.md)

@@ -1,32 +1,30 @@
 # Test Reports
 
-This folder contains human-run validation reports for the two release lines:
+Human-run validation reports for the maintained release lines live here.
 
-- `latest/`: `@mmmbuto/codex-cli-termux` (Termux-only)
-- `lts/`: `@mmmbuto/codex-cli-lts` (Linux + macOS arm64 + Termux)
+## Release lines
 
-Notes and external baselines live under `notes/`.
+- `latest/`: latest Termux line
+- `lts/`: LTS `0.80.x` line
 
-## Index
+## LTS policy
 
-- Latest
-- `latest/0.98.0-termux/`
+LTS reports should capture both:
+
+- `Core` result
+- `Extended` result
+
+Required documentation:
+
+- suite policy: [`../docs/lts-testing.md`](../docs/lts-testing.md)
+- suite index: [`./suites/README.md`](./suites/README.md)
+- report template: [`./lts/REPORT_TEMPLATE.md`](./lts/REPORT_TEMPLATE.md)
+
+## Existing history
+
 - `latest/0.91.0/`
-- LTS
-- `lts/0.80.4-lts/`
+- `latest/0.98.0-termux/`
 - `lts/0.80.3-lts/`
-- Notes
-- `notes/`
+- `lts/0.80.4-lts/`
 
-## Suites
-
-Runnable checklists live under:
-
-- `test-reports/suites/`
-
-## Notes On 0.80.4 LTS
-
-The folder `lts/0.80.4-lts/` includes:
-
-- Linux, macOS, and Termux reports
-- a pre-fix note documenting a historical `codex` vs `codex-exec` version mismatch
+The local `lts/0.80.5-lts/` directory may contain in-progress human reports and should be reviewed before release decisions.

@@ -23,6 +23,9 @@ const GPT_5_1_CODEX_MAX_INSTRUCTIONS: &str = include_str!("../../gpt-5.1-codex-m
 const GPT_5_2_CODEX_INSTRUCTIONS: &str = include_str!("../../gpt-5.2-codex_prompt.md");
 
 pub(crate) const CONTEXT_WINDOW_272K: i64 = 272_000;
+const CODING_CONTEXT_WINDOW_128K: i64 = 128_000;
+const CODING_AUTO_COMPACT_128K: i64 = 96_000;
+const THINKING_AUTO_COMPACT_128K: i64 = 80_000;
 
 macro_rules! model_info {
     (
@@ -157,7 +160,8 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
         model_info!(
             slug,
             apply_patch_tool_type: Some(ApplyPatchToolType::Function),
-            context_window: Some(128_000),
+            context_window: Some(CODING_CONTEXT_WINDOW_128K),
+            auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
         )
     } else if matches_any_prefix(
         model_id,
@@ -179,7 +183,8 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
         model_info!(
             slug,
             apply_patch_tool_type: Some(ApplyPatchToolType::Function),
-            context_window: Some(128_000),
+            context_window: Some(CODING_CONTEXT_WINDOW_128K),
+            auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
         )
     } else if model_id.starts_with("deepseek") || slug_lower.starts_with("deepseek-ai/") {
         if model_id.contains("reasoner") || model_id.contains("thinking") {
@@ -187,13 +192,15 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
                 slug,
                 // Keep reasoning variants conservative for tool compatibility.
                 apply_patch_tool_type: None,
-                context_window: Some(128_000),
+                context_window: Some(CODING_CONTEXT_WINDOW_128K),
+                auto_compact_token_limit: Some(THINKING_AUTO_COMPACT_128K),
             )
         } else {
             model_info!(
                 slug,
                 apply_patch_tool_type: Some(ApplyPatchToolType::Function),
-                context_window: Some(128_000),
+                context_window: Some(CODING_CONTEXT_WINDOW_128K),
+                auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
             )
         }
     } else if model_id.starts_with("kimi-")
@@ -204,13 +211,15 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
             model_info!(
                 slug,
                 apply_patch_tool_type: None,
-                context_window: Some(128_000),
+                context_window: Some(CODING_CONTEXT_WINDOW_128K),
+                auto_compact_token_limit: Some(THINKING_AUTO_COMPACT_128K),
             )
         } else {
             model_info!(
                 slug,
                 apply_patch_tool_type: Some(ApplyPatchToolType::Function),
-                context_window: Some(128_000),
+                context_window: Some(CODING_CONTEXT_WINDOW_128K),
+                auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
             )
         }
     } else if slug.starts_with("test-gpt-5") {
@@ -462,6 +471,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -472,6 +482,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -482,6 +493,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -492,6 +504,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -502,6 +515,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -512,6 +526,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -519,6 +534,7 @@ mod tests {
         let info = find_model_info_for_slug("deepseek-reasoner");
         assert_eq!(info.apply_patch_tool_type, None);
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(80_000));
     }
 
     #[test]
@@ -526,6 +542,7 @@ mod tests {
         let info = find_model_info_for_slug("deepseek/deepseek-reasoner");
         assert_eq!(info.apply_patch_tool_type, None);
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(80_000));
     }
 
     #[test]
@@ -536,6 +553,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -546,6 +564,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -553,6 +572,7 @@ mod tests {
         let info = find_model_info_for_slug("kimi-thinking-preview");
         assert_eq!(info.apply_patch_tool_type, None);
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(80_000));
     }
 
     #[test]
@@ -563,6 +583,7 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 
     #[test]
@@ -573,5 +594,6 @@ mod tests {
             Some(ApplyPatchToolType::Function)
         );
         assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
     }
 }

@@ -54,6 +54,7 @@ use std::path::PathBuf;
 use tempfile::tempdir;
 
 use crate::config::profile::ConfigProfile;
+use crate::config::profile::built_in_config_profiles;
 use toml::Value as TomlValue;
 use toml_edit::DocumentMut;
 
@@ -1006,6 +1007,10 @@ impl ConfigToml {
                     return Ok(profile.clone());
                 }
 
+                if let Some(profile) = built_in_config_profiles().get(key.as_str()) {
+                    return Ok(profile.clone());
+                }
+
                 Err(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
                     format!("config profile `{key}` not found"),
@@ -1109,9 +1114,12 @@ impl Config {
             .as_ref()
             .or(cfg.profile.as_ref())
             .cloned();
+        let mut merged_profiles = built_in_config_profiles();
+        for (key, profile) in cfg.profiles.iter() {
+            merged_profiles.insert(key.clone(), profile.clone());
+        }
         let config_profile = match active_profile_name.as_ref() {
-            Some(key) => cfg
-                .profiles
+            Some(key) => merged_profiles
                 .get(key)
                 .ok_or_else(|| {
                     std::io::Error::new(
@@ -1322,8 +1330,12 @@ impl Config {
         let config = Self {
             model,
             review_model,
-            model_context_window: cfg.model_context_window,
-            model_auto_compact_token_limit: cfg.model_auto_compact_token_limit,
+            model_context_window: config_profile
+                .model_context_window
+                .or(cfg.model_context_window),
+            model_auto_compact_token_limit: config_profile
+                .model_auto_compact_token_limit
+                .or(cfg.model_auto_compact_token_limit),
             model_provider_id,
             model_provider,
             cwd: resolved_cwd,
@@ -3775,6 +3787,50 @@ trust_level = "untrusted"
             Some("test-profile".to_string()),
         );
         assert_eq!(result, Some("explicit-provider".to_string()));
+    }
+
+    #[test]
+    fn built_in_profile_is_available_without_config_file_entry() {
+        let config_toml = ConfigToml::default();
+        let profile = config_toml
+            .get_config_profile(Some("qwen35-coding".to_string()))
+            .expect("built-in profile");
+        assert_eq!(profile.model.as_deref(), Some("qwen3.5-plus"));
+        assert_eq!(profile.model_provider.as_deref(), Some("alibaba-coding"));
+        assert_eq!(profile.model_context_window, Some(128_000));
+        assert_eq!(profile.model_auto_compact_token_limit, Some(96_000));
+    }
+
+    #[test]
+    fn user_profile_overrides_built_in_profile_name() -> anyhow::Result<()> {
+        let codex_home = TempDir::new()?;
+        let mut profiles = HashMap::new();
+        profiles.insert(
+            "qwen35-coding".to_string(),
+            ConfigProfile {
+                model: Some("qwen3-coder-plus".to_string()),
+                model_provider: Some("openrouter".to_string()),
+                model_context_window: Some(64_000),
+                model_auto_compact_token_limit: Some(48_000),
+                ..Default::default()
+            },
+        );
+
+        let config = Config::load_from_base_config_with_overrides(
+            ConfigToml {
+                profiles,
+                profile: Some("qwen35-coding".to_string()),
+                ..Default::default()
+            },
+            ConfigOverrides::default(),
+            codex_home.path().to_path_buf(),
+        )?;
+
+        assert_eq!(config.model.as_deref(), Some("qwen3-coder-plus"));
+        assert_eq!(config.model_provider_id, "openrouter");
+        assert_eq!(config.model_context_window, Some(64_000));
+        assert_eq!(config.model_auto_compact_token_limit, Some(48_000));
+        Ok(())
     }
 
     #[test]

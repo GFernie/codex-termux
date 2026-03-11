@@ -1,108 +1,64 @@
-# 🔨 Building Codex CLI (Termux fork)
+# Building codex-termux
 
-This repository packages the official OpenAI Codex CLI for Android Termux (ARM64) with a small set of compatibility patches. Most users should install the precompiled npm package:
+This fork maintains two separate release lines:
 
-```bash
-npm install -g @mmmbuto/codex-cli-termux
-```
+- `main`: latest Termux-focused line
+- `lts`: stability line based on upstream `0.80.x`
 
-If you want or need to build the binary yourself, follow the steps below.
+See [`docs/release-lines.md`](./docs/release-lines.md) before building or packaging.
 
----
+## Workspace Layout
 
-## 1. Prerequisites (Termux)
+- Rust workspace: `codex-rs/`
+- npm wrappers: `npm-package/`
 
-On a Termux environment with ARM64:
+## Build LTS Locally
 
-```bash
-pkg update && pkg upgrade -y
-pkg install git clang lld rust pkg-config openssl openssl-tool -y
-```
-
-You will also need Node.js if you plan to build and test the npm package:
-
-```bash
-pkg install nodejs-lts -y
-```
-
----
-
-## 2. Clone this fork
-
-```bash
-git clone https://github.com/DioNanos/codex-termux.git
-cd codex-termux
-```
-
-The Rust workspace lives in `codex-rs/` and the npm wrapper in `npm-package/`.
-
----
-
-## 3. Build the Rust binary
-
-From the workspace root:
+From the repo root:
 
 ```bash
 cd codex-rs
-cargo build --release
+cargo build --release --bin codex --bin codex-exec --bin codex-linux-sandbox
 ```
 
-Termux-specific optimizations are already baked into `codex-rs/Cargo.toml`:
+Primary local outputs:
 
-- `lto = false`
-- `codegen-units = 16`
+- `codex-rs/target/release/codex`
+- `codex-rs/target/release/codex-exec`
+- `codex-rs/target/release/codex-linux-sandbox`
 
-These settings are tuned so that the build can complete on RAM‑constrained devices while keeping good runtime performance.
+## LTS Packaging Matrix
 
-The resulting binary will be:
+- `android-arm64`: built locally from this repo
+- `linux-x64`: built locally from this repo
+- `darwin-arm64`: built by GitHub Actions for the final npm package
 
-```bash
-codex-rs/target/release/codex
-```
+The macOS arm64 artifact is not built on Linux for release packaging. It must come from the dedicated workflow.
 
-You can run it directly:
+More detail:
 
-```bash
-./target/release/codex --version
-```
+- [`docs/lts-packaging.md`](./docs/lts-packaging.md)
 
----
+## Local npm Package Assembly
 
-## 4. Use the binary with the npm wrapper (optional)
+After building Rust release binaries, populate `npm-package/bin/<target>/` with the correct artifacts for the release line you are packaging.
 
-If you want to test the same layout used by the published npm package:
+For LTS, the final npm package is valid only when these targets are present:
 
-```bash
-cd ../npm-package
-cp ../codex-rs/target/release/codex bin/codex
-chmod +x bin/codex
-```
+- `android-arm64`
+- `linux-x64`
+- `darwin-arm64`
 
-After this, from inside `npm-package/` you can run:
+## Recommended Validation Before Publish
 
-```bash
-node bin/codex.js --version
-```
+Run the LTS suites:
 
-This uses the Node.js launcher (`bin/codex.js`) together with your locally built `bin/codex` binary.
+- Core: [`test-reports/suites/lts/core/linux.md`](./test-reports/suites/lts/core/linux.md)
+- Extended: [`test-reports/suites/lts/extended/linux.md`](./test-reports/suites/lts/extended/linux.md)
+- Platform guide: [`docs/lts-testing.md`](./docs/lts-testing.md)
 
----
+## Publish Rules
 
-## 5. Maintainer notes (release workflow)
-
-For maintainers who publish `@mmmbuto/codex-cli-termux`:
-
-1. **Sync with upstream** in your local clone (fetch and merge the relevant `rust-v*` tag from `openai/codex` into this fork).
-2. **Update versions**:
-   - `codex-rs/Cargo.toml` → `[workspace.package] version`
-   - `npm-package/package.json` → `"version": "<same>-termux"`
-3. **Build the Termux binary** as in section 3.
-4. **Copy the binary into the npm wrapper** as in section 4.
-5. **Publish** from `npm-package/` (for authorized maintainers only):
-
-   ```bash
-   npm publish
-   ```
-
-This matches the automated pipeline used in the private build scripts, while keeping all steps reproducible from this public repository.
-
+- do not publish LTS npm until Core validation passes on required platforms/providers
+- do not cut GitHub release until required human test reports are stored under `test-reports/lts/`
+- do not treat Homebrew as the source of truth for npm packaging

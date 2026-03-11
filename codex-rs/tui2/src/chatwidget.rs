@@ -405,8 +405,7 @@ impl ChatWidget {
         });
         if changed {
             self.add_info_message(
-                "Plan mode enabled. Future messages stay in planning mode until /code."
-                    .to_string(),
+                "Plan mode enabled. Future messages stay in planning mode until /code.".to_string(),
                 None,
             );
         }
@@ -426,10 +425,7 @@ impl ChatWidget {
             developer_instructions: Some(self.config.developer_instructions.clone()),
         });
         if changed {
-            self.add_info_message(
-                "Returned to normal coding mode.".to_string(),
-                None,
-            );
+            self.add_info_message("Returned to normal coding mode.".to_string(), None);
         }
     }
 
