@@ -8,9 +8,21 @@ on:
 
 jobs:
   build:
-    name: Build macOS arm64 (release)
+    name: Build macOS ${{ matrix.label }} (release)
     runs-on: macos-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            label: arm64
+            out_dir: codex-macos-aarch64
+            artifact: codex-macos-aarch64
+          - target: x86_64-apple-darwin
+            label: x64
+            out_dir: codex-macos-x86_64
+            artifact: codex-macos-x86_64
     defaults:
       run:
         working-directory: codex-rs
@@ -19,10 +31,10 @@ jobs:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin
+          targets: ${{ matrix.target }}
 
       - name: Cargo build (release)
-        run: cargo build -v --release --bin codex --bin codex-exec --target aarch64-apple-darwin
+        run: cargo build -v --release --bin codex --bin codex-exec --target ${{ matrix.target }}
 
       - name: Package artifacts
         shell: bash
@@ -30,18 +42,18 @@ jobs:
           set -euo pipefail
 
           dist_root="${{ github.workspace }}/dist"
-          pkg_dir="${dist_root}/codex-macos-aarch64"
+          pkg_dir="${dist_root}/${{ matrix.out_dir }}"
 
           rm -rf "${pkg_dir}"
           mkdir -p "${pkg_dir}"
 
-          cp "target/aarch64-apple-darwin/release/codex" "${pkg_dir}/"
-          cp "target/aarch64-apple-darwin/release/codex-exec" "${pkg_dir}/"
+          cp "target/${{ matrix.target }}/release/codex" "${pkg_dir}/"
+          cp "target/${{ matrix.target }}/release/codex-exec" "${pkg_dir}/"
 
-          (cd "${dist_root}" && tar -czf codex-macos-aarch64.tar.gz codex-macos-aarch64)
+          (cd "${dist_root}" && tar -czf "${{ matrix.out_dir }}.tar.gz" "${{ matrix.out_dir }}")
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: codex-macos-aarch64
-          path: dist/codex-macos-aarch64.tar.gz
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.out_dir }}.tar.gz

@@ -31,9 +31,11 @@ Primary local outputs:
 
 - `android-arm64`: built locally from this repo
 - `linux-x64`: built locally from this repo
+- `linux-arm64`: built locally from this repo
+- `darwin-x64`: built by GitHub Actions for the final npm package
 - `darwin-arm64`: built by GitHub Actions for the final npm package
 
-The macOS arm64 artifact is not built on Linux for release packaging. It must come from the dedicated workflow.
+The macOS artifacts are not built on Linux for release packaging. They must come from the dedicated workflow.
 
 More detail:
 
@@ -47,6 +49,8 @@ For LTS, the final npm package is valid only when these targets are present:
 
 - `android-arm64`
 - `linux-x64`
+- `linux-arm64`
+- `darwin-x64`
 - `darwin-arm64`
 
 ## Recommended Validation Before Publish

@@ -12,7 +12,7 @@ Stability-first fork of OpenAI Codex CLI with two maintained release lines:
 
 - preserve `/chat` usability and avoid silent stalls
 - keep tool and file-mutation flows compatible on third-party coding providers
-- provide stable Termux/Linux/macOS arm64 packaging
+- provide stable Termux/Linux/macOS packaging across the maintained LTS targets
 - prefer conservative backports and predictable behavior over feature churn
 
 ## Release Lines
@@ -31,8 +31,10 @@ Stability-first fork of OpenAI Codex CLI with two maintained release lines:
 
 - npm: Termux / Android ARM64
 - npm: Linux x64
+- npm: Linux arm64
+- npm: macOS x64
 - npm: macOS arm64
-- GitHub Actions builds the macOS arm64 artifact used by the final npm package
+- GitHub Actions builds the macOS artifacts used by the final npm package
 - Homebrew tap can be used as an additional distribution channel, not as the source of truth for npm packaging
 
 Build and packaging details live in:

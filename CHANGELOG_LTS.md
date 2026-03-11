@@ -50,8 +50,8 @@ All notable LTS changes are documented in this file.
 ### Packaging / Distribution
 
 - Package version bumped to `0.80.5-lts`.
-- LTS npm package targets Termux ARM64 + Linux x64 + macOS arm64.
-- macOS arm64 npm packaging is built through the dedicated GitHub workflow.
+- LTS npm package targets Termux ARM64 + Linux x64/arm64 + macOS x64/arm64.
+- macOS npm packaging is built through the dedicated GitHub workflow.
 - Homebrew tap initialized at `https://github.com/DioNanos/homebrew-codex-lts` (formula `codex-lts`).
 
 ### Documentation / Test Policy
