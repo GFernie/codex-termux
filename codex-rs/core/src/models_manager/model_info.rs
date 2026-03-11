@@ -91,6 +91,9 @@ pub(crate) fn with_config_overrides(mut model: ModelInfo, config: &Config) -> Mo
 
 // todo(aibrahim): remove most of the entries here when enabling models.json
 pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
+    let slug_lower = slug.to_ascii_lowercase();
+    let model_id = provider_agnostic_model_id(&slug_lower);
+
     if slug.starts_with("o3") || slug.starts_with("o4-mini") {
         model_info!(
             slug,
@@ -133,6 +136,83 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
             supports_reasoning_summaries: false,
             context_window: Some(16_385),
         )
+    } else if matches_any_prefix(
+        model_id,
+        &[
+            "qwen3.5-plus",
+            "qwen3.5",
+            "qwen-plus",
+            "qwen3-coder-plus",
+            "qwen3-coder-next",
+            "qwen3-coder-flash",
+            "qwen3-coding",
+            "qwen3-coding-next",
+            "qwen2.5-coder",
+            "qwen3-max",
+            "qwen3-plus",
+            "qwen3-thinking",
+        ],
+    ) || slug_lower.starts_with("zai-org/qwen")
+    {
+        model_info!(
+            slug,
+            apply_patch_tool_type: Some(ApplyPatchToolType::Function),
+            context_window: Some(128_000),
+        )
+    } else if matches_any_prefix(
+        model_id,
+        &[
+            "glm-5",
+            "glm5",
+            "glm-4.7",
+            "glm4.7",
+            "glm-4.6",
+            "glm4.6",
+            "glm-4.5",
+            "glm4.5",
+            "glm-4.5-air",
+            "glm-4.5v",
+            "glm-4.6v",
+        ],
+    ) || slug_lower.starts_with("zai-org/glm-")
+    {
+        model_info!(
+            slug,
+            apply_patch_tool_type: Some(ApplyPatchToolType::Function),
+            context_window: Some(128_000),
+        )
+    } else if model_id.starts_with("deepseek") || slug_lower.starts_with("deepseek-ai/") {
+        if model_id.contains("reasoner") || model_id.contains("thinking") {
+            model_info!(
+                slug,
+                // Keep reasoning variants conservative for tool compatibility.
+                apply_patch_tool_type: None,
+                context_window: Some(128_000),
+            )
+        } else {
+            model_info!(
+                slug,
+                apply_patch_tool_type: Some(ApplyPatchToolType::Function),
+                context_window: Some(128_000),
+            )
+        }
+    } else if model_id.starts_with("kimi-")
+        || model_id.starts_with("moonshot-")
+        || model_id.starts_with("moonshot-kimi-")
+    {
+        if model_id.contains("thinking") {
+            model_info!(
+                slug,
+                apply_patch_tool_type: None,
+                context_window: Some(128_000),
+            )
+        } else {
+            model_info!(
+                slug,
+                apply_patch_tool_type: Some(ApplyPatchToolType::Function),
+                context_window: Some(128_000),
+            )
+        }
     } else if slug.starts_with("test-gpt-5") {
         model_info!(
             slug,
@@ -286,6 +366,14 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
     }
 }
 
+fn provider_agnostic_model_id(slug_lower: &str) -> &str {
+    slug_lower.rsplit('/').next().unwrap_or(slug_lower)
+}
+
+fn matches_any_prefix(value: &str, prefixes: &[&str]) -> bool {
+    prefixes.iter().any(|prefix| value.starts_with(prefix))
+}
+
 fn supported_reasoning_level_low_medium_high() -> Vec<ReasoningEffortPreset> {
     vec![
         ReasoningEffortPreset {
@@ -360,4 +448,130 @@ fn supported_reasoning_level_low_medium_high_xhigh_non_codex() -> Vec<ReasoningE
             description: "Extra high reasoning for complex problems".to_string(),
         },
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn qwen35_plus_has_known_model_profile() {
+        let info = find_model_info_for_slug("qwen3.5-plus");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn glm5_has_known_model_profile_case_insensitive() {
+        let info = find_model_info_for_slug("GLM-5");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn qwen3_coder_plus_has_known_model_profile() {
+        let info = find_model_info_for_slug("qwen3-coder-plus");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn qwen3_coding_next_has_known_model_profile() {
+        let info = find_model_info_for_slug("qwen3-coding-next");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn qwen3_coder_next_openrouter_style_slug_is_supported() {
+        let info = find_model_info_for_slug("qwen/qwen3-coder-next");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn deepseek_v32_has_known_model_profile() {
+        let info = find_model_info_for_slug("deepseek-v3.2");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn deepseek_reasoner_uses_conservative_profile() {
+        let info = find_model_info_for_slug("deepseek-reasoner");
+        assert_eq!(info.apply_patch_tool_type, None);
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn deepseek_reasoner_namespaced_slug_uses_conservative_profile() {
+        let info = find_model_info_for_slug("deepseek/deepseek-reasoner");
+        assert_eq!(info.apply_patch_tool_type, None);
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn kimi_k25_has_known_model_profile() {
+        let info = find_model_info_for_slug("kimi-k2.5");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn kimi_namespaced_slug_has_known_model_profile() {
+        let info = find_model_info_for_slug("moonshotai/kimi-k2.5");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn kimi_thinking_uses_conservative_profile() {
+        let info = find_model_info_for_slug("kimi-thinking-preview");
+        assert_eq!(info.apply_patch_tool_type, None);
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn zai_org_glm5_has_known_model_profile() {
+        let info = find_model_info_for_slug("zai-org/GLM-5-TEE");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
+
+    #[test]
+    fn glm47_has_known_model_profile() {
+        let info = find_model_info_for_slug("GLM-4.7");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+    }
 }

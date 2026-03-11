@@ -189,6 +189,44 @@ impl<'a> ChatRequestBuilder<'a> {
                         json!(text)
                     };
 
+                    if role == "assistant"
+                        && let Some(Value::Object(previous)) = messages.last_mut()
+                        && previous.get("role").and_then(Value::as_str) == Some("assistant")
+                        && previous.get("tool_calls").is_some()
+                    {
+                        if !text.is_empty() {
+                            match previous.get_mut("content") {
+                                Some(Value::Null) => {
+                                    previous.insert("content".to_string(), json!(text));
+                                }
+                                Some(Value::String(existing)) => {
+                                    if existing != &text {
+                                        if !existing.is_empty() {
+                                            existing.push('\n');
+                                        }
+                                        existing.push_str(&text);
+                                    }
+                                }
+                                _ => {
+                                    previous.insert("content".to_string(), json!(text));
+                                }
+                            }
+                        }
+
+                        if let Some(reasoning) = reasoning_by_anchor_index.get(&idx) {
+                            if let Some(Value::String(existing)) = previous.get_mut("reasoning") {
+                                if !existing.is_empty() {
+                                    existing.push('\n');
+                                }
+                                existing.push_str(reasoning);
+                            } else {
+                                previous.insert("reasoning".to_string(), json!(reasoning));
+                            }
+                        }
+
+                        continue;
+                    }
+
                     let mut msg = json!({"role": role, "content": content_value});
                     if role == "assistant"
                         && let Some(reasoning) = reasoning_by_anchor_index.get(&idx)
@@ -205,6 +243,7 @@ impl<'a> ChatRequestBuilder<'a> {
                     ..
                 } => {
                     let reasoning = reasoning_by_anchor_index.get(&idx).map(String::as_str);
+                    let arguments = normalize_function_arguments_for_chat(arguments);
                     let tool_call = json!({
                         "id": call_id,
                         "type": "function",
@@ -217,13 +256,17 @@ impl<'a> ChatRequestBuilder<'a> {
                 }
                 ResponseItem::LocalShellCall {
                     id,
-                    call_id: _,
+                    call_id,
                     status,
                     action,
                 } => {
                     let reasoning = reasoning_by_anchor_index.get(&idx).map(String::as_str);
+                    let tool_call_id = id
+                        .clone()
+                        .or_else(|| call_id.clone())
+                        .unwrap_or_else(|| format!("local-shell-{idx}"));
                     let tool_call = json!({
-                        "id": id.clone().unwrap_or_default(),
+                        "id": tool_call_id,
                         "type": "local_shell_call",
                         "status": status,
                         "action": action,
@@ -256,13 +299,14 @@ impl<'a> ChatRequestBuilder<'a> {
                 }
                 ResponseItem::CustomToolCall {
                     id,
-                    call_id: _,
+                    call_id,
                     name,
                     input,
                     status: _,
                 } => {
+                    let tool_call_id = id.clone().unwrap_or_else(|| call_id.clone());
                     let tool_call = json!({
-                        "id": id,
+                        "id": tool_call_id,
                         "type": "custom",
                         "custom": {
                             "name": name,
@@ -348,12 +392,30 @@ fn push_tool_call_message(messages: &mut Vec<Value>, tool_call: Value, reasoning
     messages.push(msg);
 }
 
+fn normalize_function_arguments_for_chat(arguments: &str) -> String {
+    let trimmed = arguments.trim();
+    if trimmed.is_empty() {
+        return "{}".to_string();
+    }
+
+    if let Ok(parsed) = serde_json::from_str::<Value>(trimmed)
+        && parsed.is_object()
+    {
+        return trimmed.to_string();
+    }
+
+    "{}".to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::provider::RetryConfig;
     use crate::provider::WireApi;
     use codex_protocol::models::FunctionCallOutputPayload;
+    use codex_protocol::models::LocalShellAction;
+    use codex_protocol::models::LocalShellExecAction;
+    use codex_protocol::models::LocalShellStatus;
     use codex_protocol::protocol::SessionSource;
     use codex_protocol::protocol::SubAgentSource;
     use http::HeaderValue;
@@ -490,5 +552,199 @@ mod tests {
         assert_eq!(messages[4]["tool_call_id"], "call-b");
         assert_eq!(messages[5]["role"], "tool");
         assert_eq!(messages[5]["tool_call_id"], "call-c");
+    }
+
+    #[test]
+    fn local_shell_call_uses_call_id_when_id_is_missing() {
+        let prompt_input = vec![
+            ResponseItem::Message {
+                id: None,
+                role: "user".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "run shell".to_string(),
+                }],
+            },
+            ResponseItem::LocalShellCall {
+                id: None,
+                call_id: Some("shell-call-1".to_string()),
+                status: LocalShellStatus::InProgress,
+                action: LocalShellAction::Exec(LocalShellExecAction {
+                    command: vec!["echo".to_string(), "hi".to_string()],
+                    timeout_ms: None,
+                    env: None,
+                    user: None,
+                    working_directory: None,
+                }),
+            },
+            ResponseItem::FunctionCallOutput {
+                call_id: "shell-call-1".to_string(),
+                output: FunctionCallOutputPayload {
+                    content: "ok".to_string(),
+                    ..Default::default()
+                },
+            },
+        ];
+
+        let req = ChatRequestBuilder::new("gpt-test", "inst", &prompt_input, &[])
+            .build(&provider())
+            .expect("request");
+
+        let messages = req
+            .body
+            .get("messages")
+            .and_then(|v| v.as_array())
+            .expect("messages array");
+
+        assert_eq!(messages[2]["role"], "assistant");
+        let tool_calls = messages[2]["tool_calls"]
+            .as_array()
+            .expect("tool_calls array");
+        assert_eq!(tool_calls.len(), 1);
+        assert_eq!(tool_calls[0]["id"], "shell-call-1");
+        assert_eq!(messages[3]["role"], "tool");
+        assert_eq!(messages[3]["tool_call_id"], "shell-call-1");
+    }
+
+    #[test]
+    fn merges_assistant_text_between_tool_call_and_tool_output() {
+        let prompt_input = vec![
+            ResponseItem::Message {
+                id: None,
+                role: "user".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "run shell".to_string(),
+                }],
+            },
+            ResponseItem::FunctionCall {
+                id: None,
+                name: "exec_command".to_string(),
+                arguments: r#"{"cmd":"echo hi"}"#.to_string(),
+                call_id: "call-tool-1".to_string(),
+            },
+            ResponseItem::Message {
+                id: None,
+                role: "assistant".to_string(),
+                content: vec![ContentItem::OutputText {
+                    text: "I'll run the command now.".to_string(),
+                }],
+            },
+            ResponseItem::FunctionCallOutput {
+                call_id: "call-tool-1".to_string(),
+                output: FunctionCallOutputPayload {
+                    content: "ok".to_string(),
+                    ..Default::default()
+                },
+            },
+        ];
+
+        let req = ChatRequestBuilder::new("gpt-test", "inst", &prompt_input, &[])
+            .build(&provider())
+            .expect("request");
+
+        let messages = req
+            .body
+            .get("messages")
+            .and_then(|v| v.as_array())
+            .expect("messages array");
+
+        // system + user + assistant(tool_calls+content) + tool output
+        assert_eq!(messages.len(), 4);
+        assert_eq!(messages[2]["role"], "assistant");
+        assert_eq!(messages[2]["content"], "I'll run the command now.");
+        let tool_calls = messages[2]["tool_calls"]
+            .as_array()
+            .expect("tool_calls array");
+        assert_eq!(tool_calls.len(), 1);
+        assert_eq!(tool_calls[0]["id"], "call-tool-1");
+        assert_eq!(messages[3]["role"], "tool");
+        assert_eq!(messages[3]["tool_call_id"], "call-tool-1");
+    }
+
+    #[test]
+    fn normalizes_invalid_function_arguments_for_chat() {
+        let prompt_input = vec![
+            ResponseItem::Message {
+                id: None,
+                role: "user".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "run command".to_string(),
+                }],
+            },
+            ResponseItem::FunctionCall {
+                id: None,
+                name: "exec_command".to_string(),
+                arguments: "not-json".to_string(),
+                call_id: "call-invalid-1".to_string(),
+            },
+            ResponseItem::FunctionCallOutput {
+                call_id: "call-invalid-1".to_string(),
+                output: FunctionCallOutputPayload {
+                    content: "failed to parse function arguments".to_string(),
+                    ..Default::default()
+                },
+            },
+        ];
+
+        let req = ChatRequestBuilder::new("gpt-test", "inst", &prompt_input, &[])
+            .build(&provider())
+            .expect("request");
+
+        let messages = req
+            .body
+            .get("messages")
+            .and_then(|v| v.as_array())
+            .expect("messages array");
+
+        let tool_calls = messages[2]["tool_calls"]
+            .as_array()
+            .expect("tool_calls array");
+        assert_eq!(
+            tool_calls[0]["function"]["arguments"],
+            serde_json::Value::String("{}".to_string())
+        );
+    }
+
+    #[test]
+    fn normalizes_non_object_function_arguments_for_chat() {
+        let prompt_input = vec![
+            ResponseItem::Message {
+                id: None,
+                role: "user".to_string(),
+                content: vec![ContentItem::InputText {
+                    text: "run command".to_string(),
+                }],
+            },
+            ResponseItem::FunctionCall {
+                id: None,
+                name: "exec_command".to_string(),
+                arguments: "[]".to_string(),
+                call_id: "call-invalid-2".to_string(),
+            },
+            ResponseItem::FunctionCallOutput {
+                call_id: "call-invalid-2".to_string(),
+                output: FunctionCallOutputPayload {
+                    content: "array args are invalid for chat tools".to_string(),
+                    ..Default::default()
+                },
+            },
+        ];
+
+        let req = ChatRequestBuilder::new("gpt-test", "inst", &prompt_input, &[])
+            .build(&provider())
+            .expect("request");
+
+        let messages = req
+            .body
+            .get("messages")
+            .and_then(|v| v.as_array())
+            .expect("messages array");
+
+        let tool_calls = messages[2]["tool_calls"]
+            .as_array()
+            .expect("tool_calls array");
+        assert_eq!(
+            tool_calls[0]["function"]["arguments"],
+            serde_json::Value::String("{}".to_string())
+        );
     }
 }

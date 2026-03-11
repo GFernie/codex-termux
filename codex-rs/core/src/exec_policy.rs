@@ -1057,14 +1057,13 @@ prefix_rule(
         let command = vec_str(&["git", "push", "origin", "+main"]);
         let manager = ExecPolicyManager::default();
         let requirement = manager
-            .create_exec_approval_requirement_for_command(ExecApprovalRequest {
-                features: &Features::with_defaults(),
-                command: &command,
-                approval_policy: AskForApproval::OnRequest,
-                sandbox_policy: &SandboxPolicy::DangerFullAccess,
-                sandbox_permissions: SandboxPermissions::UseDefault,
-                prefix_rule: None,
-            })
+            .create_exec_approval_requirement_for_command(
+                &Features::with_defaults(),
+                &command,
+                AskForApproval::OnRequest,
+                &SandboxPolicy::DangerFullAccess,
+                SandboxPermissions::UseDefault,
+            )
             .await;
 
         assert_eq!(
@@ -1125,14 +1124,13 @@ prefix_rule(
         assert_eq!(
             expected_req,
             policy
-                .create_exec_approval_requirement_for_command(ExecApprovalRequest {
-                    features: &features,
-                    command: &sneaky_command,
-                    approval_policy: AskForApproval::OnRequest,
-                    sandbox_policy: &SandboxPolicy::ReadOnly,
-                    sandbox_permissions: permissions,
-                    prefix_rule: None,
-                })
+                .create_exec_approval_requirement_for_command(
+                    &features,
+                    &sneaky_command,
+                    AskForApproval::OnRequest,
+                    &SandboxPolicy::ReadOnly,
+                    permissions,
+                )
                 .await,
             "{pwsh_approval_reason}"
         );
@@ -1149,14 +1147,13 @@ prefix_rule(
                 ]))),
             },
             policy
-                .create_exec_approval_requirement_for_command(ExecApprovalRequest {
-                    features: &features,
-                    command: &dangerous_command,
-                    approval_policy: AskForApproval::OnRequest,
-                    sandbox_policy: &SandboxPolicy::ReadOnly,
-                    sandbox_permissions: permissions,
-                    prefix_rule: None,
-                })
+                .create_exec_approval_requirement_for_command(
+                    &features,
+                    &dangerous_command,
+                    AskForApproval::OnRequest,
+                    &SandboxPolicy::ReadOnly,
+                    permissions,
+                )
                 .await,
             r#"On all platforms, a forbidden command should require approval
             (unless AskForApproval::Never is specified)."#
@@ -1169,14 +1166,13 @@ prefix_rule(
                 reason: "`rm -rf /important/data` rejected: blocked by policy".to_string(),
             },
             policy
-                .create_exec_approval_requirement_for_command(ExecApprovalRequest {
-                    features: &features,
-                    command: &dangerous_command,
-                    approval_policy: AskForApproval::Never,
-                    sandbox_policy: &SandboxPolicy::ReadOnly,
-                    sandbox_permissions: permissions,
-                    prefix_rule: None,
-                })
+                .create_exec_approval_requirement_for_command(
+                    &features,
+                    &dangerous_command,
+                    AskForApproval::Never,
+                    &SandboxPolicy::ReadOnly,
+                    permissions,
+                )
                 .await,
             r#"On all platforms, a forbidden command should require approval
             (unless AskForApproval::Never is specified)."#

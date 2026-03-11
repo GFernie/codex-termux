@@ -230,9 +230,8 @@ pub async fn process_chat_sse<S>(
                             {
                                 call_state.name.get_or_insert_with(|| fname.to_string());
                             }
-                            if let Some(arguments) = func.get("arguments").and_then(|a| a.as_str())
-                            {
-                                call_state.arguments.push_str(arguments);
+                            if let Some(arguments) = func.get("arguments") {
+                                append_tool_call_arguments(&mut call_state.arguments, arguments);
                             }
                         }
 
@@ -314,6 +313,17 @@ pub async fn process_chat_sse<S>(
                 }
             }
         }
+    }
+}
+
+fn append_tool_call_arguments(buffer: &mut String, arguments: &serde_json::Value) {
+    match arguments {
+        serde_json::Value::String(chunk) => buffer.push_str(chunk),
+        serde_json::Value::Null => {}
+        other => match serde_json::to_string(other) {
+            Ok(serialized) => buffer.push_str(&serialized),
+            Err(err) => debug!("Failed to serialize tool call arguments chunk: {err}"),
+        },
     }
 }
 
@@ -473,6 +483,37 @@ mod tests {
                 ResponseEvent::OutputItemDone(ResponseItem::FunctionCall { call_id, name, arguments, .. }),
                 ResponseEvent::Completed { .. }
             ] if call_id == "call_a" && name == "do_a" && arguments == "{ \"foo\":1}"
+        );
+    }
+
+    #[tokio::test]
+    async fn serializes_object_function_arguments() {
+        let delta = json!({
+            "choices": [{
+                "delta": {
+                    "tool_calls": [{
+                        "id": "call_obj",
+                        "index": 0,
+                        "function": { "name": "do_obj", "arguments": { "foo": 1 } }
+                    }]
+                }
+            }]
+        });
+
+        let finish = json!({
+            "choices": [{
+                "finish_reason": "tool_calls"
+            }]
+        });
+
+        let body = build_body(&[delta, finish]);
+        let events = collect_events(&body).await;
+        assert_matches!(
+            &events[..],
+            [
+                ResponseEvent::OutputItemDone(ResponseItem::FunctionCall { call_id, name, arguments, .. }),
+                ResponseEvent::Completed { .. }
+            ] if call_id == "call_obj" && name == "do_obj" && arguments == "{\"foo\":1}"
         );
     }
 
