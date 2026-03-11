@@ -28,7 +28,7 @@ All notable LTS changes are documented in this file.
 ### Packaging / Distribution
 
 - Package version bumped to `0.80.6-lts`.
-- Full LTS release matrix must be rebuilt before publish:
+- Full LTS release matrix rebuilt for publish:
   - Termux ARM64
   - Linux x64
   - Linux arm64

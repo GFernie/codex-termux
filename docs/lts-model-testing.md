@@ -142,7 +142,7 @@ Good examples:
 Bad examples:
 
 - `Platform: Linux x86_64 (host.example.com)`
-- `Tester: Full Name`
+- `Tester: personal identity`
 - `Binary path: /home/user/...`
 - `API Key: REAL_PROVIDER_KEY_NAME`
 
