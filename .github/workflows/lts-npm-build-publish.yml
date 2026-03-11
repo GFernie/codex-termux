@@ -113,7 +113,7 @@ jobs:
 
   build-darwin-x64:
     name: Build macOS x64 binaries
-    runs-on: macos-latest
+    runs-on: macos-13
     timeout-minutes: 45
     defaults:
       run:
