@@ -23,6 +23,10 @@ Secondary validation profiles:
 
 - `qwen3-coder-plus`
 - `qwen3-coder-next`
+- `qwen3max-plan`
+- `glm47-coding`
+- `kimi-k25-coding`
+- `minimax-m25-coding`
 
 ## Suite Locations
 
@@ -30,6 +34,8 @@ Secondary validation profiles:
 - Qwen 3.5 Linux model suite: [`../test-reports/suites/lts/models/linux-qwen35.md`](../test-reports/suites/lts/models/linux-qwen35.md)
 - Qwen 3 Coder Plus Linux model suite: [`../test-reports/suites/lts/models/linux-qwen3-coder-plus.md`](../test-reports/suites/lts/models/linux-qwen3-coder-plus.md)
 - Qwen 3 Coder Next Linux model suite: [`../test-reports/suites/lts/models/linux-qwen3-coder-next.md`](../test-reports/suites/lts/models/linux-qwen3-coder-next.md)
+
+Profiles without a dedicated suite yet should be recorded as availability-only until they receive a model-specific suite.
 
 ## Worker Flow
 

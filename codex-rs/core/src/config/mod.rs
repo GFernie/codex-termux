@@ -3797,8 +3797,8 @@ trust_level = "untrusted"
             .expect("built-in profile");
         assert_eq!(profile.model.as_deref(), Some("qwen3.5-plus"));
         assert_eq!(profile.model_provider.as_deref(), Some("alibaba-coding"));
-        assert_eq!(profile.model_context_window, Some(128_000));
-        assert_eq!(profile.model_auto_compact_token_limit, Some(96_000));
+        assert_eq!(profile.model_context_window, Some(1_000_000));
+        assert_eq!(profile.model_auto_compact_token_limit, Some(750_000));
     }
 
     #[test]

@@ -54,23 +54,50 @@ impl From<ConfigProfile> for codex_app_server_protocol::Profile {
 }
 
 const CODING_CONTEXT_WINDOW: i64 = 128_000;
-const CODING_AUTO_COMPACT_TOKEN_LIMIT: i64 = 96_000;
-const PLAN_AUTO_COMPACT_TOKEN_LIMIT: i64 = 90_000;
+const ALIBABA_QWEN_CONTEXT_WINDOW: i64 = 1_000_000;
+const ALIBABA_QWEN_CODER_NEXT_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_QWEN3_MAX_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_GLM5_CONTEXT_WINDOW: i64 = 202_752;
+const ALIBABA_GLM47_CONTEXT_WINDOW: i64 = 202_752;
+const ALIBABA_KIMI_K25_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_MINIMAX_M25_CONTEXT_WINDOW: i64 = 204_800;
+const ZAI_GLM5_CONTEXT_WINDOW: i64 = 200_000;
+const ZAI_GLM47_CONTEXT_WINDOW: i64 = 200_000;
 
 fn built_in_profile(
     model: &str,
     model_provider: &str,
     model_reasoning_effort: Option<ReasoningEffort>,
-    model_auto_compact_token_limit: i64,
 ) -> ConfigProfile {
+    let context_window = built_in_profile_context_window(model_provider, model);
     ConfigProfile {
         model: Some(model.to_string()),
         model_provider: Some(model_provider.to_string()),
-        model_context_window: Some(CODING_CONTEXT_WINDOW),
-        model_auto_compact_token_limit: Some(model_auto_compact_token_limit),
+        model_context_window: Some(context_window),
+        model_auto_compact_token_limit: Some(exact_auto_compact_token_limit(context_window)),
         model_reasoning_effort,
         ..Default::default()
     }
+}
+
+fn built_in_profile_context_window(model_provider: &str, model: &str) -> i64 {
+    match (model_provider, model.to_ascii_lowercase().as_str()) {
+        ("alibaba-coding", "qwen3.5-plus") => ALIBABA_QWEN_CONTEXT_WINDOW,
+        ("alibaba-coding", "qwen3-coder-plus") => ALIBABA_QWEN_CONTEXT_WINDOW,
+        ("alibaba-coding", "qwen3-coder-next") => ALIBABA_QWEN_CODER_NEXT_CONTEXT_WINDOW,
+        ("alibaba-coding", "qwen3-max-2026-01-23") => ALIBABA_QWEN3_MAX_CONTEXT_WINDOW,
+        ("alibaba-coding", "glm-5") => ALIBABA_GLM5_CONTEXT_WINDOW,
+        ("alibaba-coding", "glm-4.7") => ALIBABA_GLM47_CONTEXT_WINDOW,
+        ("alibaba-coding", "kimi-k2.5") => ALIBABA_KIMI_K25_CONTEXT_WINDOW,
+        ("alibaba-coding", "minimax-m2.5") => ALIBABA_MINIMAX_M25_CONTEXT_WINDOW,
+        ("zai-coding", "glm-5") => ZAI_GLM5_CONTEXT_WINDOW,
+        ("zai-coding", "glm-4.7") => ZAI_GLM47_CONTEXT_WINDOW,
+        _ => CODING_CONTEXT_WINDOW,
+    }
+}
+
+fn exact_auto_compact_token_limit(context_window: i64) -> i64 {
+    context_window.saturating_mul(3) / 4
 }
 
 pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
@@ -81,7 +108,6 @@ pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
                 "qwen3.5-plus",
                 "alibaba-coding",
                 Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
             ),
         ),
         (
@@ -90,7 +116,6 @@ pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
                 "qwen3.5-plus",
                 "alibaba-coding",
                 Some(ReasoningEffort::High),
-                PLAN_AUTO_COMPACT_TOKEN_LIMIT,
             ),
         ),
         (
@@ -99,7 +124,6 @@ pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
                 "qwen3-coder-plus",
                 "alibaba-coding",
                 Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
             ),
         ),
         (
@@ -108,44 +132,47 @@ pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
                 "qwen3-coder-next",
                 "alibaba-coding",
                 Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
+            ),
+        ),
+        (
+            "qwen3max-plan",
+            built_in_profile(
+                "qwen3-max-2026-01-23",
+                "alibaba-coding",
+                Some(ReasoningEffort::High),
             ),
         ),
         (
             "glm5-coding",
-            built_in_profile(
-                "glm-5",
-                "alibaba-coding",
-                Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
-            ),
+            built_in_profile("glm-5", "alibaba-coding", Some(ReasoningEffort::Medium)),
         ),
         (
             "glm5-plan",
+            built_in_profile("glm-5", "alibaba-coding", Some(ReasoningEffort::High)),
+        ),
+        (
+            "glm47-coding",
+            built_in_profile("glm-4.7", "alibaba-coding", Some(ReasoningEffort::Medium)),
+        ),
+        (
+            "kimi-k25-coding",
+            built_in_profile("kimi-k2.5", "alibaba-coding", Some(ReasoningEffort::Medium)),
+        ),
+        (
+            "minimax-m25-coding",
             built_in_profile(
-                "glm-5",
+                "minimax-m2.5",
                 "alibaba-coding",
-                Some(ReasoningEffort::High),
-                PLAN_AUTO_COMPACT_TOKEN_LIMIT,
+                Some(ReasoningEffort::Medium),
             ),
         ),
         (
             "glm5-zai-coding",
-            built_in_profile(
-                "glm-5",
-                "zai-coding",
-                Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
-            ),
+            built_in_profile("glm-5", "zai-coding", Some(ReasoningEffort::Medium)),
         ),
         (
             "glm47-zai-coding",
-            built_in_profile(
-                "glm-4.7",
-                "zai-coding",
-                Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
-            ),
+            built_in_profile("glm-4.7", "zai-coding", Some(ReasoningEffort::Medium)),
         ),
         (
             "openrouter-qwen",
@@ -153,20 +180,39 @@ pub fn built_in_config_profiles() -> HashMap<String, ConfigProfile> {
                 "qwen/qwen3-coder-next",
                 "openrouter",
                 Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
             ),
         ),
         (
             "deepseek-coding",
-            built_in_profile(
-                "deepseek-v3.2",
-                "deepseek",
-                Some(ReasoningEffort::Medium),
-                CODING_AUTO_COMPACT_TOKEN_LIMIT,
-            ),
+            built_in_profile("deepseek-v3.2", "deepseek", Some(ReasoningEffort::Medium)),
         ),
     ]
     .into_iter()
     .map(|(name, profile)| (name.to_string(), profile))
     .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn alibaba_qwen35_profile_uses_exact_context() {
+        let profile = built_in_config_profiles()
+            .remove("qwen35-coding")
+            .expect("qwen35-coding profile");
+        assert_eq!(profile.model_context_window, Some(1_000_000));
+        assert_eq!(profile.model_auto_compact_token_limit, Some(750_000));
+    }
+
+    #[test]
+    fn alibaba_glm47_profile_is_available() {
+        let profile = built_in_config_profiles()
+            .remove("glm47-coding")
+            .expect("glm47-coding profile");
+        assert_eq!(profile.model.as_deref(), Some("glm-4.7"));
+        assert_eq!(profile.model_provider.as_deref(), Some("alibaba-coding"));
+        assert_eq!(profile.model_context_window, Some(202_752));
+        assert_eq!(profile.model_auto_compact_token_limit, Some(152_064));
+    }
 }

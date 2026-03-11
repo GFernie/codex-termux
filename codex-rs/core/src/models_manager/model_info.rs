@@ -9,6 +9,10 @@ use codex_protocol::openai_models::TruncationMode;
 use codex_protocol::openai_models::TruncationPolicyConfig;
 
 use crate::config::Config;
+use crate::model_provider_info::ALIBABA_CODING_PROVIDER_ID;
+use crate::model_provider_info::DEEPSEEK_PROVIDER_ID;
+use crate::model_provider_info::OPENROUTER_PROVIDER_ID;
+use crate::model_provider_info::ZAI_CODING_PROVIDER_ID;
 use crate::truncate::approx_bytes_for_tokens;
 use tracing::warn;
 
@@ -27,6 +31,23 @@ pub(crate) const CONTEXT_WINDOW_272K: i64 = 272_000;
 const CODING_CONTEXT_WINDOW_128K: i64 = 128_000;
 const CODING_AUTO_COMPACT_128K: i64 = 96_000;
 const THINKING_AUTO_COMPACT_128K: i64 = 80_000;
+const ALIBABA_QWEN_CONTEXT_WINDOW: i64 = 1_000_000;
+const ALIBABA_QWEN_CODER_NEXT_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_QWEN3_MAX_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_GLM5_CONTEXT_WINDOW: i64 = 202_752;
+const ALIBABA_GLM47_CONTEXT_WINDOW: i64 = 202_752;
+const ALIBABA_KIMI_K25_CONTEXT_WINDOW: i64 = 262_144;
+const ALIBABA_MINIMAX_M25_CONTEXT_WINDOW: i64 = 204_800;
+const ZAI_GLM5_CONTEXT_WINDOW: i64 = 200_000;
+const ZAI_GLM47_CONTEXT_WINDOW: i64 = 200_000;
+const ZAI_GLM46_CONTEXT_WINDOW: i64 = 200_000;
+const ZAI_GLM45_CONTEXT_WINDOW: i64 = 128_000;
+
+#[derive(Clone, Copy)]
+struct ProviderModelDefaults {
+    context_window: i64,
+    auto_compact_token_limit: i64,
+}
 
 macro_rules! model_info {
     (
@@ -72,6 +93,17 @@ fn qwen_base_instructions() -> String {
 }
 
 pub(crate) fn with_config_overrides(mut model: ModelInfo, config: &Config) -> ModelInfo {
+    if let Some(defaults) = provider_specific_model_defaults(
+        &config.model_provider_id,
+        &model.slug.to_ascii_lowercase(),
+    ) {
+        if config.model_context_window.is_none() {
+            model.context_window = Some(defaults.context_window);
+        }
+        if config.model_auto_compact_token_limit.is_none() {
+            model.auto_compact_token_limit = Some(defaults.auto_compact_token_limit);
+        }
+    }
     if let Some(supports_reasoning_summaries) = config.model_supports_reasoning_summaries {
         model.supports_reasoning_summaries = supports_reasoning_summaries;
     }
@@ -95,6 +127,88 @@ pub(crate) fn with_config_overrides(mut model: ModelInfo, config: &Config) -> Mo
         };
     }
     model
+}
+
+fn provider_specific_model_defaults(
+    model_provider_id: &str,
+    slug_lower: &str,
+) -> Option<ProviderModelDefaults> {
+    let model_id = provider_agnostic_model_id(slug_lower);
+
+    match model_provider_id {
+        ALIBABA_CODING_PROVIDER_ID => alibaba_model_defaults(model_id),
+        ZAI_CODING_PROVIDER_ID => zai_model_defaults(model_id),
+        DEEPSEEK_PROVIDER_ID => deepseek_model_defaults(model_id),
+        OPENROUTER_PROVIDER_ID => None,
+        _ => None,
+    }
+}
+
+fn alibaba_model_defaults(model_id: &str) -> Option<ProviderModelDefaults> {
+    let context_window = if matches_any_prefix(model_id, &["qwen3.5-plus", "qwen3-coder-plus"]) {
+        ALIBABA_QWEN_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["qwen3-coder-next", "qwen3-coding-next"]) {
+        ALIBABA_QWEN_CODER_NEXT_CONTEXT_WINDOW
+    } else if model_id.starts_with("qwen3-max") {
+        ALIBABA_QWEN3_MAX_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["glm-5", "glm5"]) {
+        ALIBABA_GLM5_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["glm-4.7", "glm4.7"]) {
+        ALIBABA_GLM47_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["kimi-k2.5", "moonshot-kimi-k2.5"]) {
+        ALIBABA_KIMI_K25_CONTEXT_WINDOW
+    } else if model_id.starts_with("minimax-m2.5") {
+        ALIBABA_MINIMAX_M25_CONTEXT_WINDOW
+    } else {
+        return None;
+    };
+
+    Some(ProviderModelDefaults {
+        context_window,
+        auto_compact_token_limit: exact_auto_compact_token_limit(context_window),
+    })
+}
+
+fn zai_model_defaults(model_id: &str) -> Option<ProviderModelDefaults> {
+    let context_window = if matches_any_prefix(model_id, &["glm-5", "glm5"]) {
+        ZAI_GLM5_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["glm-4.7", "glm4.7"]) {
+        ZAI_GLM47_CONTEXT_WINDOW
+    } else if matches_any_prefix(model_id, &["glm-4.6", "glm4.6"]) {
+        ZAI_GLM46_CONTEXT_WINDOW
+    } else if matches_any_prefix(
+        model_id,
+        &["glm-4.5", "glm4.5", "glm-4.5-air", "glm-4.5v", "glm-4.6v"],
+    ) {
+        ZAI_GLM45_CONTEXT_WINDOW
+    } else {
+        return None;
+    };
+
+    Some(ProviderModelDefaults {
+        context_window,
+        auto_compact_token_limit: exact_auto_compact_token_limit(context_window),
+    })
+}
+
+fn deepseek_model_defaults(model_id: &str) -> Option<ProviderModelDefaults> {
+    if !(model_id.starts_with("deepseek") || model_id.starts_with("deepseek-")) {
+        return None;
+    }
+
+    Some(ProviderModelDefaults {
+        context_window: CODING_CONTEXT_WINDOW_128K,
+        auto_compact_token_limit: if model_id.contains("reasoner") || model_id.contains("thinking")
+        {
+            THINKING_AUTO_COMPACT_128K
+        } else {
+            CODING_AUTO_COMPACT_128K
+        },
+    })
+}
+
+fn exact_auto_compact_token_limit(context_window: i64) -> i64 {
+    context_window.saturating_mul(3) / 4
 }
 
 // todo(aibrahim): remove most of the entries here when enabling models.json
@@ -228,6 +342,13 @@ pub(crate) fn find_model_info_for_slug(slug: &str) -> ModelInfo {
                 auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
             )
         }
+    } else if model_id.starts_with("minimax-") {
+        model_info!(
+            slug,
+            apply_patch_tool_type: Some(ApplyPatchToolType::Function),
+            context_window: Some(CODING_CONTEXT_WINDOW_128K),
+            auto_compact_token_limit: Some(CODING_AUTO_COMPACT_128K),
+        )
     } else if slug.starts_with("test-gpt-5") {
         model_info!(
             slug,
@@ -468,6 +589,7 @@ fn supported_reasoning_level_low_medium_high_xhigh_non_codex() -> Vec<ReasoningE
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::test_config;
 
     #[test]
     fn qwen35_plus_has_known_model_profile() {
@@ -605,5 +727,62 @@ mod tests {
         );
         assert_eq!(info.context_window, Some(128_000));
         assert_eq!(info.auto_compact_token_limit, Some(96_000));
+    }
+
+    #[test]
+    fn minimax_m25_has_known_model_profile() {
+        let info = find_model_info_for_slug("MiniMax-M2.5");
+        assert_eq!(
+            info.apply_patch_tool_type,
+            Some(ApplyPatchToolType::Function)
+        );
+        assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
+    }
+
+    #[test]
+    fn alibaba_provider_uses_exact_qwen35_defaults() {
+        let model = find_model_info_for_slug("qwen3.5-plus");
+        let mut config = test_config();
+        config.model_provider_id = ALIBABA_CODING_PROVIDER_ID.to_string();
+
+        let info = with_config_overrides(model, &config);
+        assert_eq!(info.context_window, Some(1_000_000));
+        assert_eq!(info.auto_compact_token_limit, Some(750_000));
+    }
+
+    #[test]
+    fn zai_provider_uses_exact_glm5_defaults() {
+        let model = find_model_info_for_slug("glm-5");
+        let mut config = test_config();
+        config.model_provider_id = ZAI_CODING_PROVIDER_ID.to_string();
+
+        let info = with_config_overrides(model, &config);
+        assert_eq!(info.context_window, Some(200_000));
+        assert_eq!(info.auto_compact_token_limit, Some(150_000));
+    }
+
+    #[test]
+    fn openrouter_provider_stays_conservative_for_qwen() {
+        let model = find_model_info_for_slug("qwen/qwen3-coder-next");
+        let mut config = test_config();
+        config.model_provider_id = OPENROUTER_PROVIDER_ID.to_string();
+
+        let info = with_config_overrides(model, &config);
+        assert_eq!(info.context_window, Some(128_000));
+        assert_eq!(info.auto_compact_token_limit, Some(96_000));
+    }
+
+    #[test]
+    fn explicit_user_override_wins_over_provider_defaults() {
+        let model = find_model_info_for_slug("qwen3.5-plus");
+        let mut config = test_config();
+        config.model_provider_id = ALIBABA_CODING_PROVIDER_ID.to_string();
+        config.model_context_window = Some(64_000);
+        config.model_auto_compact_token_limit = Some(48_000);
+
+        let info = with_config_overrides(model, &config);
+        assert_eq!(info.context_window, Some(64_000));
+        assert_eq!(info.auto_compact_token_limit, Some(48_000));
     }
 }

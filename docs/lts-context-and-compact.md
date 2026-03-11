@@ -7,49 +7,58 @@ LTS now ships curated defaults for the main coding model families used in this f
 The effective context budget comes from this order:
 
 1. explicit user override in config/profile
-2. built-in model family metadata
-3. provider-reported value when available at runtime
+2. known-provider curated model metadata
+3. conservative model-family fallback
+4. provider-reported value when available at runtime
 
-Provider metadata is not treated as fully reliable across third-party gateways, so LTS keeps static family defaults for the high-traffic coding models.
+Provider metadata is not treated as fully reliable across third-party gateways, so LTS keeps curated static defaults.
 
-## Current curated defaults
+## Known-provider exact defaults
 
-### Qwen coding family
+### Alibaba Coding Plan
 
-- nominal context window: `128000`
-- default auto-compact threshold: `96000`
+LTS follows the current official Alibaba Coding Plan model catalog for the built-in `alibaba-coding` provider.
 
-Applies to:
+| Model | Context window | Auto-compact |
+| --- | ---: | ---: |
+| `qwen3.5-plus` | `1000000` | `750000` |
+| `qwen3-coder-plus` | `1000000` | `750000` |
+| `qwen3-coder-next` | `262144` | `196608` |
+| `qwen3-max-2026-01-23` | `262144` | `196608` |
+| `glm-5` | `202752` | `152064` |
+| `glm-4.7` | `202752` | `152064` |
+| `kimi-k2.5` | `262144` | `196608` |
+| `MiniMax-M2.5` | `204800` | `153600` |
 
-- `qwen3.5-plus`
-- `qwen3.5`
-- `qwen3-coder-plus`
-- `qwen3-coder-next`
-- `qwen3-coding`
-- `qwen3-coding-next`
+### Z.AI direct GLM defaults
 
-### GLM coding family
+Built-in `zai-coding` presets use these curated direct values:
 
-- nominal context window: `128000`
-- default auto-compact threshold: `96000`
+| Model family | Context window | Auto-compact |
+| --- | ---: | ---: |
+| `glm-5` | `200000` | `150000` |
+| `glm-4.7` | `200000` | `150000` |
+| `glm-4.6` | `200000` | `150000` |
+| `glm-4.5*` | `128000` | `96000` |
 
-Applies to:
+### DeepSeek direct defaults
 
-- `glm-5`
-- `glm-4.7`
-- `glm-4.6`
-- `glm-4.5`
+- `deepseek` direct profiles stay on `128000 / 96000`
+- reasoning variants stay on `128000 / 80000`
 
-### DeepSeek and Kimi standard variants
+## Conservative compatibility defaults
 
-- nominal context window: `128000`
-- default auto-compact threshold: `96000`
+### Generic or routed providers
 
-### DeepSeek/Kimi thinking or reasoner variants
+When the provider is generic or routed and LTS does not have a trusted exact table for that provider/model pair, it falls back to conservative family defaults:
 
-- nominal context window: `128000`
-- conservative auto-compact threshold: `80000`
-- tool compatibility remains conservative on purpose
+- recognizable Qwen/GLM/Kimi/DeepSeek coding families: `128000 / 96000`
+- thinking/reasoner variants: `128000 / 80000`
+- fully unknown models: generic fallback continues to apply
+
+This is why `openrouter` built-in compatibility profiles remain conservative unless the user overrides them.
+
+Official provider docs override older local notes if values differ.
 
 ## Manual overrides
 
@@ -58,4 +67,4 @@ Users can still override these values with:
 - `model_context_window`
 - `model_auto_compact_token_limit`
 
-Built-in LTS profiles already include safe defaults for the main Qwen/GLM coding setups.
+User overrides always win over the built-in LTS defaults.

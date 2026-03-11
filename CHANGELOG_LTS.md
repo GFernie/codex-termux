@@ -2,6 +2,39 @@
 
 All notable LTS changes are documented in this file.
 
+## [0.80.6-lts] - 2026-03-11
+
+### Summary
+
+- LTS line remains based on upstream `rust-v0.80.0`.
+- Focus: provider preset accuracy, conservative generic compatibility, and release-matrix rebuild.
+
+### Provider Presets / Context
+
+- `alibaba-coding` now uses current official Alibaba Coding Plan context windows for:
+  - `qwen3.5-plus`
+  - `qwen3-coder-plus`
+  - `qwen3-coder-next`
+  - `qwen3-max-2026-01-23`
+  - `glm-5`
+  - `glm-4.7`
+  - `kimi-k2.5`
+  - `MiniMax-M2.5`
+- `zai-coding` direct GLM presets now use curated direct context windows instead of the generic `128k/96k` fallback.
+- known providers now use provider-specific exact defaults where LTS has curated data.
+- generic and routed providers stay on conservative compatibility defaults unless the user overrides them.
+- added built-in profiles for `qwen3max-plan`, `glm47-coding`, `kimi-k25-coding`, and `minimax-m25-coding`.
+
+### Packaging / Distribution
+
+- Package version bumped to `0.80.6-lts`.
+- Full LTS release matrix must be rebuilt before publish:
+  - Termux ARM64
+  - Linux x64
+  - Linux arm64
+  - macOS arm64
+  - macOS x64
+
 ## [0.80.5-lts] - 2026-03-10
 
 ### Summary

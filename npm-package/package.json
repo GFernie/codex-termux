@@ -1,6 +1,6 @@
 {
   "name": "@mmmbuto/codex-cli-lts",
-  "version": "0.80.5-lts",
+  "version": "0.80.6-lts",
   "description": "OpenAI Codex CLI LTS (based on rust-v0.80.0) - Android Termux (ARM64), Linux x64/arm64, macOS x64/arm64. Stable branch with safety backports only.",
   "type": "module",
   "main": "bin/codex.js",
