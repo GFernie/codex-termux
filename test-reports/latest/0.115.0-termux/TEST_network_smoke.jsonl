@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"<redacted>"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Running the requested `curl -I` check now and extracting only the first HTTP status line."}}
+{"type":"item.started","item":{"id":"item_1","type":"command_execution","command":"/bin/sh -lc \"curl -I https://www.google.com 2>/dev/null | sed -n '1p'\"","aggregated_output":"","exit_code":null,"status":"in_progress"}}
+{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"/bin/sh -lc \"curl -I https://www.google.com 2>/dev/null | sed -n '1p'\"","aggregated_output":"HTTP/2 200 \r\n","exit_code":0,"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"HTTP/2 200"}}
+{"type":"turn.completed","usage":{"input_tokens":21485,"cached_input_tokens":16128,"output_tokens":104}}

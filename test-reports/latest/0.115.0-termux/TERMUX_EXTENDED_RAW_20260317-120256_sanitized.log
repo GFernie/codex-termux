@@ -1,0 +1,91 @@
+# TERMUX EXTENDED RAW LOG 20260317-120256
+
+## EXT-100
+$ bash verify-patches.sh
+🔍 VERIFYING TERMUX PATCH SET...
+
+Patch #1 (Browser Login): ✅ PRESENT
+Patch #2 (RAM Optimization): ✅ PRESENT
+Patch #4 (Auto-Update URL): ✅ PRESENT
+Patch #5 (Version Parser): ✅ PRESENT
+Patch #6 (NPM Package): ✅ PRESENT
+Patch #9 (Auto-Update Exec): ✅ PRESENT
+Patch #10 (Launcher + libc++ fallback): ✅ PRESENT
+Patch #11 (Android no-voice policy): ✅ PRESENT
+Patch #12 (Dynamic subcommand routing): ✅ PRESENT
+Bazel declared patch files: ✅ PRESENT
+
+ℹ️  Patch files present but not declared in MODULE.bazel:
+  - rules_rust.patch
+  - rules_rust_musl.patch
+  - rules_rust_windows_gnu.patch
+
+🎉 ALL CRITICAL PATCHES VERIFIED!
+
+## EXT-110
+$ cd codex-rs && cargo tree -p codex-cli -e features --target aarch64-linux-android | rg -e "voice-input|cpal|oboe|oboe-sys" || true
+
+## EXT-111
+$ cd codex-rs && cargo tree -p codex-cloud-tasks -e features --target aarch64-linux-android | rg -e "voice-input|cpal|oboe|oboe-sys" || true
+
+## EXT-120
+$ cd codex-rs && cargo check -p codex-network-proxy --target aarch64-linux-android
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.44
+   Compiling serde_core v1.0.228
+   Compiling serde v1.0.228
+   Compiling anyhow v1.0.101
+error: linker `aarch64-linux-android21-clang` not found
+  |
+  = note: No such file or directory (os error 2)
+
+error: could not compile `quote` (build script) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `anyhow` (build script) due to 1 previous error
+error: could not compile `serde_core` (build script) due to 1 previous error
+error: could not compile `serde` (build script) due to 1 previous error
+error: could not compile `proc-macro2` (build script) due to 1 previous error
+
+## EXT-121
+$ cd codex-rs && cargo check -p codex-core --target aarch64-linux-android
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.44
+   Compiling libc v0.2.182
+   Compiling serde v1.0.228
+    Checking log v0.4.29
+   Compiling version_check v0.9.5
+error: linker `aarch64-linux-android21-clang` not found
+  |
+  = note: No such file or directory (os error 2)
+
+    Checking smallvec v1.15.1
+error: could not compile `quote` (build script) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `proc-macro2` (build script) due to 1 previous error
+error: could not compile `serde` (build script) due to 1 previous error
+error: could not compile `libc` (build script) due to 1 previous error
+error: could not compile `libc` (build script) due to 1 previous error
+
+## EXT-122
+$ cd codex-rs && cargo check -p codex-cli --target aarch64-linux-android
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.44
+   Compiling libc v0.2.182
+   Compiling serde v1.0.228
+   Compiling serde_core v1.0.228
+    Checking itoa v1.0.17
+error: linker `aarch64-linux-android21-clang` not found
+  |
+  = note: No such file or directory (os error 2)
+
+error: could not compile `proc-macro2` (build script) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `serde_core` (build script) due to 1 previous error
+error: could not compile `quote` (build script) due to 1 previous error
+error: could not compile `serde` (build script) due to 1 previous error
+error: could not compile `libc` (build script) due to 1 previous error
+error: could not compile `libc` (build script) due to 1 previous error
+
+## EXT-130
+$ cd ~/codex-test-workspace && codex-exec --sandbox workspace-write --json "print current directory"
+Not inside a trusted directory and --skip-git-repo-check was not specified.

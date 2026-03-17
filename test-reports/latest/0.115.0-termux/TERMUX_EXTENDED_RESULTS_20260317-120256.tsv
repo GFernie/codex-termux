@@ -1,0 +1,8 @@
+test_id	status	command	note
+EXT-100	PASS	bash verify-patches.sh	Critical Termux patch set verified
+EXT-110	PASS	cargo tree -p codex-cli -e features --target aarch64-linux-android | rg 'voice-input|cpal|oboe|oboe-sys'	Empty output as expected
+EXT-111	PASS	cargo tree -p codex-cloud-tasks -e features --target aarch64-linux-android | rg 'voice-input|cpal|oboe|oboe-sys'	Empty output as expected
+EXT-120	FAIL	cargo check -p codex-network-proxy --target aarch64-linux-android	Missing linker: aarch64-linux-android21-clang
+EXT-121	FAIL	cargo check -p codex-core --target aarch64-linux-android	Missing linker: aarch64-linux-android21-clang
+EXT-122	FAIL	cargo check -p codex-cli --target aarch64-linux-android	Missing linker: aarch64-linux-android21-clang
+EXT-130	PASS	codex-exec --sandbox workspace-write --json "print current directory"	Expected trusted-directory refusal observed
