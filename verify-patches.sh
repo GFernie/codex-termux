@@ -98,6 +98,17 @@ else
   fail
 fi
 
+# Patch #13
+printf "Patch #13 (Android execpolicy lock fallback): "
+if grep -q 'lock_is_optional' codex-rs/execpolicy/src/amend.rs \
+  && grep -q 'cfg(target_os = "android")' codex-rs/execpolicy/src/amend.rs \
+  && grep -q 'ErrorKind::Unsupported' codex-rs/execpolicy/src/amend.rs \
+  && [ -f patches/execpolicy_android_lock_fallback.patch ]; then
+  pass
+else
+  fail
+fi
+
 # Bazel/Toolchain patch set declared in MODULE.bazel
 printf "Bazel declared patch files: "
 DECLARED_PATCHES=$(grep -o "//patches:[^\" ]*\\.patch" MODULE.bazel | sed 's#//patches:##' | sort -u || true)

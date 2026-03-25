@@ -155,10 +155,7 @@ fn append_locked_line(policy_path: &Path, line: &str) -> Result<(), AmendError> 
             path: policy_path.to_path_buf(),
             source,
         })?;
-    file.lock().map_err(|source| AmendError::LockPolicyFile {
-        path: policy_path.to_path_buf(),
-        source,
-    })?;
+    handle_lock_result(policy_path, file.lock())?;
 
     file.seek(SeekFrom::Start(0))
         .map_err(|source| AmendError::SeekPolicyFile {
@@ -191,6 +188,27 @@ fn append_locked_line(policy_path: &Path, line: &str) -> Result<(), AmendError> 
         })?;
 
     Ok(())
+}
+
+fn handle_lock_result(policy_path: &Path, result: std::io::Result<()>) -> Result<(), AmendError> {
+    match result {
+        Ok(()) => Ok(()),
+        Err(source) if lock_is_optional(&source) => Ok(()),
+        Err(source) => Err(AmendError::LockPolicyFile {
+            path: policy_path.to_path_buf(),
+            source,
+        }),
+    }
+}
+
+#[cfg(target_os = "android")]
+fn lock_is_optional(error: &std::io::Error) -> bool {
+    error.kind() == std::io::ErrorKind::Unsupported
+}
+
+#[cfg(not(target_os = "android"))]
+fn lock_is_optional(_: &std::io::Error) -> bool {
+    false
 }
 
 #[cfg(test)]
@@ -268,6 +286,58 @@ prefix_rule(pattern=["echo", "Hello, world!"], decision="allow")
             r#"prefix_rule(pattern=["ls"], decision="allow")
 prefix_rule(pattern=["echo", "Hello, world!"], decision="allow")
 "#
+        );
+    }
+
+    #[cfg(target_os = "android")]
+    #[test]
+    fn ignores_unsupported_lock_errors_on_android() {
+        let policy_path = std::path::Path::new("/tmp/default.rules");
+        let result = handle_lock_result(
+            policy_path,
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "lock() not supported",
+            )),
+        );
+
+        assert!(result.is_ok());
+    }
+
+    #[cfg(not(target_os = "android"))]
+    #[test]
+    fn returns_unsupported_lock_errors_off_android() {
+        let policy_path = std::path::Path::new("/tmp/default.rules");
+        let result = handle_lock_result(
+            policy_path,
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "lock() not supported",
+            )),
+        );
+
+        let err = result.expect_err("unsupported lock errors should be returned off Android");
+        assert_eq!(
+            err.to_string(),
+            "failed to lock policy file /tmp/default.rules: lock() not supported"
+        );
+    }
+
+    #[test]
+    fn returns_other_lock_errors() {
+        let policy_path = std::path::Path::new("/tmp/default.rules");
+        let result = handle_lock_result(
+            policy_path,
+            Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "permission denied",
+            )),
+        );
+
+        let err = result.expect_err("permission denied should be returned");
+        assert_eq!(
+            err.to_string(),
+            "failed to lock policy file /tmp/default.rules: permission denied"
         );
     }
 
