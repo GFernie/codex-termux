@@ -84,11 +84,9 @@ These are the practical fork deltas most relevant for end users.
 ### Patch #13 - Android execpolicy lock fallback for persistent approvals (0.116.0-termux)
 - Files:
   - `codex-rs/execpolicy/src/amend.rs`
-  - `patches/execpolicy_android_lock_fallback.patch`
 - Change:
   - on Android only, treat `lock() not supported` as a non-fatal advisory-lock miss when appending execpolicy amendments.
   - keep unsupported lock errors as failures on non-Android targets.
-  - store the source delta as a generated patch artifact for review/reference.
 - Goal: allow `p` / “always allow” approval persistence on Termux to append `default.rules` instead of warning with:
   - `failed to lock policy file ... lock() not supported`
 
