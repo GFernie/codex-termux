@@ -56,9 +56,10 @@ These are the practical fork deltas most relevant for end users.
   - `codex`/`codex-exec` are launcher scripts.
   - real ELF binaries moved to `codex.bin` / `codex-exec.bin`.
   - launcher exports safe `LD_LIBRARY_PATH` before `exec`.
+  - Android binaries keep `RUNPATH=$ORIGIN` so direct ELF invocation can still resolve bundled `libc++_shared.so`.
 - Goal: fix failures like:
   - `CANNOT LINK EXECUTABLE ... libc++_shared.so not found`
-  when tools invoke binaries directly without Node wrapper env.
+  when tools invoke binaries directly without Node wrapper env or when `LD_LIBRARY_PATH` is sanitised.
 
 ### Patch #11 - Disable voice/realtime audio in published Termux builds (0.111.0)
 - Files:

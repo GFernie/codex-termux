@@ -67,7 +67,8 @@ if grep -q 'exec "\$SCRIPT_DIR/codex.bin"' npm-package/bin/codex \
   && grep -q 'LD_LIBRARY_PATH' npm-package/bin/codex \
   && grep -q 'LD_LIBRARY_PATH' npm-package/bin/codex-exec \
   && grep -q '"bin/codex.bin"' npm-package/package.json \
-  && grep -q '"bin/codex-exec.bin"' npm-package/package.json; then
+  && grep -q '"bin/codex-exec.bin"' npm-package/package.json \
+  && grep -q 'link-arg=-Wl,-rpath,$ORIGIN' codex-rs/.cargo/config.toml; then
   if [ -x npm-package/bin/codex.bin ] && [ -x npm-package/bin/codex-exec.bin ]; then
     pass
   else
