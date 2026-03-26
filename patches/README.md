@@ -81,6 +81,16 @@ These are the practical fork deltas most relevant for end users.
 - Goal: avoid routing valid commands (for example `fork` or `debug`) to
   `codex exec`, which caused incorrect behavior in previous npm builds.
 
+### Patch #13 - Android execpolicy lock fallback for persistent approvals (0.116.0-termux)
+- Files:
+  - `codex-rs/execpolicy/src/amend.rs`
+- Change:
+  - on Android only, treat `lock() not supported` as a non-fatal advisory-lock miss when appending execpolicy amendments.
+  - keep unsupported lock errors as failures on non-Android targets.
+- Goal: allow `p` / “always allow” approval persistence on Termux to append `default.rules` instead of warning with:
+  - `failed to lock policy file ... lock() not supported`
+
+
 ## 2) Historical patches
 
 ### Patch #7 - Manual update instruction fallback
