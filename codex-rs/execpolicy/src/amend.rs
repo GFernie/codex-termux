@@ -304,6 +304,26 @@ prefix_rule(pattern=["echo", "Hello, world!"], decision="allow")
         assert!(result.is_ok());
     }
 
+    #[cfg(target_os = "android")]
+    #[test]
+    fn appends_rule_on_android_termux_filesystem() {
+        let tmp = tempdir().expect("create temp dir");
+        let policy_path = tmp.path().join("rules").join("default.rules");
+
+        blocking_append_allow_prefix_rule(
+            &policy_path,
+            &[String::from("printf"), String::from("probe")],
+        )
+        .expect("append rule on android");
+
+        let contents = std::fs::read_to_string(&policy_path).expect("read policy");
+        assert_eq!(
+            contents,
+            r#"prefix_rule(pattern=["printf", "probe"], decision="allow")
+"#
+        );
+    }
+
     #[cfg(not(target_os = "android"))]
     #[test]
     fn returns_unsupported_lock_errors_off_android() {
