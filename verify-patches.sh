@@ -10,6 +10,56 @@ echo ""
 pass() { echo "✅ PRESENT"; }
 fail() { echo "❌ MISSING!"; exit 1; }
 
+binary_has_origin_runpath() {
+  local binary="$1"
+
+  readelf -d "$binary" 2>/dev/null \
+    | grep -E '(RUNPATH|RPATH)' \
+    | grep -F '$ORIGIN' >/dev/null
+}
+
+is_elf_binary() {
+  local binary="$1"
+
+  readelf -h "$binary" >/dev/null 2>&1
+}
+
+detect_runtime_pair() {
+  local search_roots=(
+    "npm-package/bin"
+    "codex-rs/target/debug"
+    "codex-rs/target/release"
+    "codex-rs/target/ci-test"
+  )
+  local root
+
+  if [ -n "${CARGO_TARGET_DIR:-}" ]; then
+    search_roots+=(
+      "$CARGO_TARGET_DIR/debug"
+      "$CARGO_TARGET_DIR/release"
+      "$CARGO_TARGET_DIR/ci-test"
+    )
+  fi
+
+  for root in "${search_roots[@]}"; do
+    if [ -x "$root/codex.bin" ] && [ -x "$root/codex-exec.bin" ] \
+      && is_elf_binary "$root/codex.bin" \
+      && is_elf_binary "$root/codex-exec.bin"; then
+      printf '%s\n%s\n' "$root/codex.bin" "$root/codex-exec.bin"
+      return 0
+    fi
+
+    if [ -x "$root/codex" ] && [ -x "$root/codex-exec" ] \
+      && is_elf_binary "$root/codex" \
+      && is_elf_binary "$root/codex-exec"; then
+      printf '%s\n%s\n' "$root/codex" "$root/codex-exec"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 # Patch #1
 printf "Patch #1 (Browser Login): "
 if grep -q "target_os.*android" codex-rs/login/src/server.rs \
@@ -67,11 +117,24 @@ if grep -q 'exec "\$SCRIPT_DIR/codex.bin"' npm-package/bin/codex \
   && grep -q 'LD_LIBRARY_PATH' npm-package/bin/codex \
   && grep -q 'LD_LIBRARY_PATH' npm-package/bin/codex-exec \
   && grep -q '"bin/codex.bin"' npm-package/package.json \
-  && grep -q '"bin/codex-exec.bin"' npm-package/package.json; then
-  if [ -x npm-package/bin/codex.bin ] && [ -x npm-package/bin/codex-exec.bin ]; then
-    pass
+  && grep -q '"bin/codex-exec.bin"' npm-package/package.json \
+  && grep -q 'link-arg=-Wl,-rpath,$ORIGIN' codex-rs/.cargo/config.toml; then
+  if runtime_pair=$(detect_runtime_pair); then
+    runtime_codex=$(printf '%s\n' "$runtime_pair" | sed -n '1p')
+    runtime_codex_exec=$(printf '%s\n' "$runtime_pair" | sed -n '2p')
+
+    if binary_has_origin_runpath "$runtime_codex" \
+      && binary_has_origin_runpath "$runtime_codex_exec"; then
+      echo "✅ PRESENT (runtime proof ok: $(basename "$runtime_codex"), $(basename "$runtime_codex_exec"))"
+    else
+      echo "❌ MISSING!"
+      echo "  Runtime proof failed for:"
+      echo "  - $runtime_codex"
+      echo "  - $runtime_codex_exec"
+      exit 1
+    fi
   else
-    echo "✅ PRESENT (launchers + package wiring ok; binaries supplied at packaging/release time)"
+    echo "✅ PRESENT (source wiring ok; runtime proof skipped because no binary pair was found)"
   fi
 else
   fail

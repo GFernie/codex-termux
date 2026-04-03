@@ -56,9 +56,15 @@ These are the practical fork deltas most relevant for end users.
   - `codex`/`codex-exec` are launcher scripts.
   - real ELF binaries moved to `codex.bin` / `codex-exec.bin`.
   - launcher exports safe `LD_LIBRARY_PATH` before `exec`.
+  - Android binaries keep `RUNPATH=$ORIGIN` so direct ELF invocation can still resolve bundled `libc++_shared.so`.
 - Goal: fix failures like:
   - `CANNOT LINK EXECUTABLE ... libc++_shared.so not found`
-  when tools invoke binaries directly without Node wrapper env.
+  when tools invoke binaries directly without Node wrapper env or when `LD_LIBRARY_PATH` is sanitised.
+- Verification:
+  - source wiring is checked in `verify-patches.sh`
+  - when a built binary pair is present, `verify-patches.sh` also runs `readelf -d`
+    and requires `RUNPATH` or `RPATH` to contain `$ORIGIN` on both `codex` and
+    `codex-exec`
 
 ### Patch #11 - Disable voice/realtime audio in published Termux builds (0.111.0)
 - Files:
@@ -116,7 +122,9 @@ Run from repo root:
 bash verify-patches.sh
 ```
 
-The script verifies critical runtime patches and checks that patch files declared in `MODULE.bazel` exist.
+The script verifies critical runtime patches, checks that patch files declared in
+`MODULE.bazel` exist, and performs Patch #10 runtime ELF verification when a
+built binary pair is available in standard target/package locations.
 
 ## 5) Diff workflow against upstream
 
